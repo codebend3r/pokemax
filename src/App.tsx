@@ -122,8 +122,8 @@ const MainApp = () => {
             </button>
             {!pokemonResults && filteredSuggestions.length > 0 && (
               <ul className="autosuggest-list">
-                {filteredSuggestions.map((hint) => (
-                  <li className="autosuggest-item">
+                {filteredSuggestions.map((hint, index) => (
+                  <li className="autosuggest-item" key={`item-${index}`}>
                     <button
                       onClick={() => {
                         const matchingPokemon = pokemonList.find(({ name }) => name === hint);

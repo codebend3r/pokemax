@@ -1,0 +1,106 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: orange;
+  width: 100vw;
+  height: 500vh;
+  padding: 1rem;
+}
+
+.inner-container {
+  width: 1400px;
+  margin: 0 auto;
+}
+
+.row {
+  width: 100%;
+  display: flex;
+  padding: 0;
+  margin: 0;
+  gap: 2rem;
+}
+
+.title {
+  color: rgb(146, 8, 173);
+}
+
+.main-search {
+  font-size: 24px;
+  appearance: none;
+  outline: none;
+  padding: 5px;
+  border: 2px solid purple;
+  grid-area: search-input;
+}
+
+.main-button {
+  font-size: 24px;
+  appearance: none;
+  outline: none;
+  border: none;
+  padding: 7px 10px;
+  color: purple;
+  grid-area: search-button;
+}
+
+.pokemon-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  width: 100%;
+  border: 1px solid blue;
+  padding: 10px;
+  gap: 10px;
+}
+
+.pokecard {
+  display: block;
+  padding: 10px;
+  min-width: 200px;
+  color: rgb(31, 2, 31);
+  font-weight: bold;
+  text-transform: capitalize;
+  font-size: 18px;
+  border: 1px solid red;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.pokemon-stats {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: blue;
+  color: white;
+}
+
+.pokemon-name {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.search-autosuggest {
+  display: grid;
+  width: 100%;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  position: relative;
+  grid-template-areas:
+    'search-input search-input search-input search-button'
+    'autosuggest autosuggest autosuggest autosuggest';
+}
+
+.autosuggest-list {
+  grid-area: autosuggest;
+  position: absolute;
+  top: 0;
+  background-color: white;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.autosuggest-item {
+  font-size: 16px;
+  padding: 10px;
+  list-style: none;
+  padding: 10px;
+}

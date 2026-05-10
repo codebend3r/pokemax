@@ -110,6 +110,29 @@ class ChiptunePlayer {
   private volume = 0.12;
   getVolume(): number { return this.volume; }
 
+  /**
+   * Silence everything already scheduled into the master gain by ramping it to zero
+   * and swapping in a brand-new gain node. Any oscillators feeding the old node will
+   * fade out within ~30ms; new notes go to the fresh node.
+   */
+  private cutScheduled(): void {
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+    const oldGain = this.masterGain;
+    try {
+      oldGain.gain.cancelScheduledValues(now);
+      oldGain.gain.setValueAtTime(oldGain.gain.value, now);
+      oldGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+    } catch { /* ignore */ }
+    window.setTimeout(() => {
+      try { oldGain.disconnect(); } catch { /* already disconnected */ }
+    }, 120);
+    const fresh = this.ctx.createGain();
+    fresh.gain.value = this.volume;
+    fresh.connect(this.ctx.destination);
+    this.masterGain = fresh;
+  }
+
   play(): void {
     if (this.playing) return;
     if (!this.ensureContext() || !this.ctx) return;
@@ -121,24 +144,26 @@ class ChiptunePlayer {
   }
 
   pause(): void {
+    if (!this.playing) return;
     this.playing = false;
     if (this.timer != null) { window.clearTimeout(this.timer); this.timer = null; }
+    this.cutScheduled();
     this.emit();
   }
 
   toggle(): void { this.playing ? this.pause() : this.play(); }
 
-  next(): void {
-    this.trackIndex = (this.trackIndex + 1) % TRACKS.length;
-    this.step = 0;
-    if (this.playing && this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.05;
-    this.emit();
-  }
+  next(): void { this.changeTrack(this.trackIndex + 1); }
+  prev(): void { this.changeTrack(this.trackIndex - 1 + TRACKS.length); }
 
-  prev(): void {
-    this.trackIndex = (this.trackIndex - 1 + TRACKS.length) % TRACKS.length;
+  private changeTrack(rawIndex: number): void {
+    this.trackIndex = rawIndex % TRACKS.length;
     this.step = 0;
-    if (this.playing && this.ctx) this.nextNoteTime = this.ctx.currentTime + 0.05;
+    if (this.playing && this.ctx) {
+      // Kill the in-flight notes of the previous track before scheduling new ones
+      this.cutScheduled();
+      this.nextNoteTime = this.ctx.currentTime + 0.05;
+    }
     this.emit();
   }
 

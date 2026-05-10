@@ -16,10 +16,8 @@ interface Props {
 
 const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 const BW_ANIM_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+const SHOWDOWN_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
 
-// True flat pixel animations (Black/White animated sprites) only exist for species
-// introduced through Gen 5 — i.e. National Dex IDs 1..649. Higher IDs (Gen 6-9)
-// have no flat 2D animated sprite, so we animate the static pixel via CSS instead.
 const MAX_BW_ID = 649;
 
 function pretty(name: string): string {
@@ -35,17 +33,17 @@ function GridCell({
   selected: boolean;
   onSelect: (name: string) => void;
 }) {
-  const [animOk, setAnimOk] = useState(s.id <= MAX_BW_ID);
-  const hasBwAnim = animOk && s.id <= MAX_BW_ID;
+  const [animOk, setAnimOk] = useState(true);
+  const animUrl = animOk
+    ? s.id <= MAX_BW_ID
+      ? `${BW_ANIM_BASE}/${s.id}.gif`
+      : `${SHOWDOWN_BASE}/${s.id}.gif`
+    : null;
 
   return (
     <button
       type="button"
-      className={
-        'crt-grid-cell' +
-        (selected ? ' active' : '') +
-        (hasBwAnim ? ' has-anim' : ' no-anim')
-      }
+      className={'crt-grid-cell' + (selected ? ' active' : '') + (animUrl ? ' has-anim' : ' no-anim')}
       onClick={() => onSelect(s.name)}
     >
       <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>
@@ -57,10 +55,10 @@ function GridCell({
           loading="lazy"
           decoding="async"
         />
-        {hasBwAnim && (
+        {animUrl && (
           <img
             className="grid-anim"
-            src={`${BW_ANIM_BASE}/${s.id}.gif`}
+            src={animUrl}
             alt=""
             aria-hidden="true"
             loading="lazy"
@@ -89,8 +87,6 @@ export default function PokemonGrid({
     if (q && !s.name.includes(q)) return false;
     if (selectedTypes.size > 0) {
       const types = typeIndex?.get(s.id) ?? [];
-      // 1 selected type → show all Pokémon with that type (any of theirs matches).
-      // 2+ selected types → show only Pokémon that have ALL selected types (intersection).
       const matchesAll = [...selectedTypes].every((t) => types.includes(t));
       if (!matchesAll) return false;
     }

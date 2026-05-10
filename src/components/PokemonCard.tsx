@@ -56,8 +56,13 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
       animated: false,
     };
   }
-  // 3D — Pokémon HOME 3D render (static)
+  // 3D — Showdown animated GIF (real frame animation, "pixelated 3D-rendered" style)
   if (fallbackLevel === 0) {
+    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+    return { url, animated: true };
+  }
+  // Tier 1: HOME static 3D render
+  if (fallbackLevel === 1) {
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };

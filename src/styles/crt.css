@@ -569,36 +569,32 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   gap: 8px;
 }
 .crt-grid-cell {
-  background: rgba(0, 255, 159, 0.04);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 0;
   color: var(--primary);
   font: inherit;
   text-shadow: inherit;
-  padding: 10px 6px 10px;
+  padding: 10px 6px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
-  transition: background 80ms, border-color 80ms;
+  transition: transform 100ms;
   overflow: visible;
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
 .crt-grid-cell:focus { outline: none; }
-.crt-grid-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.crt-grid-cell:focus-visible { outline: 1px dashed var(--accent); outline-offset: 4px; }
 .crt-grid-cell::-moz-focus-inner { border: 0; }
 .crt-grid-cell:hover {
-  background: rgba(0, 255, 159, 0.13);
-  border-color: var(--primary);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
-.crt-grid-cell.active {
-  border-color: var(--accent);
+.crt-grid-cell.active .crt-grid-name {
   color: var(--accent);
-  background: rgba(255, 0, 170, 0.07);
-  box-shadow: 0 0 10px rgba(255, 0, 170, 0.3);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
 }
 .crt-grid-sprite {
   position: relative;
@@ -614,34 +610,18 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   object-fit: contain;
   pointer-events: none;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 4px rgba(0, 255, 159, 0.3));
   transition: opacity 80ms;
 }
 .crt-grid-sprite .grid-anim { opacity: 0; }
 
-/* Cells WITH a BW animated GIF (Gen 1-5): swap to the GIF on hover */
-.crt-grid-cell.has-anim:hover .grid-anim,
-.crt-grid-cell.has-anim:focus-visible .grid-anim {
+/* Hover: fade in the animated GIF, fade out the still pixel. No filter borders. */
+.crt-grid-cell:hover .grid-anim,
+.crt-grid-cell:focus-visible .grid-anim {
   opacity: 1;
-  filter: drop-shadow(0 0 10px var(--accent));
 }
-.crt-grid-cell.has-anim:hover .grid-still,
-.crt-grid-cell.has-anim:focus-visible .grid-still {
+.crt-grid-cell:hover .grid-still,
+.crt-grid-cell:focus-visible .grid-still {
   opacity: 0;
-}
-
-/* Cells WITHOUT a flat-2D animated source (Gen 6-9): CSS-jiggle the static pixel */
-@keyframes crt-grid-jiggle {
-  0%, 100% { transform: translate(0, 0)    scale(1); }
-  20%      { transform: translate(-2px, -3px) scale(1.05); }
-  40%      { transform: translate(0, -5px) scale(1.07); }
-  60%      { transform: translate(2px, -3px)  scale(1.05); }
-  80%      { transform: translate(0, -1px) scale(1.02); }
-}
-.crt-grid-cell.no-anim:hover .grid-still,
-.crt-grid-cell.no-anim:focus-visible .grid-still {
-  animation: crt-grid-jiggle 0.6s ease-in-out infinite;
-  filter: drop-shadow(0 0 10px var(--accent));
 }
 .crt-grid-dex {
   color: var(--dim);
@@ -704,16 +684,19 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   image-rendering: pixelated;
   transform-origin: center bottom;
 }
+.crt-card-top img.crt-sprite-3d {
+  /* 3D mode is bigger to differentiate from 2D when both end up on Showdown */
+  width: 220px;
+  height: 220px;
+}
 .crt-card-top img.crt-sprite-3d.is-static {
-  animation: crt-3d-dance 3.6s ease-in-out infinite;
+  /* Final fallback only (HOME static or art) — gentle CSS motion */
   image-rendering: auto;
-  background: radial-gradient(circle at 50% 80%, rgba(0, 255, 159, 0.15) 0%, transparent 60%);
+  animation: crt-3d-dance 3.6s ease-in-out infinite;
   transform-origin: center 70%;
 }
 .crt-card-top img.crt-sprite-2d.is-static {
-  /* Flat pixel art with no BW animation available — CSS jiggle to feel alive */
   image-rendering: pixelated;
-  animation: crt-pixel-idle 0.9s steps(2, end) infinite;
   transform-origin: center bottom;
 }
 

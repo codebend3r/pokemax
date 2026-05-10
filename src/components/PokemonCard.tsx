@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { EvolutionChainResponse, PokemonResponse, SpeciesResponse } from '../types';
 import { groupMoves } from '../moves';
 import { getGen } from '../generations';
@@ -25,8 +25,8 @@ interface Props {
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
-
 const BW_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+const SHOWDOWN_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
 const MAX_BW_ID = 649;
 
 interface SpritePick {
@@ -37,32 +37,36 @@ interface SpritePick {
 
 function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallbackLevel: number): SpritePick {
   if (view === '2d') {
-    // Tier 0: Black/White animated GIF (true flat pixel animation, IDs 1-649)
     if (fallbackLevel === 0 && p.id <= MAX_BW_ID) {
       const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
       return { url, animated: true };
     }
-    // Tier 1: static flat pixel sprite (Box-style)
-    const fallback = shiny
-      ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
-      : p.sprites.front_default ?? '';
-    return { url: fallback, animated: false };
+    return {
+      url: shiny
+        ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
+        : p.sprites.front_default ?? '',
+      animated: false,
+    };
   }
-
-  // 3D view
+  // 3D — prefer the animated Showdown GIF (real frame animation)
   if (fallbackLevel === 0) {
-    const home = p.sprites.other.home;
-    if (home) {
-      const url = shiny ? home.front_shiny : home.front_default;
-      if (url) return { url, animated: false };
-    }
+    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+    return { url, animated: true };
   }
-  // Tier 1+: official artwork → pixel
+  // Tier 1: HOME static 3D render
+  if (fallbackLevel === 1) {
+    const home = p.sprites.other.home;
+    const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
+    if (url) return { url, animated: false };
+  }
+  // Final fallback: official artwork
   const art = p.sprites.other['official-artwork'];
-  const url = shiny
-    ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
-    : art.front_default ?? p.sprites.front_default ?? '';
-  return { url, animated: false };
+  return {
+    url: shiny
+      ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
+      : art.front_default ?? p.sprites.front_default ?? '',
+    animated: false,
+  };
 }
 
 function CardSprite({
@@ -75,18 +79,72 @@ function CardSprite({
   view: SpriteView;
 }) {
   const [fallback, setFallback] = useState(0);
+  const [reacting, setReacting] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const sprite = pickSprite(pokemon, shiny, view, fallback);
+  const cryUrl = pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
+
+  // Auto-play cry once when this card mounts (user-gesture chain from the click that loaded it)
+  useEffect(() => {
+    if (!cryUrl) return;
+    const audio = new Audio(cryUrl);
+    audio.volume = 0.45;
+    audio.play().catch(() => {});
+    audioRef.current = audio;
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+    // re-run for each new pokemon
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pokemon.id]);
+
+  const playCry = () => {
+    if (!cryUrl) return;
+    if (!audioRef.current) audioRef.current = new Audio(cryUrl);
+    audioRef.current.currentTime = 0;
+    audioRef.current.volume = 0.45;
+    audioRef.current.play().catch(() => {});
+  };
+
+  const handleSpriteClick = () => {
+    playCry();
+    setReacting(true);
+    setShowHeart(true);
+    window.setTimeout(() => setReacting(false), 700);
+    window.setTimeout(() => setShowHeart(false), 900);
+  };
+
   const className =
-    'crt-sprite-' + view + (sprite.animated ? ' is-anim' : ' is-static');
+    'crt-sprite-' + view +
+    (sprite.animated ? ' is-anim' : ' is-static') +
+    (reacting ? ' reacting' : '');
 
   return (
-    <img
-      key={`${view}-${shiny}-${pokemon.name}-${fallback}`}
-      className={className}
-      src={sprite.url}
-      alt={pokemon.name}
-      onError={() => setFallback((f) => (f < 2 ? f + 1 : f))}
-    />
+    <div className="crt-card-sprite-wrap">
+      <img
+        key={`${view}-${shiny}-${pokemon.name}-${fallback}`}
+        className={className}
+        src={sprite.url}
+        alt={pokemon.name}
+        onClick={handleSpriteClick}
+        onError={() => setFallback((f) => (f < 2 ? f + 1 : f))}
+        title="click to play cry"
+      />
+      {showHeart && <span className="crt-card-heart" aria-hidden="true">♥</span>}
+      {cryUrl && (
+        <button
+          type="button"
+          className="crt-cry-button"
+          onClick={playCry}
+          aria-label={`play ${pokemon.name} cry`}
+          title="play cry"
+        >
+          ♪ CRY
+        </button>
+      )}
+    </div>
   );
 }
 

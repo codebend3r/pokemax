@@ -636,22 +636,84 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 .crt-card-art .crt-shiny { margin-top: 4px; }
 .crt-view-toggle { margin-top: 6px; }
 
-.crt-card-top img.crt-sprite-3d {
+.crt-card-top img.crt-sprite-3d.is-anim,
+.crt-card-top img.crt-sprite-2d.is-anim {
+  /* Real frame-animated GIF — don't fight its frames with CSS */
+  image-rendering: pixelated;
+  transform-origin: center bottom;
+}
+.crt-card-top img.crt-sprite-3d.is-static {
   animation: crt-3d-dance 3.6s ease-in-out infinite;
   image-rendering: auto;
   background: radial-gradient(circle at 50% 80%, rgba(0, 255, 159, 0.15) 0%, transparent 60%);
   transform-origin: center 70%;
 }
-.crt-card-top img.crt-sprite-2d.is-anim {
-  /* Real BW animated GIF — let it animate on its own, no CSS interference */
-  image-rendering: pixelated;
-  transform-origin: center bottom;
-}
 .crt-card-top img.crt-sprite-2d.is-static {
-  /* Static flat pixel (Gen 6+ has no BW animation) — CSS-jiggle to feel alive */
+  /* Flat pixel art with no BW animation available — CSS jiggle to feel alive */
   image-rendering: pixelated;
   animation: crt-pixel-idle 0.9s steps(2, end) infinite;
   transform-origin: center bottom;
+}
+
+/* Click-to-react sprite */
+.crt-card-sprite-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.crt-card-top img.crt-sprite-3d,
+.crt-card-top img.crt-sprite-2d {
+  cursor: pointer;
+}
+@keyframes crt-react-jump {
+  0%   { transform: translateY(0)    scale(1); }
+  20%  { transform: translateY(-22px) scale(1.18) rotate(-6deg); }
+  45%  { transform: translateY(-8px) scale(1.10) rotate(4deg); }
+  70%  { transform: translateY(-14px) scale(1.12) rotate(-3deg); }
+  100% { transform: translateY(0)    scale(1); }
+}
+.crt-card-top img.reacting {
+  animation: crt-react-jump 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  filter: drop-shadow(0 0 12px var(--accent)) brightness(1.2) !important;
+}
+@keyframes crt-heart-float {
+  0%   { transform: translate(-50%, 0)    scale(0.4); opacity: 0; }
+  20%  { transform: translate(-50%, -10px) scale(1.4); opacity: 1; }
+  100% { transform: translate(-50%, -80px) scale(1);   opacity: 0; }
+}
+.crt-card-heart {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  font-size: 36px;
+  color: #ff3399;
+  text-shadow: 0 0 12px #ff3399, 0 0 18px #ff66bb;
+  pointer-events: none;
+  animation: crt-heart-float 0.9s ease-out forwards;
+  z-index: 5;
+}
+
+/* Cry button */
+.crt-cry-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font: inherit;
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.5);
+  padding: 4px 8px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  font-size: 14px;
+  margin-top: 6px;
+  transition: background 80ms, border-color 80ms;
+}
+.crt-cry-button:hover {
+  background: rgba(255, 0, 170, 0.1);
+  border-color: var(--accent);
+}
+.crt-cry-button:active {
+  filter: brightness(1.3);
 }
 
 /* Grid sprite glow on hover (bounce removed — the GIF frames do the moving) */

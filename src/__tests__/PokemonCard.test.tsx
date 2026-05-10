@@ -76,27 +76,20 @@ describe('PokemonCard', () => {
     expect(screen.getAllByText('ghost').length).toBeGreaterThan(0);
   });
 
-  it('renders the official artwork normal sprite', () => {
+  it('renders the showdown animated sprite in default 3D view', () => {
     render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
-    expect(screen.getByRole('img')).toHaveAttribute('src', 'art-normal.png');
+    expect(screen.getByRole('img')).toHaveAttribute(
+      'src',
+      expect.stringContaining('/showdown/887.gif'),
+    );
   });
 
-  it('renders the shiny sprite when shiny is true', () => {
+  it('renders the showdown shiny sprite when shiny is true', () => {
     render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={true} onShinyChange={() => {}} gen={8} />);
-    expect(screen.getByRole('img')).toHaveAttribute('src', 'art-shiny.png');
-  });
-
-  it('falls back to pixel sprite if official-artwork shiny is missing', () => {
-    const p: PokemonResponse = {
-      ...pokemon,
-      sprites: {
-        ...pokemon.sprites,
-        front_shiny: 'pixel-shiny.png',
-        other: { 'official-artwork': { front_default: 'art-normal.png', front_shiny: null } },
-      },
-    };
-    render(<PokemonCard pokemon={p} species={species} chain={chain} shiny={true} onShinyChange={() => {}} gen={8} />);
-    expect(screen.getByRole('img')).toHaveAttribute('src', 'pixel-shiny.png');
+    expect(screen.getByRole('img')).toHaveAttribute(
+      'src',
+      expect.stringContaining('/showdown/shiny/887.gif'),
+    );
   });
 
   it('renders the evolution chain', () => {

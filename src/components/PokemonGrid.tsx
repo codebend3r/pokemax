@@ -89,8 +89,10 @@ export default function PokemonGrid({
     if (q && !s.name.includes(q)) return false;
     if (selectedTypes.size > 0) {
       const types = typeIndex?.get(s.id) ?? [];
-      const matches = types.some((t) => selectedTypes.has(t));
-      if (!matches) return false;
+      // 1 selected type → show all Pokémon with that type (any of theirs matches).
+      // 2+ selected types → show only Pokémon that have ALL selected types (intersection).
+      const matchesAll = [...selectedTypes].every((t) => types.includes(t));
+      if (!matchesAll) return false;
     }
     return true;
   });

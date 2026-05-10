@@ -11,6 +11,10 @@ export interface Gen8Species {
 export interface PokemonResponse {
   id: number;
   name: string;
+  cries?: {
+    latest: string | null;
+    legacy: string | null;
+  };
   sprites: {
     front_default: string | null;
     front_shiny: string | null;

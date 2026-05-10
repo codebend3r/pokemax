@@ -144,7 +144,32 @@ body::after {
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: 16px;
+  background: rgba(0, 0, 0, 0.3);
 }
+button.crt-type, .crt-type.crt-detail-trigger {
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 80ms;
+}
+button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
+  filter: brightness(1.4);
+  text-decoration: none;
+}
+.crt-type.crt-detail-trigger[aria-expanded="true"] {
+  filter: brightness(1.4);
+  box-shadow: 0 0 10px currentColor;
+}
+.crt-detail-section {
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-size: 16px;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  padding-bottom: 2px;
+  border-bottom: 1px dashed rgba(0, 255, 159, 0.25);
+}
+.crt-detail-section:first-child { margin-top: 0; }
 
 .crt-section {
   border-top: 1px dashed var(--border);

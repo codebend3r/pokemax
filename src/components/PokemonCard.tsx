@@ -7,8 +7,9 @@ import MoveList from './MoveList';
 import ShinyToggle from './ShinyToggle';
 import Section from './Section';
 import CompetitiveBuild from './CompetitiveBuild';
-import TypeMatchup from './TypeMatchup';
+import Detail from './Detail';
 import { useCompetitiveSet } from '../hooks/useCompetitiveSet';
+import { TYPE_COLORS, TYPES, type PokeType } from '../typeChart';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -48,9 +49,20 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
           <div className="crt-card-name">{pokemon.name.toUpperCase()}</div>
           <div className="crt-card-dex">№ {String(pokemon.id).padStart(3, '0')}</div>
           <div className="crt-types">
-            {pokemon.types.map((t) => (
-              <span key={t.type.name} className="crt-type">{t.type.name}</span>
-            ))}
+            {pokemon.types.map((t) => {
+              const isPoke = (TYPES as readonly string[]).includes(t.type.name);
+              const color = isPoke ? TYPE_COLORS[t.type.name as PokeType] : 'var(--primary)';
+              return (
+                <Detail
+                  key={t.type.name}
+                  kind="type"
+                  name={t.type.name}
+                  label={t.type.name}
+                  triggerClassName="crt-type"
+                  triggerStyle={{ color, borderColor: color, textShadow: `0 0 4px ${color}66` }}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -59,10 +71,6 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
         {sortedStats.map((s) => (
           <StatBar key={s.stat.name} name={s.stat.name} value={s.base_stat} />
         ))}
-      </Section>
-
-      <Section label="▶ DEFENSIVE MATCHUPS">
-        <TypeMatchup types={pokemon.types.map((t) => t.type.name)} />
       </Section>
 
       <Section label="▶ ABILITIES">

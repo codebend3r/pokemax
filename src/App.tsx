@@ -4,14 +4,18 @@ import StatusLine from './components/StatusLine';
 import PokemonCard from './components/PokemonCard';
 import PokemonGrid from './components/PokemonGrid';
 import GenFilter from './components/GenFilter';
+import MusicPlayer from './components/MusicPlayer';
+import ThemeToggle from './components/ThemeToggle';
 import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
+import { useTheme } from './hooks/useTheme';
 import type { PokeType } from './typeChart';
 
 export default function App() {
   const list = useAllSpecies();
   const typeIndex = useTypeIndex();
+  const { theme, toggle: toggleTheme } = useTheme();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
@@ -88,10 +92,16 @@ export default function App() {
 
   return (
     <div className="crt">
-      <button type="button" className="crt-header crt-header-link" onClick={goHome} aria-label="Go to top">
-        ▶ POKEMAX
-      </button>
+      <div className="crt-topbar">
+        <button type="button" className="crt-header crt-header-link" onClick={goHome} aria-label="Go to top">
+          ▶ POKEMAX
+        </button>
+        <div className="crt-topbar-controls">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
+      </div>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
+      <MusicPlayer />
       <StatusLine state={status} />
       <SearchBar
         names={list.names}

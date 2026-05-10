@@ -1015,3 +1015,141 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   text-shadow: 0 0 4px var(--accent);
   background: rgba(255, 0, 170, 0.08);
 }
+
+/* ────────────────────────────────────────────
+   Top bar (header + controls)
+   ──────────────────────────────────────────── */
+.crt-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.crt-topbar-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.crt-theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font: inherit;
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+  cursor: pointer;
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 80ms, border-color 80ms;
+}
+.crt-theme-toggle:hover {
+  background: rgba(255, 0, 170, 0.08);
+  border-color: var(--accent);
+}
+
+/* ────────────────────────────────────────────
+   Music player widget
+   ──────────────────────────────────────────── */
+.crt-music {
+  margin: 4px 0 16px;
+  border: 1px solid var(--border);
+  background: rgba(0, 255, 159, 0.04);
+  padding: 6px 10px;
+}
+.crt-music-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.crt-music-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  padding: 2px 8px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  min-width: 36px;
+  white-space: nowrap;
+  transition: background 80ms, border-color 80ms;
+}
+.crt-music-btn:hover { background: rgba(0, 255, 159, 0.13); border-color: var(--primary); }
+.crt-music-btn.play {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.5);
+  font-size: 18px;
+}
+.crt-music-track {
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+  font-size: 17px;
+  letter-spacing: 1px;
+  margin-left: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crt-music-counter {
+  color: var(--dim);
+  font-size: 14px;
+  text-shadow: none;
+  margin-left: 4px;
+}
+
+/* ────────────────────────────────────────────
+   Light theme — vintage warm-amber CRT
+   Same retro structure, swapped palette.
+   ──────────────────────────────────────────── */
+:root[data-theme="light"] {
+  --bg: #f6ecd0;          /* aged-paper cream */
+  --primary: #5a3210;     /* dark amber/sepia text */
+  --accent: #b8431a;      /* burnt-orange CRT phosphor */
+  --dim: rgba(90, 50, 16, 0.55);
+  --border: rgba(90, 50, 16, 0.45);
+  --error: #8a1f1f;
+}
+:root[data-theme="light"] body::after {
+  /* slightly more visible scanlines on cream so they still read as "CRT" */
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 3px,
+    rgba(90, 50, 16, 0.10) 4px
+  );
+}
+:root[data-theme="light"] html,
+:root[data-theme="light"] body,
+:root[data-theme="light"] #root {
+  text-shadow: none;
+}
+:root[data-theme="light"] .crt-card-dex,
+:root[data-theme="light"] .crt-card-name,
+:root[data-theme="light"] .crt-section-label,
+:root[data-theme="light"] .crt-header,
+:root[data-theme="light"] .crt-music-track,
+:root[data-theme="light"] .crt-music-btn.play,
+:root[data-theme="light"] .crt-status.scanning,
+:root[data-theme="light"] .crt-typefilter-label,
+:root[data-theme="light"] .crt-genfilter-label,
+:root[data-theme="light"] .crt-card-particle.heart,
+:root[data-theme="light"] .crt-card-particle.star,
+:root[data-theme="light"] .crt-card-particle.sparkle,
+:root[data-theme="light"] .crt-tab.active,
+:root[data-theme="light"] .crt-gen-chip.active,
+:root[data-theme="light"] .crt-form-chip.active,
+:root[data-theme="light"] .crt-shiny button[aria-pressed="true"] {
+  text-shadow: 0 0 0 transparent;
+}
+:root[data-theme="light"] .crt-cursor {
+  background: var(--primary);
+  color: var(--primary);
+}
+:root[data-theme="light"] body::after { mix-blend-mode: multiply; }

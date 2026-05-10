@@ -14,6 +14,7 @@ export default function App() {
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
   if (list.loading) status = 'loading-dex';
+  else if (list.error) status = 'err-api';
   else if (result.loading) status = 'scanning';
   else if (result.error?.kind === 'not-in-gen-8') status = 'err-not-found';
   else if (result.error?.kind === 'transmission') status = 'err-api';
@@ -30,8 +31,15 @@ export default function App() {
       <StatusLine state={status} />
       <SearchBar names={list.names} onSearch={handleSearch} disabled={list.loading} />
 
-      {!query && !result.loading && (
+      {!query && !result.loading && !list.error && (
         <div className="crt-empty">▶ ENTER POKéMON NAME AND PRESS RETURN</div>
+      )}
+
+      {list.error && (
+        <div className="crt-error">
+          ERR: COULD NOT LOAD GEN VIII INDEX
+          <button type="button" onClick={() => window.location.reload()}>[ reload ]</button>
+        </div>
       )}
 
       {result.error?.kind === 'not-in-gen-8' && (

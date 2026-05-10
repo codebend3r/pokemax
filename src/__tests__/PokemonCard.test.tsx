@@ -99,9 +99,9 @@ describe('PokemonCard', () => {
 
   it('renders the evolution chain', () => {
     render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
-    expect(screen.getByText('dreepy')).toBeInTheDocument();
-    expect(screen.getByText('drakloak')).toBeInTheDocument();
-    expect(screen.getAllByText(/dragapult/i).length).toBeGreaterThan(0);
+    expect(screen.getByText('DREEPY')).toBeInTheDocument();
+    expect(screen.getByText('DRAKLOAK')).toBeInTheDocument();
+    expect(screen.getAllByText('DRAGAPULT').length).toBe(2);
   });
 
   it('renders the move list (level-up open by default)', () => {

@@ -59,7 +59,7 @@ describe('EvolutionChain', () => {
   it('renders branches for Toxel→Toxtricity', () => {
     render(<EvolutionChain chain={branching} active="toxel" />);
     expect(screen.getByText(/toxel/i)).toBeInTheDocument();
-    expect(screen.getByText(/toxtricity-amped/i)).toBeInTheDocument();
-    expect(screen.getByText(/toxtricity-low-key/i)).toBeInTheDocument();
+    expect(screen.getByText(/toxtricity amped/i)).toBeInTheDocument();
+    expect(screen.getByText(/toxtricity low key/i)).toBeInTheDocument();
   });
 });

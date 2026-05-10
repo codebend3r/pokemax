@@ -20,10 +20,14 @@ function describeCondition(d: EvolutionDetail): string {
   return parts.join(' · ');
 }
 
+function pretty(name: string) {
+  return name.replace(/-/g, ' ').toUpperCase();
+}
+
 function Node({ link, active }: { link: ChainLink; active: string }) {
   const isActive = link.species.name === active;
   return (
-    <span className={'crt-evo-node' + (isActive ? ' active' : '')}>{link.species.name}</span>
+    <span className={'crt-evo-node' + (isActive ? ' active' : '')}>{pretty(link.species.name)}</span>
   );
 }
 

@@ -9,7 +9,6 @@ export type PokeType = (typeof TYPES)[number];
 const X = 0.5; // resists
 const O = 0;   // immune
 const D = 2;   // double (super effective)
-const N = 1;   // neutral
 
 const EFFECTIVENESS: Record<PokeType, Partial<Record<PokeType, number>>> = {
   normal:   { fighting: D, ghost: O },

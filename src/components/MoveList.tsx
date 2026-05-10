@@ -4,25 +4,26 @@ import Detail from './Detail';
 
 const ORDER: Array<{ key: string; label: string; openByDefault?: boolean }> = [
   { key: 'level-up', label: 'LEVEL-UP', openByDefault: true },
-  { key: 'machine', label: 'TM / TR' },
+  { key: 'machine', label: 'TM / TR / HM' },
   { key: 'egg', label: 'EGG' },
   { key: 'tutor', label: 'TUTOR' },
 ];
 
 interface Props {
   moves: PokemonResponse['moves'];
+  versionGroup: string;
 }
 
 function pretty(name: string) {
   return name.replace(/-/g, ' ');
 }
 
-export default function MoveList({ moves }: Props) {
-  const groups = groupMoves(moves);
+export default function MoveList({ moves, versionGroup }: Props) {
+  const groups = groupMoves(moves, versionGroup);
   const totalCount = Object.values(groups).reduce((n, g) => n + g.length, 0);
 
   if (totalCount === 0) {
-    return <div style={{ color: 'var(--dim)' }}>· no moves recorded</div>;
+    return <div style={{ color: 'var(--dim)' }}>· no moves recorded for this game</div>;
   }
 
   return (

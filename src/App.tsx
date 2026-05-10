@@ -3,13 +3,16 @@ import SearchBar from './components/SearchBar';
 import StatusLine from './components/StatusLine';
 import PokemonCard from './components/PokemonCard';
 import PokemonGrid from './components/PokemonGrid';
-import { useGen8List } from './hooks/useGen8List';
+import GenTabs from './components/GenTabs';
+import { useGenerationList } from './hooks/useGenerationList';
 import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
+import { getGen } from './generations';
 import type { PokeType } from './typeChart';
 
 export default function App() {
-  const list = useGen8List();
+  const [gen, setGen] = useState(8);
+  const list = useGenerationList(gen);
   const typeIndex = useTypeIndex();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
@@ -18,6 +21,8 @@ export default function App() {
   const [attempt, setAttempt] = useState(0);
   const result = usePokemon(selected, list.species, attempt);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const meta = getGen(gen);
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
   if (list.loading) status = 'loading-dex';
@@ -39,6 +44,13 @@ export default function App() {
     setQuery('');
   };
 
+  const handleGenChange = (n: number) => {
+    setGen(n);
+    setSelected(null);
+    setQuery('');
+    setSelectedTypes(new Set());
+  };
+
   const handleSubmit = (typed: string) => {
     const q = typed.trim().toLowerCase();
     if (!q) return;
@@ -52,8 +64,10 @@ export default function App() {
 
   return (
     <div className="crt">
-      <header className="crt-header">▶ POKEMAX // GEN VIII</header>
+      <header className="crt-header">▶ POKEMAX // GEN {meta.roman}</header>
+      <div className="crt-subheader">{meta.region.toUpperCase()} REGION</div>
       <StatusLine state={status} />
+      <GenTabs active={gen} onChange={handleGenChange} />
       <SearchBar
         names={list.names}
         value={query}
@@ -64,13 +78,13 @@ export default function App() {
 
       {list.error && (
         <div className="crt-error">
-          ERR: COULD NOT LOAD GEN VIII INDEX
+          ERR: COULD NOT LOAD GEN {meta.roman} INDEX
           <button type="button" onClick={() => window.location.reload()}>[ reload ]</button>
         </div>
       )}
 
       {result.error?.kind === 'not-in-gen-8' && (
-        <div className="crt-error">ERR: "{selected}" NOT FOUND IN GEN VIII</div>
+        <div className="crt-error">ERR: "{selected}" NOT FOUND IN GEN {meta.roman}</div>
       )}
 
       {result.error?.kind === 'transmission' && (
@@ -89,6 +103,7 @@ export default function App() {
             shiny={shiny}
             onShinyChange={setShiny}
             onSelectEvolution={handleSelect}
+            gen={gen}
           />
         </div>
       )}

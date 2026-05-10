@@ -57,32 +57,32 @@ const chain: EvolutionChainResponse = { chain: chainLink };
 
 describe('PokemonCard', () => {
   it('renders all stat values', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
     expect(screen.getByText('88')).toBeInTheDocument();
     expect(screen.getByText('120')).toBeInTheDocument();
     expect(screen.getByText('142')).toBeInTheDocument();
   });
 
   it('marks the hidden ability', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
     const item = screen.getByText(/cursed body/i).closest('li');
     expect(item).not.toBeNull();
     expect(item).toHaveTextContent(/HIDDEN/i);
   });
 
   it('renders types as chips', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
     expect(screen.getAllByText('dragon').length).toBeGreaterThan(0);
     expect(screen.getAllByText('ghost').length).toBeGreaterThan(0);
   });
 
   it('renders the official artwork normal sprite', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
     expect(screen.getByRole('img')).toHaveAttribute('src', 'art-normal.png');
   });
 
   it('renders the shiny sprite when shiny is true', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={true} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={true} onShinyChange={() => {}} gen={8} />);
     expect(screen.getByRole('img')).toHaveAttribute('src', 'art-shiny.png');
   });
 
@@ -95,19 +95,19 @@ describe('PokemonCard', () => {
         other: { 'official-artwork': { front_default: 'art-normal.png', front_shiny: null } },
       },
     };
-    render(<PokemonCard pokemon={p} species={species} chain={chain} shiny={true} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={p} species={species} chain={chain} shiny={true} onShinyChange={() => {}} gen={8} />);
     expect(screen.getByRole('img')).toHaveAttribute('src', 'pixel-shiny.png');
   });
 
   it('renders the evolution chain', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
     expect(screen.getByText('DREEPY')).toBeInTheDocument();
     expect(screen.getByText('DRAKLOAK')).toBeInTheDocument();
     expect(screen.getAllByText('DRAGAPULT').length).toBe(2);
   });
 
   it('renders the move list (level-up open by default)', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
     expect(screen.getByText(/dragon darts/i)).toBeInTheDocument();
   });
 });

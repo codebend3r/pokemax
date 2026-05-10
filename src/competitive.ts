@@ -10,8 +10,6 @@ export interface SmogonSet {
 
 type SmogonData = Record<string, Record<string, Record<string, SmogonSet>>>;
 
-const URL = 'https://pkmn.github.io/smogon/data/sets/gen8.json';
-
 const TIER_PRIORITY = [
   'ou',
   'ubers',
@@ -23,28 +21,33 @@ const TIER_PRIORITY = [
   'zu',
   'lc',
   'vgc2022',
+  'vgc2023',
+  'vgc2024',
   'doubles',
   '2v2doubles',
   'monotype',
 ];
 
-let cached: SmogonData | null = null;
-let inflight: Promise<SmogonData> | null = null;
+const cached = new Map<number, SmogonData>();
+const inflight = new Map<number, Promise<SmogonData>>();
 
-export async function fetchSmogonData(): Promise<SmogonData> {
-  if (cached) return cached;
-  if (!inflight) {
-    inflight = fetch(URL)
+export async function fetchSmogonData(gen: number): Promise<SmogonData> {
+  if (cached.has(gen)) return cached.get(gen)!;
+  let p = inflight.get(gen);
+  if (!p) {
+    p = fetch(`https://pkmn.github.io/smogon/data/sets/gen${gen}.json`)
       .then((r) => {
         if (!r.ok) throw new Error('Smogon data unavailable');
         return r.json() as Promise<SmogonData>;
       })
       .then((d) => {
-        cached = d;
+        cached.set(gen, d);
+        inflight.delete(gen);
         return d;
       });
+    inflight.set(gen, p);
   }
-  return inflight;
+  return p;
 }
 
 function pokeapiToSmogon(name: string): string {

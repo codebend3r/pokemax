@@ -62,7 +62,7 @@ export default function PokemonGrid({
                 className={'crt-grid-cell' + (s.name === selected ? ' active' : '')}
                 onClick={() => onSelect(s.name)}
               >
-                <span className="crt-grid-dex">№{String(s.id).padStart(3, '0')}</span>
+                <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>
                 <span className="crt-grid-sprite">
                   <img
                     className="grid-still"

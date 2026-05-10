@@ -7,7 +7,7 @@ export interface CompetitiveState {
   error: string | null;
 }
 
-export function useCompetitiveSet(name: string | null): CompetitiveState {
+export function useCompetitiveSet(name: string | null, gen: number): CompetitiveState {
   const [state, setState] = useState<CompetitiveState>({
     build: null,
     loading: !!name,
@@ -22,7 +22,7 @@ export function useCompetitiveSet(name: string | null): CompetitiveState {
     let active = true;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchSmogonData()
+    fetchSmogonData(gen)
       .then((data) => {
         if (!active) return;
         const build = pickBuild(data, name);
@@ -35,7 +35,7 @@ export function useCompetitiveSet(name: string | null): CompetitiveState {
     return () => {
       active = false;
     };
-  }, [name]);
+  }, [name, gen]);
 
   return state;
 }

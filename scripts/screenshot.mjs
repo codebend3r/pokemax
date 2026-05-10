@@ -17,7 +17,7 @@ async function shot(page, file) {
 
 const browser = await chromium.launch();
 
-// Desktop home
+// Desktop home (Gen VIII default)
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
@@ -26,17 +26,22 @@ const browser = await chromium.launch();
   await page.waitForTimeout(800);
   await shot(page, 'desktop-home.png');
 
-  // Card open: click cinderace
-  await page.locator('button.crt-grid-cell:has-text("cinderace")').click();
+  // Switch to Gen 1 (Kanto)
+  await page.locator('button.crt-tab:has-text("Kanto")').click();
+  await page.waitForTimeout(1500);
+  await shot(page, 'desktop-gen1.png');
+
+  // Click Charizard
+  await page.locator('button.crt-grid-cell:has-text("charizard")').click();
   await page.waitForSelector('.crt-card', { timeout: 15000 });
   await page.waitForTimeout(1500);
   await shot(page, 'desktop-card.png');
 
-  // Open the type chip (DRAGAPULT for type click)
-  await page.evaluate(() => window.scrollTo(0, 0));
+  // Switch back to Gen 8 and click Dragapult, expand a type
+  await page.locator('button.crt-tab:has-text("Galar")').click();
+  await page.waitForTimeout(1200);
   await page.locator('button.crt-grid-cell:has-text("dragapult")').click();
   await page.waitForTimeout(1500);
-  // click first type chip
   await page.locator('.crt-type').first().click();
   await page.waitForTimeout(800);
   await shot(page, 'desktop-type-matchup.png');
@@ -44,7 +49,7 @@ const browser = await chromium.launch();
   await ctx.close();
 }
 
-// Mobile home
+// Mobile home (Gen VIII default)
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true });
   const page = await ctx.newPage();

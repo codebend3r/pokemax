@@ -150,8 +150,21 @@ body::after {
   background: rgba(0, 255, 159, 0.05);
 }
 .crt-card-meta { flex: 1; }
-.crt-card-name { color: var(--accent); text-shadow: 0 0 8px rgba(255, 0, 170, 0.5); font-size: 32px; letter-spacing: 1px; }
-.crt-card-dex { color: var(--dim); font-size: 18px; }
+.crt-card-dex {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(255, 0, 170, 0.55);
+  font-size: 38px;
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.crt-card-name { color: var(--primary); text-shadow: 0 0 6px rgba(0, 255, 159, 0.5); font-size: 28px; letter-spacing: 1px; }
+.crt-card-gen {
+  color: var(--dim);
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
 .crt-types { display: flex; gap: 6px; margin-top: 8px; }
 .crt-type {
   padding: 2px 12px;
@@ -667,4 +680,72 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 
 @media (max-width: 600px) {
   .crt-tf-chip { padding: 3px 8px; font-size: 12px; }
+}
+
+/* Generation tabs */
+.crt-subheader {
+  color: var(--dim);
+  font-size: 14px;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+.crt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 16px 0 16px;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 12px;
+}
+.crt-tab {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 70px;
+  transition: background 80ms, border-color 80ms;
+}
+.crt-tab:hover {
+  background: rgba(0, 255, 159, 0.12);
+  border-color: var(--primary);
+}
+.crt-tab.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 0, 170, 0.08);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+  box-shadow: 0 0 10px rgba(255, 0, 170, 0.2);
+}
+.crt-tab-roman {
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+.crt-tab-region {
+  font-size: 12px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.crt-tab.active .crt-tab-region { color: var(--accent); opacity: 0.8; }
+
+.crt-grid-dex {
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 600px) {
+  .crt-tabs { gap: 3px; padding-bottom: 8px; margin: 12px 0; }
+  .crt-tab { min-width: 56px; padding: 4px 6px; }
+  .crt-tab-roman { font-size: 15px; }
+  .crt-tab-region { font-size: 10px; }
+  .crt-card-dex { font-size: 28px; }
 }

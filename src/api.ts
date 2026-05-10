@@ -21,12 +21,15 @@ function speciesIdFromUrl(url: string): number {
   return m ? parseInt(m[1], 10) : 0;
 }
 
-export async function fetchGen8List(): Promise<Gen8Species[]> {
-  const data = await getJson<Gen8ListResponse>(`${BASE}/generation/8`);
+export async function fetchGenerationList(gen: number): Promise<Gen8Species[]> {
+  const data = await getJson<Gen8ListResponse>(`${BASE}/generation/${gen}`);
   return data.pokemon_species
     .map((s) => ({ name: s.name, id: speciesIdFromUrl(s.url) }))
     .sort((a, b) => a.id - b.id);
 }
+
+// Backwards-compat alias
+export const fetchGen8List = () => fetchGenerationList(8);
 
 export function fetchPokemon(idOrName: string | number): Promise<PokemonResponse> {
   return getJson<PokemonResponse>(`${BASE}/pokemon/${idOrName}`);

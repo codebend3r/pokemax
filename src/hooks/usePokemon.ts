@@ -6,6 +6,7 @@ import {
 } from '../api';
 import type {
   EvolutionChainResponse,
+  Gen8Species,
   PokemonResponse,
   SpeciesResponse,
 } from '../types';
@@ -28,7 +29,7 @@ export interface UsePokemonState {
 
 export function usePokemon(
   name: string | null,
-  gen8Names: string[],
+  gen8Species: Gen8Species[],
   attempt: number,
 ): UsePokemonState {
   const [state, setState] = useState<UsePokemonState>({
@@ -42,7 +43,8 @@ export function usePokemon(
       setState({ data: null, loading: false, error: null });
       return;
     }
-    if (gen8Names.length > 0 && !gen8Names.includes(name)) {
+    const entry = gen8Species.find((s) => s.name === name);
+    if (gen8Species.length > 0 && !entry) {
       setState({ data: null, loading: false, error: { kind: 'not-in-gen-8' } });
       return;
     }
@@ -53,7 +55,9 @@ export function usePokemon(
     (async () => {
       try {
         const [pokemon, species] = await Promise.all([
-          fetchPokemon(name),
+          // Fetch by species ID — always returns the default Pokémon form,
+          // works for species like Toxtricity that don't have a /pokemon/{name} endpoint
+          fetchPokemon(entry ? entry.id : name),
           fetchSpecies(name),
         ]);
         const chain = await fetchEvolutionChain(species.evolution_chain.url);
@@ -70,7 +74,7 @@ export function usePokemon(
     return () => {
       active = false;
     };
-  }, [name, gen8Names, attempt]);
+  }, [name, gen8Species, attempt]);
 
   return state;
 }

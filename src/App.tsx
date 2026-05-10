@@ -12,7 +12,7 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const result = usePokemon(selected, list.names, attempt);
+  const result = usePokemon(selected, list.species, attempt);
   const cardRef = useRef<HTMLDivElement>(null);
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
@@ -63,6 +63,10 @@ export default function App() {
           ERR: COULD NOT LOAD GEN VIII INDEX
           <button type="button" onClick={() => window.location.reload()}>[ reload ]</button>
         </div>
+      )}
+
+      {result.error?.kind === 'not-in-gen-8' && (
+        <div className="crt-error">ERR: "{selected}" NOT FOUND IN GEN VIII</div>
       )}
 
       {result.error?.kind === 'transmission' && (

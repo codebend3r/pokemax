@@ -28,8 +28,8 @@ export async function fetchGen8List(): Promise<Gen8Species[]> {
     .sort((a, b) => a.id - b.id);
 }
 
-export function fetchPokemon(name: string): Promise<PokemonResponse> {
-  return getJson<PokemonResponse>(`${BASE}/pokemon/${name}`);
+export function fetchPokemon(idOrName: string | number): Promise<PokemonResponse> {
+  return getJson<PokemonResponse>(`${BASE}/pokemon/${idOrName}`);
 }
 
 export function fetchSpecies(name: string): Promise<SpeciesResponse> {

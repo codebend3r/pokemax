@@ -507,7 +507,12 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   gap: 6px;
   transition: background 80ms, border-color 80ms;
   overflow: visible;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
+.crt-grid-cell:focus { outline: none; }
+.crt-grid-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.crt-grid-cell::-moz-focus-inner { border: 0; }
 .crt-grid-cell:hover {
   background: rgba(0, 255, 159, 0.13);
   border-color: var(--primary);

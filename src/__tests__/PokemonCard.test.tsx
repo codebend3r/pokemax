@@ -6,6 +6,8 @@ import type { ChainLink, PokemonResponse, SpeciesResponse, EvolutionChainRespons
 const pokemon: PokemonResponse = {
   id: 887,
   name: 'dragapult',
+  height: 30,
+  weight: 500,
   sprites: {
     front_default: 'normal.png',
     front_shiny: 'shiny.png',
@@ -56,6 +58,10 @@ const species: SpeciesResponse = {
   name: 'dragapult',
   evolution_chain: { url: 'X' },
   varieties: [{ is_default: true, pokemon: { name: 'dragapult', url: '' } }],
+  flavor_text_entries: [
+    { flavor_text: 'It can teleport 1,000 ft in the blink of an eye.', language: { name: 'en' }, version: { name: 'sword' } },
+  ],
+  genera: [{ genus: 'Stealth Pokémon', language: { name: 'en' } }],
 };
 const chain: EvolutionChainResponse = { chain: chainLink };
 

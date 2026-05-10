@@ -3,14 +3,22 @@ export interface Gen8ListResponse {
 }
 
 export interface Gen8Species {
-  name: string;
-  id: number;
+  name: string;             // pokemon endpoint name (may include form suffix, e.g. 'charizard-mega-x')
+  id: number;               // /pokemon/{id} works for both base species and forms
   gen: number;
+  /** Species (parent) name used for /pokemon-species/{name}. Defaults to `name` if absent. */
+  speciesName?: string;
+  /** Human-readable form label, only set for non-default forms (e.g. "Mega X", "Gigantamax"). */
+  formLabel?: string;
 }
 
 export interface PokemonResponse {
   id: number;
   name: string;
+  /** Decimetres (1 = 10 cm) — divide by 10 for metres */
+  height: number;
+  /** Hectograms (1 = 100 g) — divide by 10 for kilograms */
+  weight: number;
   cries?: {
     latest: string | null;
     legacy: string | null;
@@ -50,6 +58,12 @@ export interface SpeciesResponse {
   name: string;
   evolution_chain: { url: string };
   varieties: { is_default: boolean; pokemon: { name: string; url: string } }[];
+  flavor_text_entries: {
+    flavor_text: string;
+    language: { name: string };
+    version: { name: string };
+  }[];
+  genera: { genus: string; language: { name: string } }[];
 }
 
 export interface EvolutionDetail {

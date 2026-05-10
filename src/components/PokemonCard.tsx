@@ -278,6 +278,28 @@ export default function PokemonCard({
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
 
+  // Height (decimetres → m + ft′in″)
+  const meters = pokemon.height / 10;
+  const totalInches = meters * 39.3701;
+  const ft = Math.floor(totalInches / 12);
+  const inches = Math.round(totalInches - ft * 12);
+  const heightStr = `${meters.toFixed(1)} m  (${ft}'${String(inches).padStart(2, '0')}")`;
+
+  // Weight (hectograms → kg + lbs)
+  const kg = pokemon.weight / 10;
+  const lbs = (kg * 2.20462).toFixed(1);
+  const weightStr = `${kg.toFixed(1)} kg  (${lbs} lbs)`;
+
+  // Genus ("Mouse Pokémon", "Lizard Pokémon", etc.)
+  const genus = species.genera.find((g) => g.language.name === 'en')?.genus ?? '';
+
+  // Pokédex entry (latest available English flavor text). Replaces NBSPs and form-feed glyphs that PokeAPI text contains.
+  const flavorText = (() => {
+    const en = species.flavor_text_entries.filter((e) => e.language.name === 'en');
+    if (en.length === 0) return '';
+    return en[en.length - 1].flavor_text.replace(/[\n\f­ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  })();
+
   return (
     <div className="crt-card">
       <div className="crt-card-top">
@@ -302,7 +324,9 @@ export default function PokemonCard({
         <div className="crt-card-meta">
           <div className="crt-card-dex">#{String(pokemon.id).padStart(3, '0')}</div>
           <div className="crt-card-name">{pokemon.name.toUpperCase()}</div>
-          <div className="crt-card-gen">GEN {meta.roman} · {meta.region.toUpperCase()}</div>
+          <div className="crt-card-gen">
+            GEN {meta.roman} · {meta.region.toUpperCase()}{genus ? ` · ${genus.toUpperCase()}` : ''}
+          </div>
           <div className="crt-types">
             {pokemon.types.map((t) => {
               const isPoke = (TYPES as readonly string[]).includes(t.type.name);
@@ -319,8 +343,19 @@ export default function PokemonCard({
               );
             })}
           </div>
+          <div className="crt-card-vitals">
+            <span><span className="crt-card-vitals-label">HT</span> {heightStr}</span>
+            <span><span className="crt-card-vitals-label">WT</span> {weightStr}</span>
+          </div>
         </div>
       </div>
+
+      {flavorText && (
+        <div className="crt-pokedex-entry">
+          <span className="crt-pokedex-entry-label">▶ POKéDEX ENTRY</span>
+          <p>{flavorText}</p>
+        </div>
+      )}
 
       <Section label="▶ BASE STATS">
         {sortedStats.map((s) => (

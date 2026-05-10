@@ -54,11 +54,12 @@ export function usePokemon(
 
     (async () => {
       try {
+        // Form entries (e.g. charizard-mega-x) carry their parent species name; use it
+        // for the species fetch since /pokemon-species/charizard-mega-x doesn't exist.
+        const speciesNameForFetch = entry?.speciesName ?? name;
         const [pokemon, species] = await Promise.all([
-          // Fetch by species ID — always returns the default Pokémon form,
-          // works for species like Toxtricity that don't have a /pokemon/{name} endpoint
           fetchPokemon(entry ? entry.id : name),
-          fetchSpecies(name),
+          fetchSpecies(speciesNameForFetch),
         ]);
         const chain = await fetchEvolutionChain(species.evolution_chain.url);
         if (active) {

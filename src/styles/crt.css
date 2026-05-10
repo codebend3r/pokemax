@@ -1239,3 +1239,93 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 .crt-music .crt-volume {
   margin-left: auto;
 }
+
+/* Height / weight row in card meta */
+.crt-card-vitals {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 17px;
+  color: var(--primary);
+  text-shadow: 0 0 4px rgba(0, 255, 159, 0.4);
+}
+.crt-card-vitals-label {
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+/* Pokédex flavor-text entry block */
+.crt-pokedex-entry {
+  margin-top: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+}
+.crt-pokedex-entry-label {
+  display: block;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+  letter-spacing: 1px;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.crt-pokedex-entry p {
+  margin: 0;
+  color: var(--primary);
+  line-height: 1.5;
+  font-size: 18px;
+  font-style: italic;
+  border-left: 2px solid var(--accent);
+  padding-left: 10px;
+  background: rgba(255, 0, 170, 0.04);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* Alt-forms toggle row */
+.crt-extra-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 12px;
+  padding: 8px 0;
+}
+.crt-extra-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-size: 16px;
+  color: var(--primary);
+}
+.crt-extra-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border);
+  background: rgba(0, 255, 159, 0.04);
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  margin: 0;
+}
+.crt-extra-label input[type="checkbox"]:checked {
+  background: rgba(255, 0, 170, 0.15);
+  border-color: var(--accent);
+}
+.crt-extra-label input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: var(--accent);
+  font-size: 16px;
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.5);
+}
+.crt-extra-status {
+  color: var(--accent);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+}

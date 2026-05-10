@@ -24,6 +24,13 @@ function pretty(name: string): string {
   return name.replace(/-/g, ' ');
 }
 
+function cellLabel(s: Gen8Species): string {
+  if (s.formLabel && s.speciesName) {
+    return `${pretty(s.speciesName)} · ${s.formLabel}`;
+  }
+  return pretty(s.name);
+}
+
 function GridCell({
   s,
   selected,
@@ -67,7 +74,7 @@ function GridCell({
           />
         )}
       </span>
-      <span className="crt-grid-name">{pretty(s.name)}</span>
+      <span className="crt-grid-name">{cellLabel(s)}</span>
     </button>
   );
 }

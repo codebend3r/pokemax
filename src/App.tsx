@@ -9,6 +9,7 @@ import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
 import { useTheme } from './hooks/useTheme';
 import { useVolume } from './hooks/useVolume';
+import { useExtraForms } from './hooks/useExtraForms';
 import type { PokeType } from './typeChart';
 
 // Lazy-loaded — only fetched when first needed
@@ -25,19 +26,27 @@ export default function App() {
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
   const typeIndex = useTypeIndex(typeIndexEnabled);
+  const [showExtraForms, setShowExtraForms] = useState(false);
+  const extraForms = useExtraForms(list.species, showExtraForms);
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const result = usePokemon(selected, list.species, attempt);
+  const fullSpeciesIndex = useMemo(
+    () => [...list.species, ...extraForms.forms],
+    [list.species, extraForms.forms],
+  );
+  const result = usePokemon(selected, fullSpeciesIndex, attempt);
   const cardRef = useRef<HTMLDivElement>(null);
   const cryAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Filter the master species list down to whatever generations are selected
+  // Combine base species with alternate forms when the toggle is on, then apply gen filter
   const filteredSpecies = useMemo(() => {
-    if (selectedGens.size === 0) return list.species;
-    return list.species.filter((s) => selectedGens.has(s.gen));
-  }, [list.species, selectedGens]);
+    const merged = showExtraForms ? [...list.species, ...extraForms.forms] : list.species;
+    const sorted = [...merged].sort((a, b) => a.id - b.id);
+    if (selectedGens.size === 0) return sorted;
+    return sorted.filter((s) => selectedGens.has(s.gen));
+  }, [list.species, extraForms.forms, selectedGens, showExtraForms]);
 
-  const selectedEntry = selected ? list.species.find((s) => s.name === selected) ?? null : null;
+  const selectedEntry = selected ? fullSpeciesIndex.find((s) => s.name === selected) ?? null : null;
   const selectedGen = selectedEntry?.gen ?? 8;
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
@@ -61,9 +70,11 @@ export default function App() {
 
     // Pre-warm the cry audio while the pokemon data is still being fetched.
     // The cry URL is predictable from the species ID, so we don't need to wait.
-    const sp = list.species.find((s) => s.name === name);
+    const sp = fullSpeciesIndex.find((s) => s.name === name);
     if (sp) {
-      const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
+      // For alt forms (id ≥ 10000), the cry endpoint usually only has the base species's cry
+      const cryId = sp.id >= 10000 && sp.speciesName ? (list.species.find((b) => b.name === sp.speciesName)?.id ?? sp.id) : sp.id;
+      const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${cryId}.ogg`;
       if (cryAudioRef.current) {
         cryAudioRef.current.pause();
         cryAudioRef.current.src = '';
@@ -167,6 +178,23 @@ export default function App() {
         }
         onClear={() => setSelectedGens(new Set())}
       />
+
+      <div className="crt-extra-toggle">
+        <label className="crt-extra-label">
+          <input
+            type="checkbox"
+            checked={showExtraForms}
+            onChange={(e) => setShowExtraForms(e.target.checked)}
+          />
+          <span>SHOW ALT FORMS (Mega · Gigantamax · Regional · Battle Forms)</span>
+        </label>
+        {extraForms.loading && (
+          <span className="crt-extra-status">▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span></span>
+        )}
+        {showExtraForms && extraForms.forms.length > 0 && !extraForms.loading && (
+          <span className="crt-extra-status">+ {extraForms.forms.length} forms</span>
+        )}
+      </div>
 
       <PokemonGrid
         species={filteredSpecies}

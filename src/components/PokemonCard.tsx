@@ -1,9 +1,11 @@
 import type { EvolutionChainResponse, PokemonResponse, SpeciesResponse } from '../types';
+import { groupMoves } from '../moves';
 import StatBar from './StatBar';
 import AbilityList from './AbilityList';
 import EvolutionChain from './EvolutionChain';
 import MoveList from './MoveList';
 import ShinyToggle from './ShinyToggle';
+import Section from './Section';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -29,6 +31,7 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
   );
+  const moveCount = Object.values(groupMoves(pokemon.moves)).reduce((n, g) => n + g.length, 0);
 
   return (
     <div className="crt-card">
@@ -48,18 +51,23 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
         </div>
       </div>
 
-      <div className="crt-section">
-        <div className="crt-section-label">▶ BASE STATS</div>
+      <Section label="▶ BASE STATS">
         {sortedStats.map((s) => (
           <StatBar key={s.stat.name} name={s.stat.name} value={s.base_stat} />
         ))}
-      </div>
+      </Section>
 
-      <AbilityList abilities={pokemon.abilities} />
+      <Section label="▶ ABILITIES">
+        <AbilityList abilities={pokemon.abilities} />
+      </Section>
 
-      <EvolutionChain chain={chain.chain} active={pokemon.name} onSelect={onSelectEvolution} />
+      <Section label="▶ EVOLUTION">
+        <EvolutionChain chain={chain.chain} active={pokemon.name} onSelect={onSelectEvolution} />
+      </Section>
 
-      <MoveList moves={pokemon.moves} />
+      <Section label="▶ MOVES (SWORD/SHIELD)" count={moveCount}>
+        <MoveList moves={pokemon.moves} />
+      </Section>
     </div>
   );
 }

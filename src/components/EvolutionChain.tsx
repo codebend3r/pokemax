@@ -97,11 +97,8 @@ function Branch({
 
 export default function EvolutionChain({ chain, active, onSelect }: Props) {
   return (
-    <div className="crt-section">
-      <div className="crt-section-label">▶ EVOLUTION</div>
-      <div className="crt-evo">
-        <Branch link={chain} active={active} onSelect={onSelect} />
-      </div>
+    <div className="crt-evo">
+      <Branch link={chain} active={active} onSelect={onSelect} />
     </div>
   );
 }

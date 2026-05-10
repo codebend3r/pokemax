@@ -21,17 +21,11 @@ export default function MoveList({ moves }: Props) {
   const totalCount = Object.values(groups).reduce((n, g) => n + g.length, 0);
 
   if (totalCount === 0) {
-    return (
-      <div className="crt-section">
-        <div className="crt-section-label">▶ MOVES (SWORD/SHIELD)</div>
-        <div style={{ color: 'var(--dim)' }}>· no moves recorded</div>
-      </div>
-    );
+    return <div style={{ color: 'var(--dim)' }}>· no moves recorded</div>;
   }
 
   return (
-    <div className="crt-section crt-moves">
-      <div className="crt-section-label">▶ MOVES (SWORD/SHIELD) · {totalCount}</div>
+    <div className="crt-moves">
       {ORDER.map(({ key, label, openByDefault }) => {
         const list = groups[key];
         if (!list || list.length === 0) return null;

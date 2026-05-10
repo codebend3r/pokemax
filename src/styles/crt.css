@@ -148,16 +148,36 @@ body::after {
 
 .crt-section {
   border-top: 1px dashed var(--border);
-  padding-top: 12px;
   margin-top: 12px;
 }
+.crt-section-summary {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  padding: 12px 4px 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  position: relative;
+}
+.crt-section-summary::-webkit-details-marker { display: none; }
+.crt-section-summary::before {
+  content: '▾';
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--primary);
+  transition: transform 120ms;
+}
+.crt-section:not([open]) > .crt-section-summary::before { transform: rotate(-90deg); }
+.crt-section-summary:hover { background: rgba(0, 255, 159, 0.06); }
 .crt-section-label {
   color: var(--accent);
   text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
   letter-spacing: 1px;
-  margin-bottom: 8px;
   font-size: 20px;
 }
+.crt-section-count { color: var(--dim); font-size: 16px; }
+.crt-section-body { padding: 4px 4px 12px; }
 
 .crt-stat {
   display: grid;

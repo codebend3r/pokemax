@@ -26,8 +26,8 @@ const browser = await chromium.launch();
   await page.waitForTimeout(800);
   await shot(page, 'desktop-home.png');
 
-  // Switch to Gen 1 (Kanto)
-  await page.locator('button.crt-tab:has-text("Kanto")').click();
+  // Filter to Gen 1 (Kanto) only via the gen filter
+  await page.locator('button.crt-gen-chip:has-text("Kanto")').click();
   await page.waitForTimeout(1500);
   await shot(page, 'desktop-gen1.png');
 
@@ -37,8 +37,10 @@ const browser = await chromium.launch();
   await page.waitForTimeout(1500);
   await shot(page, 'desktop-card.png');
 
-  // Switch back to Gen 8 and click Dragapult, expand a type
-  await page.locator('button.crt-tab:has-text("Galar")').click();
+  // Filter Galar + Paldea (multi-select) + click Dragapult, expand a type
+  await page.locator('button.crt-gen-chip.all').click();   // clear
+  await page.locator('button.crt-gen-chip:has-text("Galar")').click();
+  await page.locator('button.crt-gen-chip:has-text("Paldea")').click();
   await page.waitForTimeout(1200);
   await page.locator('button.crt-grid-cell:has-text("dragapult")').click();
   await page.waitForTimeout(1500);

@@ -28,16 +28,12 @@ const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defens
 
 function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView): string {
   if (view === '2d') {
-    const sd = p.sprites.other.showdown;
-    if (sd) {
-      const url = shiny ? sd.front_shiny : sd.front_default;
-      if (url) return url;
-    }
+    // Flat pixel art (the small 96x96 Box-style sprite). NOT the shaded showdown render.
     return shiny
       ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
       : p.sprites.front_default ?? '';
   }
-  // 3D
+  // 3D: prefer Pokémon HOME 3D render, fall back to official artwork
   const home = p.sprites.other.home;
   if (home) {
     const url = shiny ? home.front_shiny : home.front_default;

@@ -35,8 +35,8 @@ describe('fetchGen8List', () => {
     );
     const list = await fetchGen8List();
     expect(list).toEqual([
-      { name: 'grookey', id: 810 },
-      { name: 'scorbunny', id: 813 },
+      { name: 'grookey', id: 810, gen: 8 },
+      { name: 'scorbunny', id: 813, gen: 8 },
     ]);
     expect(fetchMock).toHaveBeenCalledWith('https://pokeapi.co/api/v2/generation/8');
   });

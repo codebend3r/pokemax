@@ -5,6 +5,7 @@ export interface Gen8ListResponse {
 export interface Gen8Species {
   name: string;
   id: number;
+  gen: number;
 }
 
 export interface PokemonResponse {

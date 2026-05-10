@@ -591,15 +591,17 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   .crt-grid-name { font-size: 13px; }
 }
 
-/* Sprite views — both animated */
-@keyframes crt-3d-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+/* Sprite views */
+@keyframes crt-3d-float {
+  0%   { transform: translateY(0)    rotate(-2deg) scale(1);    filter: drop-shadow(0 6px 8px rgba(0, 255, 159, 0.25)); }
+  25%  { transform: translateY(-6px) rotate(0deg)  scale(1.02); filter: drop-shadow(0 10px 12px rgba(0, 255, 159, 0.45)); }
+  50%  { transform: translateY(-10px) rotate(2deg) scale(1.03); filter: drop-shadow(0 14px 14px rgba(255, 0, 170, 0.35)); }
+  75%  { transform: translateY(-6px) rotate(0deg)  scale(1.02); filter: drop-shadow(0 10px 12px rgba(0, 255, 159, 0.45)); }
+  100% { transform: translateY(0)    rotate(-2deg) scale(1);    filter: drop-shadow(0 6px 8px rgba(0, 255, 159, 0.25)); }
 }
-@keyframes crt-pixel-jiggle {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(-1px, -2px) scale(1.02); }
-  75% { transform: translate(1px, 0) scale(1); }
+@keyframes crt-pixel-idle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
 }
 @keyframes crt-grid-bounce {
   0%, 100% { transform: translateY(0); }
@@ -616,14 +618,15 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 .crt-view-toggle { margin-top: 6px; }
 
 .crt-card-top img.crt-sprite-3d {
-  animation: crt-3d-bob 2.6s ease-in-out infinite;
+  animation: crt-3d-float 3.2s ease-in-out infinite;
   image-rendering: auto;
-  background: radial-gradient(circle at 50% 80%, rgba(0,255,159,0.15) 0%, transparent 60%);
+  background: radial-gradient(circle at 50% 80%, rgba(0, 255, 159, 0.15) 0%, transparent 60%);
+  transform-origin: center 70%;
 }
 .crt-card-top img.crt-sprite-2d {
   image-rendering: pixelated;
-  /* gif animates frames itself; add a tiny breathing scale */
-  animation: crt-pixel-jiggle 1.6s ease-in-out infinite;
+  /* Real flat pixel art — gentle breathing only, frame-style */
+  animation: crt-pixel-idle 1.2s steps(2, end) infinite;
   transform-origin: center bottom;
 }
 
@@ -748,4 +751,71 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   .crt-tab-roman { font-size: 15px; }
   .crt-tab-region { font-size: 10px; }
   .crt-card-dex { font-size: 28px; }
+}
+
+/* Generation filter chips (replaces tabs) */
+.crt-genfilter {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+.crt-genfilter-label {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+  letter-spacing: 1px;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+.crt-genfilter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.crt-gen-chip {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 64px;
+  transition: background 80ms, border-color 80ms;
+  letter-spacing: 1px;
+}
+.crt-gen-chip:hover {
+  background: rgba(0, 255, 159, 0.13);
+  border-color: var(--primary);
+}
+.crt-gen-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 0, 170, 0.08);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+  box-shadow: 0 0 8px rgba(255, 0, 170, 0.2);
+}
+.crt-gen-chip.all {
+  min-width: 56px;
+  border-style: dashed;
+  flex-direction: row;
+  letter-spacing: 2px;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+.crt-gen-chip-roman { font-size: 18px; }
+.crt-gen-chip-region {
+  font-size: 11px;
+  color: var(--dim);
+  text-transform: uppercase;
+}
+.crt-gen-chip.active .crt-gen-chip-region { color: var(--accent); opacity: 0.8; }
+
+@media (max-width: 600px) {
+  .crt-gen-chip { min-width: 50px; padding: 4px 6px; }
+  .crt-gen-chip-roman { font-size: 15px; }
+  .crt-gen-chip-region { font-size: 10px; }
+  .crt-gen-chip.all { min-width: 48px; padding: 6px 10px; font-size: 12px; }
 }

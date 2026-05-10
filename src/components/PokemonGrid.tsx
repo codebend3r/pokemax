@@ -48,7 +48,7 @@ export default function PokemonGrid({
       <TypeFilter selected={selectedTypes} onToggle={onToggleType} onClear={onClearTypes} />
 
       {visible.length === 0 ? (
-        <div className="crt-grid-empty">▶ NO MATCHES IN GEN VIII</div>
+        <div className="crt-grid-empty">▶ NO MATCHES</div>
       ) : (
         <>
           <div className="crt-grid-count">

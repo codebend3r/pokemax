@@ -1,28 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import SearchBar from './components/SearchBar';
 import StatusLine from './components/StatusLine';
 import PokemonCard from './components/PokemonCard';
 import PokemonGrid from './components/PokemonGrid';
-import GenTabs from './components/GenTabs';
-import { useGenerationList } from './hooks/useGenerationList';
+import GenFilter from './components/GenFilter';
+import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
-import { getGen } from './generations';
 import type { PokeType } from './typeChart';
 
 export default function App() {
-  const [gen, setGen] = useState(8);
-  const list = useGenerationList(gen);
+  const list = useAllSpecies();
   const typeIndex = useTypeIndex();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const result = usePokemon(selected, list.species, attempt);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const meta = getGen(gen);
+  // Filter the master species list down to whatever generations are selected
+  const filteredSpecies = useMemo(() => {
+    if (selectedGens.size === 0) return list.species;
+    return list.species.filter((s) => selectedGens.has(s.gen));
+  }, [list.species, selectedGens]);
+
+  const selectedEntry = selected ? list.species.find((s) => s.name === selected) ?? null : null;
+  const selectedGen = selectedEntry?.gen ?? 8;
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
   if (list.loading) status = 'loading-dex';
@@ -44,13 +50,6 @@ export default function App() {
     setQuery('');
   };
 
-  const handleGenChange = (n: number) => {
-    setGen(n);
-    setSelected(null);
-    setQuery('');
-    setSelectedTypes(new Set());
-  };
-
   const handleSubmit = (typed: string) => {
     const q = typed.trim().toLowerCase();
     if (!q) return;
@@ -58,16 +57,15 @@ export default function App() {
       handleSelect(q);
       return;
     }
-    const visible = list.species.filter((s) => s.name.includes(q));
+    const visible = filteredSpecies.filter((s) => s.name.includes(q));
     if (visible.length > 0) handleSelect(visible[0].name);
   };
 
   return (
     <div className="crt">
-      <header className="crt-header">▶ POKEMAX // GEN {meta.roman}</header>
-      <div className="crt-subheader">{meta.region.toUpperCase()} REGION</div>
+      <header className="crt-header">▶ POKEMAX</header>
+      <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
       <StatusLine state={status} />
-      <GenTabs active={gen} onChange={handleGenChange} />
       <SearchBar
         names={list.names}
         value={query}
@@ -78,13 +76,13 @@ export default function App() {
 
       {list.error && (
         <div className="crt-error">
-          ERR: COULD NOT LOAD GEN {meta.roman} INDEX
+          ERR: COULD NOT LOAD POKéDEX INDEX
           <button type="button" onClick={() => window.location.reload()}>[ reload ]</button>
         </div>
       )}
 
       {result.error?.kind === 'not-in-gen-8' && (
-        <div className="crt-error">ERR: "{selected}" NOT FOUND IN GEN {meta.roman}</div>
+        <div className="crt-error">ERR: "{selected}" NOT FOUND</div>
       )}
 
       {result.error?.kind === 'transmission' && (
@@ -103,13 +101,26 @@ export default function App() {
             shiny={shiny}
             onShinyChange={setShiny}
             onSelectEvolution={handleSelect}
-            gen={gen}
+            gen={selectedGen}
           />
         </div>
       )}
 
+      <GenFilter
+        selected={selectedGens}
+        onToggle={(g) =>
+          setSelectedGens((prev) => {
+            const next = new Set(prev);
+            if (next.has(g)) next.delete(g);
+            else next.add(g);
+            return next;
+          })
+        }
+        onClear={() => setSelectedGens(new Set())}
+      />
+
       <PokemonGrid
-        species={list.species}
+        species={filteredSpecies}
         query={query}
         selected={selected}
         onSelect={handleSelect}

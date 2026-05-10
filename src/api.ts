@@ -24,7 +24,7 @@ function speciesIdFromUrl(url: string): number {
 export async function fetchGenerationList(gen: number): Promise<Gen8Species[]> {
   const data = await getJson<Gen8ListResponse>(`${BASE}/generation/${gen}`);
   return data.pokemon_species
-    .map((s) => ({ name: s.name, id: speciesIdFromUrl(s.url) }))
+    .map((s) => ({ name: s.name, id: speciesIdFromUrl(s.url), gen }))
     .sort((a, b) => a.id - b.id);
 }
 

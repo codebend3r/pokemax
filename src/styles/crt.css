@@ -63,6 +63,50 @@ body::after {
   animation: power-on 400ms ease-out;
 }
 
+/* Tablet (iPad-class) — keep one column but breathe a bit more */
+@media (min-width: 768px) {
+  .crt { padding: 36px 28px 80px; }
+  .crt-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .crt-card-top img { width: 180px; height: 180px; }
+}
+
+/* Small desktop / large tablet landscape */
+@media (min-width: 1024px) {
+  .crt {
+    max-width: 1080px;
+    padding: 44px 36px 80px;
+  }
+  html, body, #root { font-size: 23px; }
+  .crt-card { padding: 22px; }
+  .crt-card-top { gap: 24px; }
+  .crt-card-top img { width: 220px; height: 220px; }
+  .crt-card-name { font-size: 32px; }
+  .crt-card-dex { font-size: 44px; }
+  .crt-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+  .crt-grid-sprite { width: 110px; height: 110px; }
+  .crt-section-label { font-size: 22px; }
+  .crt-stat { grid-template-columns: 100px 1fr 60px; }
+  .crt-build { grid-template-columns: 110px 1fr; }
+  .crt-moves ul { columns: 3; }
+}
+
+/* Full desktop — cap at 1280px */
+@media (min-width: 1280px) {
+  .crt {
+    max-width: 1280px;
+    padding: 48px 48px 80px;
+  }
+  .crt-card-top img { width: 260px; height: 260px; }
+  .crt-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+  .crt-grid-sprite { width: 120px; height: 120px; }
+  .crt-moves ul { columns: 4; }
+}
+
+/* Ultra-wide screens — keep content centered, don't stretch further */
+@media (min-width: 1600px) {
+  .crt-card-top img { width: 280px; height: 280px; }
+}
+
 .crt-header {
   color: var(--accent);
   text-shadow: 0 0 8px rgba(255, 0, 170, 0.6);

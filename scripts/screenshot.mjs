@@ -17,7 +17,7 @@ async function shot(page, file) {
 
 const browser = await chromium.launch();
 
-// Desktop home (Gen VIII default)
+// Wide desktop (1280px viewport)
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
@@ -26,32 +26,43 @@ const browser = await chromium.launch();
   await page.waitForTimeout(800);
   await shot(page, 'desktop-home.png');
 
-  // Filter to Gen 1 (Kanto) only via the gen filter
   await page.locator('button.crt-gen-chip:has-text("Kanto")').click();
   await page.waitForTimeout(1500);
   await shot(page, 'desktop-gen1.png');
 
-  // Click Charizard
   await page.locator('button.crt-grid-cell:has-text("charizard")').click();
   await page.waitForSelector('.crt-card', { timeout: 15000 });
   await page.waitForTimeout(1500);
   await shot(page, 'desktop-card.png');
 
-  // Filter Galar + Paldea (multi-select) + click Dragapult, expand a type
-  await page.locator('button.crt-gen-chip.all').click();   // clear
+  await page.locator('button.crt-gen-chip.all').click();
   await page.locator('button.crt-gen-chip:has-text("Galar")').click();
-  await page.locator('button.crt-gen-chip:has-text("Paldea")').click();
   await page.waitForTimeout(1200);
   await page.locator('button.crt-grid-cell:has-text("dragapult")').click();
   await page.waitForTimeout(1500);
   await page.locator('.crt-type').first().click();
   await page.waitForTimeout(800);
   await shot(page, 'desktop-type-matchup.png');
-
   await ctx.close();
 }
 
-// Mobile home (Gen VIII default)
+// Tablet portrait (iPad-ish, 820 x 1180)
+{
+  const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 2 });
+  const page = await ctx.newPage();
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.crt-grid-cell', { timeout: 15000 });
+  await page.waitForTimeout(800);
+  await shot(page, 'tablet-home.png');
+
+  await page.locator('button.crt-grid-cell:has-text("garchomp")').click();
+  await page.waitForSelector('.crt-card', { timeout: 15000 });
+  await page.waitForTimeout(1500);
+  await shot(page, 'tablet-card.png');
+  await ctx.close();
+}
+
+// Mobile (390 x 844, iPhone-ish)
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true });
   const page = await ctx.newPage();
@@ -64,7 +75,6 @@ const browser = await chromium.launch();
   await page.waitForSelector('.crt-card', { timeout: 15000 });
   await page.waitForTimeout(1500);
   await shot(page, 'mobile-card.png');
-
   await ctx.close();
 }
 

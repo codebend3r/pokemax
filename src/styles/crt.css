@@ -492,7 +492,6 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   justify-content: flex-start;
   gap: 6px;
   transition: background 80ms, border-color 80ms;
-  min-height: 150px;
   overflow: visible;
 }
 .crt-grid-cell:hover {
@@ -506,6 +505,13 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   background: rgba(255, 0, 170, 0.07);
   box-shadow: 0 0 10px rgba(255, 0, 170, 0.3);
 }
+@keyframes crt-grid-bounce {
+  0%   { transform: translateY(0)    scale(1.05); }
+  25%  { transform: translateY(-10px) scale(1.10); }
+  50%  { transform: translateY(0)    scale(1.05); }
+  75%  { transform: translateY(-5px)  scale(1.08); }
+  100% { transform: translateY(0)    scale(1.05); }
+}
 .crt-grid-img {
   display: block;
   width: 96px;
@@ -514,11 +520,11 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   pointer-events: none;
   image-rendering: pixelated;
   filter: drop-shadow(0 0 4px rgba(0, 255, 159, 0.3));
-  transition: transform 120ms, filter 120ms;
+  transition: filter 120ms;
 }
 .crt-grid-cell:hover .crt-grid-img,
 .crt-grid-cell:focus-visible .crt-grid-img {
-  transform: scale(1.12);
+  animation: crt-grid-bounce 0.7s ease-in-out infinite;
   filter: drop-shadow(0 0 10px var(--accent));
 }
 .crt-grid-dex {

@@ -7,7 +7,6 @@ interface Props {
   onSelect: (name: string) => void;
 }
 
-const ANIM_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
 const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 
 function pretty(name: string): string {
@@ -44,17 +43,10 @@ export default function PokemonGrid({ species, query, selected, onSelect }: Prop
             <span className="crt-grid-dex">№{String(s.id).padStart(3, '0')}</span>
             <img
               className="crt-grid-img"
-              src={`${ANIM_BASE}/${s.id}.gif`}
+              src={`${PIXEL_BASE}/${s.id}.png`}
               alt={s.name}
               loading="lazy"
               decoding="async"
-              onError={(e) => {
-                const img = e.currentTarget as HTMLImageElement;
-                if (!img.dataset.fallback) {
-                  img.dataset.fallback = '1';
-                  img.src = `${PIXEL_BASE}/${s.id}.png`;
-                }
-              }}
             />
             <span className="crt-grid-name">{pretty(s.name)}</span>
           </button>

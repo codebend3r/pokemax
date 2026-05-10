@@ -618,3 +618,52 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 .crt-grid-cell:focus-visible .crt-grid-sprite {
   filter: drop-shadow(0 0 8px var(--accent));
 }
+
+/* Type filter chips above the grid */
+.crt-typefilter {
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+.crt-typefilter-label {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+  letter-spacing: 1px;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+.crt-typefilter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.crt-tf-chip {
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  background: rgba(0, 0, 0, 0.3);
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+  cursor: pointer;
+  text-shadow: 0 0 4px currentColor;
+  transition: filter 80ms;
+}
+.crt-tf-chip:hover { filter: brightness(1.4); }
+.crt-tf-chip.active { text-shadow: none; font-weight: bold; }
+.crt-tf-clear {
+  margin-left: 8px;
+  padding: 4px 10px;
+  border: 1px dashed var(--dim);
+  background: transparent;
+  color: var(--dim);
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+.crt-tf-clear:hover { color: var(--primary); border-color: var(--primary); }
+
+@media (max-width: 600px) {
+  .crt-tf-chip { padding: 3px 8px; font-size: 12px; }
+}

@@ -5,11 +5,15 @@ import PokemonCard from './components/PokemonCard';
 import PokemonGrid from './components/PokemonGrid';
 import { useGen8List } from './hooks/useGen8List';
 import { usePokemon } from './hooks/usePokemon';
+import { useTypeIndex } from './hooks/useTypeIndex';
+import type { PokeType } from './typeChart';
 
 export default function App() {
   const list = useGen8List();
+  const typeIndex = useTypeIndex();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const result = usePokemon(selected, list.species, attempt);
@@ -94,6 +98,17 @@ export default function App() {
         query={query}
         selected={selected}
         onSelect={handleSelect}
+        typeIndex={typeIndex.index}
+        selectedTypes={selectedTypes}
+        onToggleType={(t) =>
+          setSelectedTypes((prev) => {
+            const next = new Set(prev);
+            if (next.has(t)) next.delete(t);
+            else next.add(t);
+            return next;
+          })
+        }
+        onClearTypes={() => setSelectedTypes(new Set())}
       />
     </div>
   );

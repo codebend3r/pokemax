@@ -556,14 +556,30 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   transition: opacity 80ms;
 }
 .crt-grid-sprite .grid-anim { opacity: 0; }
-.crt-grid-cell:hover .grid-anim,
-.crt-grid-cell:focus-visible .grid-anim {
+
+/* Cells WITH a BW animated GIF (Gen 1-5): swap to the GIF on hover */
+.crt-grid-cell.has-anim:hover .grid-anim,
+.crt-grid-cell.has-anim:focus-visible .grid-anim {
   opacity: 1;
   filter: drop-shadow(0 0 10px var(--accent));
 }
-.crt-grid-cell:hover .grid-still,
-.crt-grid-cell:focus-visible .grid-still {
+.crt-grid-cell.has-anim:hover .grid-still,
+.crt-grid-cell.has-anim:focus-visible .grid-still {
   opacity: 0;
+}
+
+/* Cells WITHOUT a flat-2D animated source (Gen 6-9): CSS-jiggle the static pixel */
+@keyframes crt-grid-jiggle {
+  0%, 100% { transform: translate(0, 0)    scale(1); }
+  20%      { transform: translate(-2px, -3px) scale(1.05); }
+  40%      { transform: translate(0, -5px) scale(1.07); }
+  60%      { transform: translate(2px, -3px)  scale(1.05); }
+  80%      { transform: translate(0, -1px) scale(1.02); }
+}
+.crt-grid-cell.no-anim:hover .grid-still,
+.crt-grid-cell.no-anim:focus-visible .grid-still {
+  animation: crt-grid-jiggle 0.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px var(--accent));
 }
 .crt-grid-dex {
   color: var(--dim);
@@ -592,16 +608,19 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 }
 
 /* Sprite views */
-@keyframes crt-3d-float {
-  0%   { transform: translateY(0)    rotate(-2deg) scale(1);    filter: drop-shadow(0 6px 8px rgba(0, 255, 159, 0.25)); }
-  25%  { transform: translateY(-6px) rotate(0deg)  scale(1.02); filter: drop-shadow(0 10px 12px rgba(0, 255, 159, 0.45)); }
-  50%  { transform: translateY(-10px) rotate(2deg) scale(1.03); filter: drop-shadow(0 14px 14px rgba(255, 0, 170, 0.35)); }
-  75%  { transform: translateY(-6px) rotate(0deg)  scale(1.02); filter: drop-shadow(0 10px 12px rgba(0, 255, 159, 0.45)); }
-  100% { transform: translateY(0)    rotate(-2deg) scale(1);    filter: drop-shadow(0 6px 8px rgba(0, 255, 159, 0.25)); }
+@keyframes crt-3d-dance {
+  0%   { transform: translate(0, 0)     rotate(-4deg) scale(1);    filter: drop-shadow(0 6px 8px rgba(0, 255, 159, 0.3)); }
+  15%  { transform: translate(-3px, -4px) rotate(-2deg) scale(1.03); filter: drop-shadow(0 8px 10px rgba(0, 255, 159, 0.5)); }
+  30%  { transform: translate(0, -10px) rotate(0deg)  scale(1.05); filter: drop-shadow(0 14px 16px rgba(255, 0, 170, 0.45)); }
+  45%  { transform: translate(3px, -6px)  rotate(3deg)  scale(1.04); filter: drop-shadow(0 10px 12px rgba(255, 0, 170, 0.35)); }
+  60%  { transform: translate(0, -10px) rotate(0deg)  scale(1.05); filter: drop-shadow(0 14px 16px rgba(0, 255, 159, 0.5)); }
+  75%  { transform: translate(-3px, -4px) rotate(-2deg) scale(1.03); filter: drop-shadow(0 8px 10px rgba(0, 255, 159, 0.4)); }
+  100% { transform: translate(0, 0)     rotate(-4deg) scale(1);    filter: drop-shadow(0 6px 8px rgba(0, 255, 159, 0.3)); }
 }
 @keyframes crt-pixel-idle {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-2px); }
+  0%, 50%, 100% { transform: translateY(0); }
+  25%           { transform: translateY(-3px) scale(1.04); }
+  75%           { transform: translateY(-1px) scale(1.02); }
 }
 @keyframes crt-grid-bounce {
   0%, 100% { transform: translateY(0); }
@@ -618,15 +637,20 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 .crt-view-toggle { margin-top: 6px; }
 
 .crt-card-top img.crt-sprite-3d {
-  animation: crt-3d-float 3.2s ease-in-out infinite;
+  animation: crt-3d-dance 3.6s ease-in-out infinite;
   image-rendering: auto;
   background: radial-gradient(circle at 50% 80%, rgba(0, 255, 159, 0.15) 0%, transparent 60%);
   transform-origin: center 70%;
 }
-.crt-card-top img.crt-sprite-2d {
+.crt-card-top img.crt-sprite-2d.is-anim {
+  /* Real BW animated GIF — let it animate on its own, no CSS interference */
   image-rendering: pixelated;
-  /* Real flat pixel art — gentle breathing only, frame-style */
-  animation: crt-pixel-idle 1.2s steps(2, end) infinite;
+  transform-origin: center bottom;
+}
+.crt-card-top img.crt-sprite-2d.is-static {
+  /* Static flat pixel (Gen 6+ has no BW animation) — CSS-jiggle to feel alive */
+  image-rendering: pixelated;
+  animation: crt-pixel-idle 0.9s steps(2, end) infinite;
   transform-origin: center bottom;
 }
 

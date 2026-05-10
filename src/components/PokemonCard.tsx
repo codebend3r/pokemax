@@ -26,23 +26,68 @@ interface Props {
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
 
-function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView): string {
+const BW_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+const MAX_BW_ID = 649;
+
+interface SpritePick {
+  url: string;
+  /** true when the rendered image is a real frame-animated GIF */
+  animated: boolean;
+}
+
+function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallbackLevel: number): SpritePick {
   if (view === '2d') {
-    // Flat pixel art (the small 96x96 Box-style sprite). NOT the shaded showdown render.
-    return shiny
+    // Tier 0: Black/White animated GIF (true flat pixel animation, IDs 1-649)
+    if (fallbackLevel === 0 && p.id <= MAX_BW_ID) {
+      const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
+      return { url, animated: true };
+    }
+    // Tier 1: static flat pixel sprite (Box-style)
+    const fallback = shiny
       ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
       : p.sprites.front_default ?? '';
+    return { url: fallback, animated: false };
   }
-  // 3D: prefer Pokémon HOME 3D render, fall back to official artwork
-  const home = p.sprites.other.home;
-  if (home) {
-    const url = shiny ? home.front_shiny : home.front_default;
-    if (url) return url;
+
+  // 3D view
+  if (fallbackLevel === 0) {
+    const home = p.sprites.other.home;
+    if (home) {
+      const url = shiny ? home.front_shiny : home.front_default;
+      if (url) return { url, animated: false };
+    }
   }
+  // Tier 1+: official artwork → pixel
   const art = p.sprites.other['official-artwork'];
-  return shiny
+  const url = shiny
     ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
     : art.front_default ?? p.sprites.front_default ?? '';
+  return { url, animated: false };
+}
+
+function CardSprite({
+  pokemon,
+  shiny,
+  view,
+}: {
+  pokemon: PokemonResponse;
+  shiny: boolean;
+  view: SpriteView;
+}) {
+  const [fallback, setFallback] = useState(0);
+  const sprite = pickSprite(pokemon, shiny, view, fallback);
+  const className =
+    'crt-sprite-' + view + (sprite.animated ? ' is-anim' : ' is-static');
+
+  return (
+    <img
+      key={`${view}-${shiny}-${pokemon.name}-${fallback}`}
+      className={className}
+      src={sprite.url}
+      alt={pokemon.name}
+      onError={() => setFallback((f) => (f < 2 ? f + 1 : f))}
+    />
+  );
 }
 
 export default function PokemonCard({
@@ -54,7 +99,6 @@ export default function PokemonCard({
   gen,
 }: Props) {
   const [view, setView] = useState<SpriteView>('3d');
-  const sprite = pickSprite(pokemon, shiny, view);
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -65,20 +109,13 @@ export default function PokemonCard({
   );
   const competitive = useCompetitiveSet(pokemon.name, gen);
 
-  const movesLabel = meta.primaryVersionGroup
-    .toUpperCase()
-    .replace(/-/g, '/');
+  const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
 
   return (
     <div className="crt-card">
       <div className="crt-card-top">
         <div className="crt-card-art">
-          <img
-            key={`${view}-${shiny}-${pokemon.name}`}
-            className={'crt-sprite-' + view}
-            src={sprite}
-            alt={pokemon.name}
-          />
+          <CardSprite pokemon={pokemon} shiny={shiny} view={view} />
           <SpriteToggle value={view} onChange={setView} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
         </div>

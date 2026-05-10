@@ -1,6 +1,8 @@
 # pokemax
 
-A retro CRT-terminal-styled Pokédex for **Generation VIII** (Pokémon Sword/Shield, 96 species). Browse the whole gen as a sprite grid, search by name, and inspect every stat, ability, evolution, and move — plus the canonical competitive build sourced live from Smogon.
+A retro CRT-terminal-styled Gen-8 Pokémon explorer (Pokémon Sword/Shield, 96 species). Browse the whole gen as a sprite grid, search by name, and inspect every stat, ability, evolution, and move — plus the canonical competitive build sourced live from Smogon.
+
+🔗 **Live:** [codebend3r.github.io/pokemax](https://codebend3r.github.io/pokemax/)
 
 Built with Vite + React 18 + TypeScript. Phosphor green on navy, scanline overlay, magenta accents, VT323 monospace, blinking cursor — the whole CRT aesthetic.
 

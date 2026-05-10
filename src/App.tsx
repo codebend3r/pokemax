@@ -48,7 +48,7 @@ export default function App() {
 
   return (
     <div className="crt">
-      <header className="crt-header">▶ POKéDEX // GEN VIII</header>
+      <header className="crt-header">▶ POKEMAX // GEN VIII</header>
       <StatusLine state={status} />
       <SearchBar
         names={list.names}

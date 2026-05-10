@@ -20,10 +20,6 @@ function describeCondition(d: EvolutionDetail): string {
   return parts.join(' · ');
 }
 
-function pretty(name: string) {
-  return name.replace(/-/g, ' ');
-}
-
 function Node({ link, active }: { link: ChainLink; active: string }) {
   const isActive = link.species.name === active;
   return (

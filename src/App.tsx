@@ -20,6 +20,7 @@ export default function App() {
   const [attempt, setAttempt] = useState(0);
   const result = usePokemon(selected, list.species, attempt);
   const cardRef = useRef<HTMLDivElement>(null);
+  const cryAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Filter the master species list down to whatever generations are selected
   const filteredSpecies = useMemo(() => {
@@ -48,6 +49,30 @@ export default function App() {
     setSelected(name);
     setAttempt((n) => n + 1);
     setQuery('');
+
+    // Pre-warm the cry audio while the pokemon data is still being fetched.
+    // The cry URL is predictable from the species ID, so we don't need to wait.
+    const sp = list.species.find((s) => s.name === name);
+    if (sp) {
+      const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
+      if (cryAudioRef.current) {
+        cryAudioRef.current.pause();
+        cryAudioRef.current.src = '';
+      }
+      const audio = new Audio(url);
+      audio.preload = 'auto';
+      audio.volume = 0.45;
+      audio.load();
+      cryAudioRef.current = audio;
+    }
+  };
+
+  const goHome = () => {
+    setSelected(null);
+    setQuery('');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleSubmit = (typed: string) => {
@@ -63,7 +88,9 @@ export default function App() {
 
   return (
     <div className="crt">
-      <header className="crt-header">▶ POKEMAX</header>
+      <button type="button" className="crt-header crt-header-link" onClick={goHome} aria-label="Go to top">
+        ▶ POKEMAX
+      </button>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
       <StatusLine state={status} />
       <SearchBar
@@ -102,6 +129,7 @@ export default function App() {
             onShinyChange={setShiny}
             onSelectEvolution={handleSelect}
             gen={selectedGen}
+            cryAudioRef={cryAudioRef}
           />
         </div>
       )}

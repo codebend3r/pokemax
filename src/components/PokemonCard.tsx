@@ -22,6 +22,7 @@ interface Props {
   onShinyChange: (v: boolean) => void;
   onSelectEvolution?: (name: string) => void;
   gen: number;
+  cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
@@ -37,10 +38,17 @@ interface SpritePick {
 
 function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallbackLevel: number): SpritePick {
   if (view === '2d') {
-    if (fallbackLevel === 0 && p.id <= MAX_BW_ID) {
-      const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
+    if (fallbackLevel === 0) {
+      // Gen 1-5: Black/White animated (true flat pixel art)
+      if (p.id <= MAX_BW_ID) {
+        const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
+        return { url, animated: true };
+      }
+      // Gen 6+: Showdown animated GIF (pixelated frame animation)
+      const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
       return { url, animated: true };
     }
+    // Fallback: static flat pixel sprite
     return {
       url: shiny
         ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
@@ -48,13 +56,8 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
       animated: false,
     };
   }
-  // 3D — prefer the animated Showdown GIF (real frame animation)
+  // 3D — Pokémon HOME 3D render (static)
   if (fallbackLevel === 0) {
-    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-    return { url, animated: true };
-  }
-  // Tier 1: HOME static 3D render
-  if (fallbackLevel === 1) {
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };
@@ -69,51 +72,80 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
   };
 }
 
+interface Particle {
+  id: number;
+  type: 'heart' | 'star' | 'sparkle';
+  x: number;
+  delay: number;
+  rotate: number;
+}
+
 function CardSprite({
   pokemon,
   shiny,
   view,
+  preloadedAudio,
 }: {
   pokemon: PokemonResponse;
   shiny: boolean;
   view: SpriteView;
+  preloadedAudio: React.MutableRefObject<HTMLAudioElement | null>;
 }) {
   const [fallback, setFallback] = useState(0);
   const [reacting, setReacting] = useState(false);
-  const [showHeart, setShowHeart] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [particles, setParticles] = useState<Particle[]>([]);
   const sprite = pickSprite(pokemon, shiny, view, fallback);
   const cryUrl = pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
 
-  // Auto-play cry once when this card mounts (user-gesture chain from the click that loaded it)
+  // Auto-play cry once on mount. The audio was pre-warmed when the user clicked
+  // the grid cell, so this should fire near-instantly.
   useEffect(() => {
-    if (!cryUrl) return;
-    const audio = new Audio(cryUrl);
-    audio.volume = 0.45;
-    audio.play().catch(() => {});
-    audioRef.current = audio;
-    return () => {
-      audio.pause();
-      audioRef.current = null;
-    };
-    // re-run for each new pokemon
+    const a = preloadedAudio.current;
+    if (a && a.src) {
+      a.currentTime = 0;
+      a.play().catch(() => {});
+      return;
+    }
+    if (cryUrl) {
+      const fallbackAudio = new Audio(cryUrl);
+      fallbackAudio.volume = 0.45;
+      fallbackAudio.play().catch(() => {});
+      preloadedAudio.current = fallbackAudio;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pokemon.id]);
 
   const playCry = () => {
-    if (!cryUrl) return;
-    if (!audioRef.current) audioRef.current = new Audio(cryUrl);
-    audioRef.current.currentTime = 0;
-    audioRef.current.volume = 0.45;
-    audioRef.current.play().catch(() => {});
+    const a = preloadedAudio.current;
+    if (a && a.src) {
+      a.currentTime = 0;
+      a.play().catch(() => {});
+      return;
+    }
+    if (cryUrl) {
+      const fresh = new Audio(cryUrl);
+      fresh.volume = 0.45;
+      fresh.play().catch(() => {});
+      preloadedAudio.current = fresh;
+    }
   };
 
   const handleSpriteClick = () => {
     playCry();
     setReacting(true);
-    setShowHeart(true);
-    window.setTimeout(() => setReacting(false), 700);
-    window.setTimeout(() => setShowHeart(false), 900);
+    const types: Particle['type'][] = ['heart', 'star', 'sparkle', 'heart', 'sparkle'];
+    const newParticles: Particle[] = Array.from({ length: 5 }, (_, i) => ({
+      id: Date.now() + i,
+      type: types[i] ?? 'heart',
+      x: (Math.random() - 0.5) * 120, // -60 to +60 px
+      delay: Math.random() * 180,     // staggered launch
+      rotate: (Math.random() - 0.5) * 120,
+    }));
+    setParticles((p) => [...p, ...newParticles]);
+    window.setTimeout(() => setReacting(false), 720);
+    window.setTimeout(() => {
+      setParticles((p) => p.filter((x) => !newParticles.includes(x)));
+    }, 1300);
   };
 
   const className =
@@ -132,7 +164,20 @@ function CardSprite({
         onError={() => setFallback((f) => (f < 2 ? f + 1 : f))}
         title="click to play cry"
       />
-      {showHeart && <span className="crt-card-heart" aria-hidden="true">♥</span>}
+      {particles.map((p) => (
+        <span
+          key={p.id}
+          className={`crt-card-particle ${p.type}`}
+          aria-hidden="true"
+          style={{
+            ['--x' as string]: `${p.x}px`,
+            ['--rotate' as string]: `${p.rotate}deg`,
+            animationDelay: `${p.delay}ms`,
+          }}
+        >
+          {p.type === 'heart' ? '♥' : p.type === 'star' ? '★' : '✦'}
+        </span>
+      ))}
       {cryUrl && (
         <button
           type="button"
@@ -155,8 +200,11 @@ export default function PokemonCard({
   onShinyChange,
   onSelectEvolution,
   gen,
+  cryAudioRef,
 }: Props) {
   const [view, setView] = useState<SpriteView>('3d');
+  const localCryRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = cryAudioRef ?? localCryRef;
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -173,7 +221,7 @@ export default function PokemonCard({
     <div className="crt-card">
       <div className="crt-card-top">
         <div className="crt-card-art">
-          <CardSprite pokemon={pokemon} shiny={shiny} view={view} />
+          <CardSprite pokemon={pokemon} shiny={shiny} view={view} preloadedAudio={audioRef} />
           <SpriteToggle value={view} onChange={setView} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
         </div>

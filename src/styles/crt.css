@@ -364,15 +364,18 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   margin-top: 8px;
 }
 .crt-shiny button {
-  flex: 1;
+  flex: 1 0 auto;
+  min-width: max-content;
+  white-space: nowrap;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--primary);
   font: inherit;
   text-shadow: inherit;
-  padding: 4px 8px;
+  padding: 4px 10px;
   cursor: pointer;
   letter-spacing: 1px;
+  text-align: center;
 }
 .crt-shiny button[aria-pressed="true"] {
   border-color: var(--accent);
@@ -679,7 +682,10 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   gap: 6px;
   align-items: stretch;
 }
-.crt-card-art .crt-shiny { margin-top: 4px; }
+.crt-card-art {
+  flex-shrink: 0;
+}
+.crt-card-art .crt-shiny { margin-top: 4px; flex-wrap: nowrap; }
 .crt-view-toggle { margin-top: 6px; }
 
 .crt-card-top img.crt-sprite-3d.is-anim,

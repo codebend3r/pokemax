@@ -25,13 +25,11 @@ async function fetchTypeIndex(): Promise<Map<number, PokeType[]>> {
       const m = entry.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
       if (!m) continue;
       const id = parseInt(m[1], 10);
-      // Sort by slot so the primary type comes first
       const list = map.get(id) ?? [];
       list[entry.slot - 1] = type;
       map.set(id, list);
     }
   }
-  // Compact arrays (in case slot-2 only entries left holes)
   for (const [k, v] of map) {
     map.set(k, v.filter((t): t is PokeType => Boolean(t)));
   }
@@ -44,16 +42,26 @@ export interface TypeIndexState {
   error: string | null;
 }
 
-export function useTypeIndex(): TypeIndexState {
+/**
+ * Lazy: pass `enabled=false` (default) and the hook stays idle. Pass `enabled=true`
+ * once the user interacts with anything that needs the index (e.g. clicks a type filter
+ * chip) and the 18 type endpoints are fetched in parallel exactly once across the app.
+ */
+export function useTypeIndex(enabled = false): TypeIndexState {
   const [state, setState] = useState<TypeIndexState>({
     index: cache,
-    loading: cache === null,
+    loading: false,
     error: null,
   });
 
   useEffect(() => {
-    if (cache) return;
+    if (!enabled) return;
+    if (cache) {
+      setState({ index: cache, loading: false, error: null });
+      return;
+    }
     let active = true;
+    setState((s) => ({ ...s, loading: true, error: null }));
     if (!inflight) inflight = fetchTypeIndex();
     inflight
       .then((m) => {
@@ -66,7 +74,7 @@ export function useTypeIndex(): TypeIndexState {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   return state;
 }

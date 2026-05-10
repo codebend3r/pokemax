@@ -1153,3 +1153,15 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   color: var(--primary);
 }
 :root[data-theme="light"] body::after { mix-blend-mode: multiply; }
+
+/* Lazy-loading placeholder while the PokemonCard chunk downloads */
+.crt-card.crt-card-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+  letter-spacing: 2px;
+  font-size: 18px;
+}

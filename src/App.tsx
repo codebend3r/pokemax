@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import SearchBar from './components/SearchBar';
 import StatusLine from './components/StatusLine';
-import PokemonCard from './components/PokemonCard';
 import PokemonGrid from './components/PokemonGrid';
 import GenFilter from './components/GenFilter';
-import MusicPlayer from './components/MusicPlayer';
 import ThemeToggle from './components/ThemeToggle';
 import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
@@ -12,14 +10,19 @@ import { useTypeIndex } from './hooks/useTypeIndex';
 import { useTheme } from './hooks/useTheme';
 import type { PokeType } from './typeChart';
 
+// Lazy-loaded — only fetched when first needed
+const PokemonCard = lazy(() => import('./components/PokemonCard'));
+const MusicPlayer = lazy(() => import('./components/MusicPlayer'));
+
 export default function App() {
   const list = useAllSpecies();
-  const typeIndex = useTypeIndex();
   const { theme, toggle: toggleTheme } = useTheme();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
+  const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
+  const typeIndex = useTypeIndex(typeIndexEnabled);
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const result = usePokemon(selected, list.species, attempt);
@@ -101,7 +104,9 @@ export default function App() {
         </div>
       </div>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
-      <MusicPlayer />
+      <Suspense fallback={<div className="crt-music"><div className="crt-music-row"><span className="crt-music-track">♪ loading player…</span></div></div>}>
+        <MusicPlayer />
+      </Suspense>
       <StatusLine state={status} />
       <SearchBar
         names={list.names}
@@ -131,16 +136,18 @@ export default function App() {
 
       {result.data && (
         <div ref={cardRef}>
-          <PokemonCard
-            pokemon={result.data.pokemon}
-            species={result.data.species}
-            chain={result.data.chain}
-            shiny={shiny}
-            onShinyChange={setShiny}
-            onSelectEvolution={handleSelect}
-            gen={selectedGen}
-            cryAudioRef={cryAudioRef}
-          />
+          <Suspense fallback={<div className="crt-card crt-card-loading">▶ LOADING CARD<span className="crt-cursor">&nbsp;</span></div>}>
+            <PokemonCard
+              pokemon={result.data.pokemon}
+              species={result.data.species}
+              chain={result.data.chain}
+              shiny={shiny}
+              onShinyChange={setShiny}
+              onSelectEvolution={handleSelect}
+              gen={selectedGen}
+              cryAudioRef={cryAudioRef}
+            />
+          </Suspense>
         </div>
       )}
 
@@ -164,14 +171,15 @@ export default function App() {
         onSelect={handleSelect}
         typeIndex={typeIndex.index}
         selectedTypes={selectedTypes}
-        onToggleType={(t) =>
+        onToggleType={(t) => {
+          setTypeIndexEnabled(true);
           setSelectedTypes((prev) => {
             const next = new Set(prev);
             if (next.has(t)) next.delete(t);
             else next.add(t);
             return next;
-          })
-        }
+          });
+        }}
         onClearTypes={() => setSelectedTypes(new Set())}
       />
     </div>

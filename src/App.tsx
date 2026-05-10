@@ -10,6 +10,14 @@ import { useTypeIndex } from './hooks/useTypeIndex';
 import { useTheme } from './hooks/useTheme';
 import { useVolume } from './hooks/useVolume';
 import { useExtraForms } from './hooks/useExtraForms';
+import type { FormCategory } from './types';
+
+const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
+  { key: 'mega', label: 'MEGA / PRIMAL' },
+  { key: 'gmax', label: 'GIGANTAMAX' },
+  { key: 'regional', label: 'REGIONAL' },
+  { key: 'other', label: 'BATTLE FORMS' },
+];
 import type { PokeType } from './typeChart';
 
 // Lazy-loaded — only fetched when first needed
@@ -26,8 +34,8 @@ export default function App() {
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
   const typeIndex = useTypeIndex(typeIndexEnabled);
-  const [showExtraForms, setShowExtraForms] = useState(false);
-  const extraForms = useExtraForms(list.species, showExtraForms);
+  const [activeFormCats, setActiveFormCats] = useState<Set<FormCategory>>(new Set());
+  const extraForms = useExtraForms(list.species, activeFormCats.size > 0);
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const fullSpeciesIndex = useMemo(
@@ -38,13 +46,17 @@ export default function App() {
   const cardRef = useRef<HTMLDivElement>(null);
   const cryAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Combine base species with alternate forms when the toggle is on, then apply gen filter
+  // Combine base species with selected alternate-form categories, then apply gen filter
   const filteredSpecies = useMemo(() => {
-    const merged = showExtraForms ? [...list.species, ...extraForms.forms] : list.species;
-    const sorted = [...merged].sort((a, b) => a.id - b.id);
+    const filteredForms =
+      activeFormCats.size > 0
+        ? extraForms.forms.filter((f) => f.formCategory && activeFormCats.has(f.formCategory))
+        : [];
+    const merged = [...list.species, ...filteredForms];
+    const sorted = merged.sort((a, b) => a.id - b.id);
     if (selectedGens.size === 0) return sorted;
     return sorted.filter((s) => selectedGens.has(s.gen));
-  }, [list.species, extraForms.forms, selectedGens, showExtraForms]);
+  }, [list.species, extraForms.forms, selectedGens, activeFormCats]);
 
   const selectedEntry = selected ? fullSpeciesIndex.find((s) => s.name === selected) ?? null : null;
   const selectedGen = selectedEntry?.gen ?? 8;
@@ -180,19 +192,44 @@ export default function App() {
       />
 
       <div className="crt-extra-toggle">
-        <label className="crt-extra-label">
-          <input
-            type="checkbox"
-            checked={showExtraForms}
-            onChange={(e) => setShowExtraForms(e.target.checked)}
-          />
-          <span>SHOW ALT FORMS (Mega · Gigantamax · Regional · Battle Forms)</span>
-        </label>
+        <div className="crt-extra-title">▶ INCLUDE ALT FORMS</div>
+        <div className="crt-extra-chips">
+          {FORM_CATEGORIES.map(({ key, label }) => {
+            const active = activeFormCats.has(key);
+            const count = extraForms.forms.filter((f) => f.formCategory === key).length;
+            return (
+              <button
+                key={key}
+                type="button"
+                className={'crt-extra-chip' + (active ? ' active' : '')}
+                aria-pressed={active}
+                onClick={() => {
+                  setActiveFormCats((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(key)) next.delete(key);
+                    else next.add(key);
+                    return next;
+                  });
+                }}
+              >
+                {label}
+                {count > 0 && <span className="crt-extra-chip-count"> · {count}</span>}
+              </button>
+            );
+          })}
+          {activeFormCats.size > 0 && (
+            <button
+              type="button"
+              className="crt-extra-chip clear"
+              onClick={() => setActiveFormCats(new Set())}
+              title="Clear all"
+            >
+              [ clear ]
+            </button>
+          )}
+        </div>
         {extraForms.loading && (
           <span className="crt-extra-status">▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span></span>
-        )}
-        {showExtraForms && extraForms.forms.length > 0 && !extraForms.loading && (
-          <span className="crt-extra-status">+ {extraForms.forms.length} forms</span>
         )}
       </div>
 

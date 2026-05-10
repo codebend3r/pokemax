@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Gen8Species } from '../types';
+import type { FormCategory, Gen8Species } from '../types';
 
 const URL = 'https://pokeapi.co/api/v2/pokemon?limit=20000';
 
@@ -69,6 +69,13 @@ function prettifyForm(suffix: string): string {
   );
 }
 
+function categorizeForm(suffix: string): FormCategory {
+  if (/^mega(-[xy])?$/.test(suffix) || suffix === 'primal') return 'mega';
+  if (suffix === 'gmax' || suffix.startsWith('gmax-') || suffix.endsWith('-gmax')) return 'gmax';
+  if (/^(alola|galar|hisui|paldea)(-|$)/.test(suffix)) return 'regional';
+  return 'other';
+}
+
 async function fetchExtraForms(byName: Map<string, Gen8Species>): Promise<Gen8Species[]> {
   const r = await fetch(URL);
   if (!r.ok) throw new Error('Failed to load alternate forms');
@@ -102,6 +109,7 @@ async function fetchExtraForms(byName: Map<string, Gen8Species>): Promise<Gen8Sp
       gen: base.gen,
       speciesName: base.name,
       formLabel: prettifyForm(suffix),
+      formCategory: categorizeForm(suffix),
     });
   }
   return forms.sort((a, b) => a.id - b.id);

@@ -1,0 +1,111 @@
+import { describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import PokemonCard from '../components/PokemonCard';
+import type { ChainLink, PokemonResponse, SpeciesResponse, EvolutionChainResponse } from '../types';
+
+const pokemon: PokemonResponse = {
+  id: 887,
+  name: 'dragapult',
+  sprites: {
+    front_default: 'normal.png',
+    front_shiny: 'shiny.png',
+    other: { 'official-artwork': { front_default: 'art-normal.png', front_shiny: 'art-shiny.png' } },
+  },
+  types: [{ slot: 1, type: { name: 'dragon' } }, { slot: 2, type: { name: 'ghost' } }],
+  stats: [
+    { base_stat: 88, stat: { name: 'hp' } },
+    { base_stat: 120, stat: { name: 'attack' } },
+    { base_stat: 75, stat: { name: 'defense' } },
+    { base_stat: 100, stat: { name: 'special-attack' } },
+    { base_stat: 75, stat: { name: 'special-defense' } },
+    { base_stat: 142, stat: { name: 'speed' } },
+  ],
+  abilities: [
+    { ability: { name: 'clear-body' }, is_hidden: false, slot: 1 },
+    { ability: { name: 'infiltrator' }, is_hidden: false, slot: 2 },
+    { ability: { name: 'cursed-body' }, is_hidden: true, slot: 3 },
+  ],
+  moves: [
+    { move: { name: 'dragon-darts' }, version_group_details: [{ level_learned_at: 48, move_learn_method: { name: 'level-up' }, version_group: { name: 'sword-shield' } }] },
+  ],
+};
+
+const chainLink: ChainLink = {
+  species: { name: 'dreepy' },
+  evolution_details: [],
+  evolves_to: [
+    {
+      species: { name: 'drakloak' },
+      evolution_details: [
+        { min_level: 50, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+      ],
+      evolves_to: [
+        {
+          species: { name: 'dragapult' },
+          evolution_details: [
+            { min_level: 60, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+          ],
+          evolves_to: [],
+        },
+      ],
+    },
+  ],
+};
+
+const species: SpeciesResponse = { name: 'dragapult', evolution_chain: { url: 'X' } };
+const chain: EvolutionChainResponse = { chain: chainLink };
+
+describe('PokemonCard', () => {
+  it('renders all stat values', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    expect(screen.getByText('88')).toBeInTheDocument();
+    expect(screen.getByText('120')).toBeInTheDocument();
+    expect(screen.getByText('142')).toBeInTheDocument();
+  });
+
+  it('marks the hidden ability', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    expect(screen.getByText(/cursed body/i).parentElement).toHaveTextContent(/HIDDEN/i);
+  });
+
+  it('renders types as chips', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    expect(screen.getByText(/dragon/i)).toBeInTheDocument();
+    expect(screen.getByText(/ghost/i)).toBeInTheDocument();
+  });
+
+  it('renders the official artwork normal sprite', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    expect(screen.getByRole('img')).toHaveAttribute('src', 'art-normal.png');
+  });
+
+  it('renders the shiny sprite when shiny is true', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={true} onShinyChange={() => {}} />);
+    expect(screen.getByRole('img')).toHaveAttribute('src', 'art-shiny.png');
+  });
+
+  it('falls back to pixel sprite if official-artwork shiny is missing', () => {
+    const p: PokemonResponse = {
+      ...pokemon,
+      sprites: {
+        ...pokemon.sprites,
+        front_shiny: 'pixel-shiny.png',
+        other: { 'official-artwork': { front_default: 'art-normal.png', front_shiny: null } },
+      },
+    };
+    render(<PokemonCard pokemon={p} species={species} chain={chain} shiny={true} onShinyChange={() => {}} />);
+    expect(screen.getByRole('img')).toHaveAttribute('src', 'pixel-shiny.png');
+  });
+
+  it('renders the evolution chain', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    expect(screen.getByText(/dreepy/i)).toBeInTheDocument();
+    expect(screen.getByText(/drakloak/i)).toBeInTheDocument();
+    expect(screen.getByText(/dragapult/i)).toBeInTheDocument();
+  });
+
+  it('renders the move list (level-up open by default)', () => {
+    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
+    expect(screen.getByText(/dragon darts/i)).toBeInTheDocument();
+  });
+});

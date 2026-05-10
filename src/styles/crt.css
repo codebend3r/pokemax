@@ -972,3 +972,46 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   .crt-gen-chip-region { font-size: 10px; }
   .crt-gen-chip.all { min-width: 48px; padding: 6px 10px; font-size: 12px; }
 }
+
+/* Regional / alternate form switcher */
+.crt-forms {
+  margin-top: 8px;
+  border-top: 1px dashed rgba(0, 255, 159, 0.3);
+  padding-top: 6px;
+}
+.crt-forms-label {
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+  letter-spacing: 1px;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.crt-forms-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.crt-form-chip {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 3px 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+  transition: background 80ms, border-color 80ms;
+}
+.crt-form-chip:hover {
+  background: rgba(0, 255, 159, 0.12);
+  border-color: var(--primary);
+}
+.crt-form-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-shadow: 0 0 4px var(--accent);
+  background: rgba(255, 0, 170, 0.08);
+}

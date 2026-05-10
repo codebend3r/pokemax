@@ -52,7 +52,11 @@ const chainLink: ChainLink = {
   ],
 };
 
-const species: SpeciesResponse = { name: 'dragapult', evolution_chain: { url: 'X' } };
+const species: SpeciesResponse = {
+  name: 'dragapult',
+  evolution_chain: { url: 'X' },
+  varieties: [{ is_default: true, pokemon: { name: 'dragapult', url: '' } }],
+};
 const chain: EvolutionChainResponse = { chain: chainLink };
 
 describe('PokemonCard', () => {

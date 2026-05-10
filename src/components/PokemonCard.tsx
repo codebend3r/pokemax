@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { EvolutionChainResponse, PokemonResponse, SpeciesResponse } from '../types';
 import { groupMoves } from '../moves';
 import { getGen } from '../generations';
+import { fetchPokemon } from '../api';
 import StatBar from './StatBar';
 import AbilityList from './AbilityList';
 import EvolutionChain from './EvolutionChain';
 import MoveList from './MoveList';
 import ShinyToggle from './ShinyToggle';
 import SpriteToggle, { type SpriteView } from './SpriteToggle';
+import FormSwitcher from './FormSwitcher';
 import Section from './Section';
 import CompetitiveBuild from './CompetitiveBuild';
 import Detail from './Detail';
@@ -199,7 +201,8 @@ function CardSprite({
 }
 
 export default function PokemonCard({
-  pokemon,
+  pokemon: defaultPokemon,
+  species,
   chain,
   shiny,
   onShinyChange,
@@ -208,8 +211,31 @@ export default function PokemonCard({
   cryAudioRef,
 }: Props) {
   const [view, setView] = useState<SpriteView>('3d');
+  const [activeVariety, setActiveVariety] = useState<string>(defaultPokemon.name);
+  const [varietyData, setVarietyData] = useState<PokemonResponse | null>(null);
   const localCryRef = useRef<HTMLAudioElement | null>(null);
   const audioRef = cryAudioRef ?? localCryRef;
+
+  // Reset to the default variety whenever the underlying species changes
+  useEffect(() => {
+    setActiveVariety(defaultPokemon.name);
+    setVarietyData(null);
+  }, [defaultPokemon.name]);
+
+  // Fetch alternate variety data when user picks a different form
+  useEffect(() => {
+    if (activeVariety === defaultPokemon.name) {
+      setVarietyData(null);
+      return;
+    }
+    let active = true;
+    fetchPokemon(activeVariety)
+      .then((p) => { if (active) setVarietyData(p); })
+      .catch(() => { /* leave defaults */ });
+    return () => { active = false; };
+  }, [activeVariety, defaultPokemon.name]);
+
+  const pokemon = varietyData ?? defaultPokemon;
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -229,6 +255,12 @@ export default function PokemonCard({
           <CardSprite pokemon={pokemon} shiny={shiny} view={view} preloadedAudio={audioRef} />
           <SpriteToggle value={view} onChange={setView} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
+          <FormSwitcher
+            varieties={species.varieties}
+            speciesName={species.name}
+            active={activeVariety}
+            onChange={setActiveVariety}
+          />
         </div>
         <div className="crt-card-meta">
           <div className="crt-card-dex">#{String(pokemon.id).padStart(3, '0')}</div>

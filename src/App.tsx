@@ -60,6 +60,7 @@ export default function App() {
           chain={result.data.chain}
           shiny={shiny}
           onShinyChange={setShiny}
+          onSelectEvolution={handleSearch}
         />
       )}
     </div>

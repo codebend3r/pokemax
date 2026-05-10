@@ -11,6 +11,7 @@ interface Props {
   chain: EvolutionChainResponse;
   shiny: boolean;
   onShinyChange: (v: boolean) => void;
+  onSelectEvolution?: (name: string) => void;
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
@@ -23,7 +24,7 @@ function pickSprite(p: PokemonResponse, shiny: boolean): string {
   return art.front_default ?? p.sprites.front_default ?? '';
 }
 
-export default function PokemonCard({ pokemon, chain, shiny, onShinyChange }: Props) {
+export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSelectEvolution }: Props) {
   const sprite = pickSprite(pokemon, shiny);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -56,7 +57,7 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange }: Pr
 
       <AbilityList abilities={pokemon.abilities} />
 
-      <EvolutionChain chain={chain.chain} active={pokemon.name} />
+      <EvolutionChain chain={chain.chain} active={pokemon.name} onSelect={onSelectEvolution} />
 
       <MoveList moves={pokemon.moves} />
     </div>

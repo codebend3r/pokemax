@@ -3,6 +3,7 @@ import type { ChainLink, EvolutionDetail } from '../types';
 interface Props {
   chain: ChainLink;
   active: string;
+  onSelect?: (name: string) => void;
 }
 
 function describeCondition(d: EvolutionDetail): string {
@@ -24,33 +25,59 @@ function pretty(name: string) {
   return name.replace(/-/g, ' ').toUpperCase();
 }
 
-function Node({ link, active }: { link: ChainLink; active: string }) {
+function Node({
+  link,
+  active,
+  onSelect,
+}: {
+  link: ChainLink;
+  active: string;
+  onSelect?: (name: string) => void;
+}) {
   const isActive = link.species.name === active;
-  return (
-    <span className={'crt-evo-node' + (isActive ? ' active' : '')}>{pretty(link.species.name)}</span>
-  );
+  const label = pretty(link.species.name);
+  if (onSelect && !isActive) {
+    return (
+      <button
+        type="button"
+        className="crt-evo-node clickable"
+        onClick={() => onSelect(link.species.name)}
+      >
+        {label}
+      </button>
+    );
+  }
+  return <span className={'crt-evo-node' + (isActive ? ' active' : '')}>{label}</span>;
 }
 
-function Branch({ link, active }: { link: ChainLink; active: string }) {
+function Branch({
+  link,
+  active,
+  onSelect,
+}: {
+  link: ChainLink;
+  active: string;
+  onSelect?: (name: string) => void;
+}) {
   if (link.evolves_to.length === 0) {
-    return <Node link={link} active={active} />;
+    return <Node link={link} active={active} onSelect={onSelect} />;
   }
   if (link.evolves_to.length === 1) {
     const child = link.evolves_to[0];
     const cond = child.evolution_details[0];
     return (
       <>
-        <Node link={link} active={active} />
+        <Node link={link} active={active} onSelect={onSelect} />
         <span className="crt-evo-arrow">→</span>
         {cond && <span className="crt-evo-cond">{describeCondition(cond)}</span>}
         <span className="crt-evo-arrow">→</span>
-        <Branch link={child} active={active} />
+        <Branch link={child} active={active} onSelect={onSelect} />
       </>
     );
   }
   return (
     <>
-      <Node link={link} active={active} />
+      <Node link={link} active={active} onSelect={onSelect} />
       <span className="crt-evo-arrow">→</span>
       <span className="crt-evo-branch">
         {link.evolves_to.map((child) => {
@@ -59,7 +86,7 @@ function Branch({ link, active }: { link: ChainLink; active: string }) {
             <span key={child.species.name} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {cond && <span className="crt-evo-cond">{describeCondition(cond)}</span>}
               <span className="crt-evo-arrow">→</span>
-              <Branch link={child} active={active} />
+              <Branch link={child} active={active} onSelect={onSelect} />
             </span>
           );
         })}
@@ -68,12 +95,12 @@ function Branch({ link, active }: { link: ChainLink; active: string }) {
   );
 }
 
-export default function EvolutionChain({ chain, active }: Props) {
+export default function EvolutionChain({ chain, active, onSelect }: Props) {
   return (
     <div className="crt-section">
       <div className="crt-section-label">▶ EVOLUTION</div>
       <div className="crt-evo">
-        <Branch link={chain} active={active} />
+        <Branch link={chain} active={active} onSelect={onSelect} />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SearchBar from './components/SearchBar';
 import StatusLine from './components/StatusLine';
 import PokemonCard from './components/PokemonCard';
@@ -13,6 +13,7 @@ export default function App() {
   const [shiny, setShiny] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const result = usePokemon(selected, list.names, attempt);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
   if (list.loading) status = 'loading-dex';
@@ -21,12 +22,17 @@ export default function App() {
   else if (result.error?.kind === 'not-in-gen-8') status = 'err-not-found';
   else if (result.error?.kind === 'transmission') status = 'err-api';
 
+  useEffect(() => {
+    if (result.data && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [result.data]);
+
   const handleSelect = (name: string) => {
     setShiny(false);
     setSelected(name);
     setAttempt((n) => n + 1);
     setQuery('');
-    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = (typed: string) => {
@@ -67,14 +73,16 @@ export default function App() {
       )}
 
       {result.data && (
-        <PokemonCard
-          pokemon={result.data.pokemon}
-          species={result.data.species}
-          chain={result.data.chain}
-          shiny={shiny}
-          onShinyChange={setShiny}
-          onSelectEvolution={handleSelect}
-        />
+        <div ref={cardRef}>
+          <PokemonCard
+            pokemon={result.data.pokemon}
+            species={result.data.species}
+            chain={result.data.chain}
+            shiny={shiny}
+            onShinyChange={setShiny}
+            onSelectEvolution={handleSelect}
+          />
+        </div>
       )}
 
       <PokemonGrid

@@ -1,6 +1,7 @@
 import type {
   EvolutionChainResponse,
   Gen8ListResponse,
+  Gen8Species,
   PokemonResponse,
   SpeciesResponse,
 } from './types';
@@ -15,9 +16,16 @@ async function getJson<T>(url: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-export async function fetchGen8List(): Promise<string[]> {
+function speciesIdFromUrl(url: string): number {
+  const m = url.match(/\/(\d+)\/?$/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+export async function fetchGen8List(): Promise<Gen8Species[]> {
   const data = await getJson<Gen8ListResponse>(`${BASE}/generation/8`);
-  return data.pokemon_species.map((s) => s.name);
+  return data.pokemon_species
+    .map((s) => ({ name: s.name, id: speciesIdFromUrl(s.url) }))
+    .sort((a, b) => a.id - b.id);
 }
 
 export function fetchPokemon(name: string): Promise<PokemonResponse> {

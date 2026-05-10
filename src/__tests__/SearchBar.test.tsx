@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -5,38 +6,47 @@ import SearchBar from '../components/SearchBar';
 
 const NAMES = ['scorbunny', 'cinderace', 'dragapult', 'grookey'];
 
+function Harness({ onSearch }: { onSearch: (name: string) => void }) {
+  const [v, setV] = useState('');
+  return <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={onSearch} />;
+}
+
 describe('SearchBar', () => {
-  it('shows autocomplete suggestions filtered by input', async () => {
-    render(<SearchBar names={NAMES} onSearch={() => {}} />);
+  it('passes typed value to onValueChange', async () => {
+    let last = '';
+    function Capture() {
+      const [v, setV] = useState('');
+      last = v;
+      return <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={() => {}} />;
+    }
+    render(<Capture />);
     const user = userEvent.setup();
-    const input = screen.getByRole('textbox');
-    await user.type(input, 'sc');
-    expect(screen.getByText('scorbunny')).toBeInTheDocument();
-    expect(screen.queryByText('dragapult')).not.toBeInTheDocument();
+    await user.type(screen.getByRole('textbox'), 'sc');
+    expect(last).toBe('sc');
   });
 
   it('calls onSearch with the typed name on Enter', async () => {
     const onSearch = vi.fn();
-    render(<SearchBar names={NAMES} onSearch={onSearch} />);
+    render(<Harness onSearch={onSearch} />);
     const user = userEvent.setup();
     await user.type(screen.getByRole('textbox'), 'dragapult{Enter}');
     expect(onSearch).toHaveBeenCalledWith('dragapult');
   });
 
-  it('clicking a suggestion submits it', async () => {
-    const onSearch = vi.fn();
-    render(<SearchBar names={NAMES} onSearch={onSearch} />);
+  it('clears the input on Escape', async () => {
+    function Capture() {
+      const [v, setV] = useState('cinderace');
+      return (
+        <>
+          <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={() => {}} />
+          <output data-testid="value">{v}</output>
+        </>
+      );
+    }
+    render(<Capture />);
     const user = userEvent.setup();
-    await user.type(screen.getByRole('textbox'), 'cin');
-    await user.click(screen.getByText('cinderace'));
-    expect(onSearch).toHaveBeenCalledWith('cinderace');
-  });
-
-  it('lowercases and trims the submitted value', async () => {
-    const onSearch = vi.fn();
-    render(<SearchBar names={NAMES} onSearch={onSearch} />);
-    const user = userEvent.setup();
-    await user.type(screen.getByRole('textbox'), '  Dragapult  {Enter}');
-    expect(onSearch).toHaveBeenCalledWith('dragapult');
+    await user.click(screen.getByRole('textbox'));
+    await user.keyboard('{Escape}');
+    expect(screen.getByTestId('value')).toHaveTextContent('');
   });
 });

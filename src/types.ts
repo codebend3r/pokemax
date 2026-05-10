@@ -2,6 +2,11 @@ export interface Gen8ListResponse {
   pokemon_species: { name: string; url: string }[];
 }
 
+export interface Gen8Species {
+  name: string;
+  id: number;
+}
+
 export interface PokemonResponse {
   id: number;
   name: string;
@@ -10,6 +15,14 @@ export interface PokemonResponse {
     front_shiny: string | null;
     other: {
       'official-artwork': {
+        front_default: string | null;
+        front_shiny: string | null;
+      };
+      home?: {
+        front_default: string | null;
+        front_shiny: string | null;
+      };
+      showdown?: {
         front_default: string | null;
         front_shiny: string | null;
       };

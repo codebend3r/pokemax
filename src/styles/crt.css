@@ -463,3 +463,117 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   .crt-build { grid-template-columns: 1fr; }
   .crt-build-label { color: var(--accent); margin-top: 4px; }
 }
+
+/* Pokémon grid */
+.crt-grid-wrap { margin-top: 24px; }
+.crt-grid-count {
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-size: 17px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+}
+.crt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+.crt-grid-cell {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 10px 6px 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: background 80ms, border-color 80ms, transform 80ms;
+}
+.crt-grid-cell:hover {
+  background: rgba(0, 255, 159, 0.13);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+.crt-grid-cell.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 0, 170, 0.07);
+  box-shadow: 0 0 10px rgba(255, 0, 170, 0.3);
+}
+.crt-grid-cell img {
+  width: 80px;
+  height: 80px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 4px rgba(0, 255, 159, 0.3));
+}
+.crt-grid-dex {
+  color: var(--dim);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.crt-grid-name {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.crt-grid-empty {
+  color: var(--dim);
+  border: 1px dashed var(--border);
+  padding: 20px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .crt-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 6px; }
+  .crt-grid-cell { padding: 8px 4px 6px; }
+  .crt-grid-cell img { width: 64px; height: 64px; }
+  .crt-grid-name { font-size: 13px; }
+}
+
+/* Sprite views — both animated */
+@keyframes crt-3d-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes crt-pixel-jiggle {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-1px, -2px) scale(1.02); }
+  75% { transform: translate(1px, 0) scale(1); }
+}
+@keyframes crt-grid-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.crt-card-art {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+.crt-card-art .crt-shiny { margin-top: 4px; }
+.crt-view-toggle { margin-top: 6px; }
+
+.crt-card-top img.crt-sprite-3d {
+  animation: crt-3d-bob 2.6s ease-in-out infinite;
+  image-rendering: auto;
+  background: radial-gradient(circle at 50% 80%, rgba(0,255,159,0.15) 0%, transparent 60%);
+}
+.crt-card-top img.crt-sprite-2d {
+  image-rendering: pixelated;
+  /* gif animates frames itself; add a tiny breathing scale */
+  animation: crt-pixel-jiggle 1.6s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* Grid sprite: bob on hover; the swap to animated GIF (handled in JS) does the rest */
+.crt-grid-cell:hover img,
+.crt-grid-cell:focus-visible img {
+  animation: crt-grid-bounce 0.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px var(--accent));
+}

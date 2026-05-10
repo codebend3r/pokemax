@@ -24,12 +24,20 @@ function notOk(status: number) {
 }
 
 describe('fetchGen8List', () => {
-  it('returns the species name list', async () => {
+  it('returns species with name and id, sorted by id', async () => {
     fetchMock.mockReturnValue(
-      ok({ pokemon_species: [{ name: 'grookey', url: '' }, { name: 'scorbunny', url: '' }] }),
+      ok({
+        pokemon_species: [
+          { name: 'scorbunny', url: 'https://pokeapi.co/api/v2/pokemon-species/813/' },
+          { name: 'grookey', url: 'https://pokeapi.co/api/v2/pokemon-species/810/' },
+        ],
+      }),
     );
-    const names = await fetchGen8List();
-    expect(names).toEqual(['grookey', 'scorbunny']);
+    const list = await fetchGen8List();
+    expect(list).toEqual([
+      { name: 'grookey', id: 810 },
+      { name: 'scorbunny', id: 813 },
+    ]);
     expect(fetchMock).toHaveBeenCalledWith('https://pokeapi.co/api/v2/generation/8');
   });
 

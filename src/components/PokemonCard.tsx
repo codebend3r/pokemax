@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { EvolutionChainResponse, PokemonResponse, SpeciesResponse } from '../types';
 import { groupMoves } from '../moves';
 import StatBar from './StatBar';
@@ -5,6 +6,7 @@ import AbilityList from './AbilityList';
 import EvolutionChain from './EvolutionChain';
 import MoveList from './MoveList';
 import ShinyToggle from './ShinyToggle';
+import SpriteToggle, { type SpriteView } from './SpriteToggle';
 import Section from './Section';
 import CompetitiveBuild from './CompetitiveBuild';
 import Detail from './Detail';
@@ -22,16 +24,32 @@ interface Props {
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
 
-function pickSprite(p: PokemonResponse, shiny: boolean): string {
-  const art = p.sprites.other['official-artwork'];
-  if (shiny) {
-    return art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? '';
+function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView): string {
+  if (view === '2d') {
+    const sd = p.sprites.other.showdown;
+    if (sd) {
+      const url = shiny ? sd.front_shiny : sd.front_default;
+      if (url) return url;
+    }
+    return shiny
+      ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
+      : p.sprites.front_default ?? '';
   }
-  return art.front_default ?? p.sprites.front_default ?? '';
+  // 3D
+  const home = p.sprites.other.home;
+  if (home) {
+    const url = shiny ? home.front_shiny : home.front_default;
+    if (url) return url;
+  }
+  const art = p.sprites.other['official-artwork'];
+  return shiny
+    ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
+    : art.front_default ?? p.sprites.front_default ?? '';
 }
 
 export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSelectEvolution }: Props) {
-  const sprite = pickSprite(pokemon, shiny);
+  const [view, setView] = useState<SpriteView>('3d');
+  const sprite = pickSprite(pokemon, shiny, view);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
   );
@@ -41,8 +59,14 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
   return (
     <div className="crt-card">
       <div className="crt-card-top">
-        <div>
-          <img src={sprite} alt={pokemon.name} />
+        <div className="crt-card-art">
+          <img
+            key={`${view}-${shiny}-${pokemon.name}`}
+            className={'crt-sprite-' + view}
+            src={sprite}
+            alt={pokemon.name}
+          />
+          <SpriteToggle value={view} onChange={setView} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
         </div>
         <div className="crt-card-meta">

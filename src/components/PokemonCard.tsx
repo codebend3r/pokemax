@@ -6,6 +6,8 @@ import EvolutionChain from './EvolutionChain';
 import MoveList from './MoveList';
 import ShinyToggle from './ShinyToggle';
 import Section from './Section';
+import CompetitiveBuild from './CompetitiveBuild';
+import { useCompetitiveSet } from '../hooks/useCompetitiveSet';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -32,6 +34,7 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
   );
   const moveCount = Object.values(groupMoves(pokemon.moves)).reduce((n, g) => n + g.length, 0);
+  const competitive = useCompetitiveSet(pokemon.name);
 
   return (
     <div className="crt-card">
@@ -67,6 +70,17 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
 
       <Section label="▶ MOVES (SWORD/SHIELD)" count={moveCount}>
         <MoveList moves={pokemon.moves} />
+      </Section>
+
+      <Section
+        label="▶ COMPETITIVE BUILD"
+        count={competitive.build ? competitive.build.tier.toUpperCase() : undefined}
+      >
+        <CompetitiveBuild
+          build={competitive.build}
+          loading={competitive.loading}
+          error={competitive.error}
+        />
       </Section>
     </div>
   );

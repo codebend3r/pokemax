@@ -290,3 +290,65 @@ body::after {
   cursor: pointer;
   padding: 2px 8px;
 }
+
+.crt-build {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 6px 12px;
+  align-items: baseline;
+}
+.crt-build-tier {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(0, 255, 159, 0.25);
+}
+.crt-build-tier-label {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+  letter-spacing: 2px;
+  font-size: 22px;
+}
+.crt-build-tier-name {
+  color: var(--primary);
+  font-size: 19px;
+}
+.crt-build-row {
+  display: contents;
+}
+.crt-build-label {
+  color: var(--dim);
+  letter-spacing: 1px;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.crt-build-value {
+  color: var(--primary);
+}
+.crt-build-moves {
+  display: contents;
+}
+.crt-build-moves ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.crt-build-moves li {
+  padding: 1px 0;
+}
+.crt-build-source {
+  grid-column: 1 / -1;
+  color: var(--dim);
+  font-size: 14px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0, 255, 159, 0.25);
+  text-align: right;
+}
+.crt-build-empty {
+  color: var(--dim);
+  padding: 8px 0;
+}

@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 import { player } from '../music';
+import { useVolume } from '../hooks/useVolume';
 
 export default function MusicPlayer() {
   const [, force] = useState(0);
+  const [volume, setVolume] = useVolume('pokemax.music.volume', 0.12);
 
   useEffect(() => {
     return player.subscribe(() => force((n) => n + 1));
   }, []);
+
+  // Keep the synth in sync with the persisted slider value
+  useEffect(() => {
+    player.setVolume(volume);
+  }, [volume]);
 
   const track = player.currentTrack;
   const playing = player.isPlaying;
@@ -46,6 +53,19 @@ export default function MusicPlayer() {
           {' '}
           <span className="crt-music-counter">[{player.currentIndex + 1}/{player.tracks.length}]</span>
         </span>
+        <label className="crt-volume" title="Music volume">
+          <span className="crt-volume-icon" aria-hidden="true">♪</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.02}
+            value={volume}
+            aria-label="Music volume"
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="crt-volume-slider"
+          />
+        </label>
       </div>
     </div>
   );

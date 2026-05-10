@@ -25,6 +25,8 @@ interface Props {
   onSelectEvolution?: (name: string) => void;
   gen: number;
   cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
+  cryVolume?: number;
+  onCryVolumeChange?: (v: number) => void;
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
@@ -92,11 +94,15 @@ function CardSprite({
   shiny,
   view,
   preloadedAudio,
+  cryVolume,
+  onCryVolumeChange,
 }: {
   pokemon: PokemonResponse;
   shiny: boolean;
   view: SpriteView;
   preloadedAudio: React.MutableRefObject<HTMLAudioElement | null>;
+  cryVolume: number;
+  onCryVolumeChange?: (v: number) => void;
 }) {
   const [fallback, setFallback] = useState(0);
   const [reacting, setReacting] = useState(false);
@@ -104,18 +110,24 @@ function CardSprite({
   const sprite = pickSprite(pokemon, shiny, view, fallback);
   const cryUrl = pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
 
+  // Keep the live audio element in sync with the volume slider
+  useEffect(() => {
+    if (preloadedAudio.current) preloadedAudio.current.volume = cryVolume;
+  }, [cryVolume, preloadedAudio]);
+
   // Auto-play cry once on mount. The audio was pre-warmed when the user clicked
   // the grid cell, so this should fire near-instantly.
   useEffect(() => {
     const a = preloadedAudio.current;
     if (a && a.src) {
       a.currentTime = 0;
+      a.volume = cryVolume;
       a.play().catch(() => {});
       return;
     }
     if (cryUrl) {
       const fallbackAudio = new Audio(cryUrl);
-      fallbackAudio.volume = 0.45;
+      fallbackAudio.volume = cryVolume;
       fallbackAudio.play().catch(() => {});
       preloadedAudio.current = fallbackAudio;
     }
@@ -126,12 +138,13 @@ function CardSprite({
     const a = preloadedAudio.current;
     if (a && a.src) {
       a.currentTime = 0;
+      a.volume = cryVolume;
       a.play().catch(() => {});
       return;
     }
     if (cryUrl) {
       const fresh = new Audio(cryUrl);
-      fresh.volume = 0.45;
+      fresh.volume = cryVolume;
       fresh.play().catch(() => {});
       preloadedAudio.current = fresh;
     }
@@ -186,15 +199,30 @@ function CardSprite({
         </span>
       ))}
       {cryUrl && (
-        <button
-          type="button"
-          className="crt-cry-button"
-          onClick={playCry}
-          aria-label={`play ${pokemon.name} cry`}
-          title="play cry"
-        >
-          ♪ CRY
-        </button>
+        <div className="crt-cry-row">
+          <button
+            type="button"
+            className="crt-cry-button"
+            onClick={playCry}
+            aria-label={`play ${pokemon.name} cry`}
+            title="play cry"
+          >
+            ♪ CRY
+          </button>
+          {onCryVolumeChange && (
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.02}
+              value={cryVolume}
+              aria-label="Cry volume"
+              title="Cry volume"
+              onChange={(e) => onCryVolumeChange(parseFloat(e.target.value))}
+              className="crt-volume-slider crt-cry-slider"
+            />
+          )}
+        </div>
       )}
     </div>
   );
@@ -209,6 +237,8 @@ export default function PokemonCard({
   onSelectEvolution,
   gen,
   cryAudioRef,
+  cryVolume = 0.25,
+  onCryVolumeChange,
 }: Props) {
   const [view, setView] = useState<SpriteView>('3d');
   const [activeVariety, setActiveVariety] = useState<string>(defaultPokemon.name);
@@ -252,7 +282,14 @@ export default function PokemonCard({
     <div className="crt-card">
       <div className="crt-card-top">
         <div className="crt-card-art">
-          <CardSprite pokemon={pokemon} shiny={shiny} view={view} preloadedAudio={audioRef} />
+          <CardSprite
+            pokemon={pokemon}
+            shiny={shiny}
+            view={view}
+            preloadedAudio={audioRef}
+            cryVolume={cryVolume}
+            onCryVolumeChange={onCryVolumeChange}
+          />
           <SpriteToggle value={view} onChange={setView} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
           <FormSwitcher

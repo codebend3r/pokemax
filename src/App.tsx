@@ -8,6 +8,7 @@ import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
 import { useTheme } from './hooks/useTheme';
+import { useVolume } from './hooks/useVolume';
 import type { PokeType } from './typeChart';
 
 // Lazy-loaded — only fetched when first needed
@@ -17,6 +18,7 @@ const MusicPlayer = lazy(() => import('./components/MusicPlayer'));
 export default function App() {
   const list = useAllSpecies();
   const { theme, toggle: toggleTheme } = useTheme();
+  const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
@@ -68,7 +70,7 @@ export default function App() {
       }
       const audio = new Audio(url);
       audio.preload = 'auto';
-      audio.volume = 0.45;
+      audio.volume = cryVolume;
       audio.load();
       cryAudioRef.current = audio;
     }
@@ -146,6 +148,8 @@ export default function App() {
               onSelectEvolution={handleSelect}
               gen={selectedGen}
               cryAudioRef={cryAudioRef}
+              cryVolume={cryVolume}
+              onCryVolumeChange={setCryVolume}
             />
           </Suspense>
         </div>

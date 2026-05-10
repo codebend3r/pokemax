@@ -100,12 +100,15 @@ class ChiptunePlayer {
     if (!Ctor) return false;
     const ctx = new Ctor();
     const master = ctx.createGain();
-    master.gain.value = 0.06;
+    master.gain.value = this.volume;
     master.connect(ctx.destination);
     this.ctx = ctx;
     this.masterGain = master;
     return true;
   }
+
+  private volume = 0.12;
+  getVolume(): number { return this.volume; }
 
   play(): void {
     if (this.playing) return;
@@ -140,7 +143,9 @@ class ChiptunePlayer {
   }
 
   setVolume(v: number): void {
-    if (this.masterGain) this.masterGain.gain.value = Math.max(0, Math.min(1, v));
+    this.volume = Math.max(0, Math.min(1, v));
+    if (this.masterGain) this.masterGain.gain.value = this.volume;
+    this.emit();
   }
 
   private tick = (): void => {

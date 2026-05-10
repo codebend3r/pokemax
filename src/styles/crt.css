@@ -1165,3 +1165,77 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   letter-spacing: 2px;
   font-size: 18px;
 }
+
+/* Volume sliders — both music and cry use these styles */
+.crt-volume {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.crt-volume-icon {
+  color: var(--accent);
+  font-size: 16px;
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+}
+.crt-volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 84px;
+  height: 12px;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+.crt-volume-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: rgba(0, 255, 159, 0.3);
+  border: 1px solid var(--border);
+}
+.crt-volume-slider::-moz-range-track {
+  height: 4px;
+  background: rgba(0, 255, 159, 0.3);
+  border: 1px solid var(--border);
+}
+.crt-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 14px;
+  margin-top: -6px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+}
+.crt-volume-slider::-moz-range-thumb {
+  width: 10px;
+  height: 14px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+  border-radius: 0;
+  box-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+}
+.crt-volume-slider:hover::-webkit-slider-thumb { filter: brightness(1.2); }
+.crt-volume-slider:hover::-moz-range-thumb { filter: brightness(1.2); }
+
+/* Cry-specific row layout */
+.crt-cry-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.crt-cry-slider {
+  flex: 1;
+  width: auto;
+  min-width: 50px;
+}
+
+/* Music slider gets pushed to the right edge of the player row */
+.crt-music .crt-volume {
+  margin-left: auto;
+}

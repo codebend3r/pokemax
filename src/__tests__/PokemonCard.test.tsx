@@ -65,13 +65,15 @@ describe('PokemonCard', () => {
 
   it('marks the hidden ability', () => {
     render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
-    expect(screen.getByText(/cursed body/i).parentElement).toHaveTextContent(/HIDDEN/i);
+    const item = screen.getByText(/cursed body/i).closest('li');
+    expect(item).not.toBeNull();
+    expect(item).toHaveTextContent(/HIDDEN/i);
   });
 
   it('renders types as chips', () => {
     render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} />);
-    expect(screen.getByText('dragon')).toBeInTheDocument();
-    expect(screen.getByText('ghost')).toBeInTheDocument();
+    expect(screen.getAllByText('dragon').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('ghost').length).toBeGreaterThan(0);
   });
 
   it('renders the official artwork normal sprite', () => {

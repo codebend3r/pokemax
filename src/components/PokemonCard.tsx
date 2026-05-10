@@ -7,6 +7,7 @@ import MoveList from './MoveList';
 import ShinyToggle from './ShinyToggle';
 import Section from './Section';
 import CompetitiveBuild from './CompetitiveBuild';
+import TypeMatchup from './TypeMatchup';
 import { useCompetitiveSet } from '../hooks/useCompetitiveSet';
 
 interface Props {
@@ -58,6 +59,10 @@ export default function PokemonCard({ pokemon, chain, shiny, onShinyChange, onSe
         {sortedStats.map((s) => (
           <StatBar key={s.stat.name} name={s.stat.name} value={s.base_stat} />
         ))}
+      </Section>
+
+      <Section label="▶ DEFENSIVE MATCHUPS">
+        <TypeMatchup types={pokemon.types.map((t) => t.type.name)} />
       </Section>
 
       <Section label="▶ ABILITIES">

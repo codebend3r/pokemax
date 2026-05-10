@@ -1,5 +1,6 @@
-import type { ResolvedBuild } from '../competitive';
-import { formatEVs, formatMaybeArray } from '../competitive';
+import type { ResolvedBuild, SmogonSet } from '../competitive';
+import { formatEVs } from '../competitive';
+import Detail from './Detail';
 
 interface Props {
   build: ResolvedBuild | null;
@@ -7,12 +8,43 @@ interface Props {
   error: string | null;
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function smogonToApi(name: string): string {
+  return name.toLowerCase().replace(/[\s.]+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+function DetailValues({
+  kind,
+  value,
+}: {
+  kind: 'ability' | 'item' | 'nature';
+  value: string | string[] | undefined;
+}) {
+  if (!value) return <>—</>;
+  const list = Array.isArray(value) ? value : [value];
   return (
-    <div className="crt-build-row">
-      <span className="crt-build-label">{label}</span>
-      <span className="crt-build-value">{value}</span>
-    </div>
+    <>
+      {list.map((v, i) => (
+        <span key={`${v}-${i}`}>
+          {i > 0 && <span style={{ color: 'var(--dim)' }}> / </span>}
+          <Detail kind={kind} name={smogonToApi(v)} label={v} />
+        </span>
+      ))}
+    </>
+  );
+}
+
+function MoveCell({ move }: { move: SmogonSet['moves'][number] }) {
+  const list = Array.isArray(move) ? move : [move];
+  return (
+    <li>
+      ·{' '}
+      {list.map((m, i) => (
+        <span key={`${m}-${i}`}>
+          {i > 0 && <span style={{ color: 'var(--dim)' }}> / </span>}
+          <Detail kind="move" name={smogonToApi(m)} label={m} />
+        </span>
+      ))}
+    </li>
   );
 }
 
@@ -42,18 +74,31 @@ export default function CompetitiveBuild({ build, loading, error }: Props) {
         <span className="crt-build-tier-label">[{tier.toUpperCase()}]</span>
         <span className="crt-build-tier-name">{buildName}</span>
       </div>
-      <Row label="ABILITY" value={formatMaybeArray(set.ability)} />
-      <Row label="ITEM" value={formatMaybeArray(set.item)} />
-      <Row label="NATURE" value={formatMaybeArray(set.nature)} />
-      <Row label="EVS" value={formatEVs(set.evs)} />
+
+      <span className="crt-build-label">ABILITY</span>
+      <span className="crt-build-value"><DetailValues kind="ability" value={set.ability} /></span>
+
+      <span className="crt-build-label">ITEM</span>
+      <span className="crt-build-value"><DetailValues kind="item" value={set.item} /></span>
+
+      <span className="crt-build-label">NATURE</span>
+      <span className="crt-build-value"><DetailValues kind="nature" value={set.nature} /></span>
+
+      <span className="crt-build-label">EVS</span>
+      <span className="crt-build-value">{formatEVs(set.evs)}</span>
+
       {set.ivs && Object.keys(set.ivs).length > 0 && (
-        <Row label="IVS" value={formatEVs(set.ivs)} />
+        <>
+          <span className="crt-build-label">IVS</span>
+          <span className="crt-build-value">{formatEVs(set.ivs)}</span>
+        </>
       )}
+
       <div className="crt-build-moves">
         <span className="crt-build-label">MOVES</span>
         <ul>
           {set.moves.map((m, i) => (
-            <li key={i}>· {Array.isArray(m) ? m.join(' / ') : m}</li>
+            <MoveCell key={i} move={m} />
           ))}
         </ul>
       </div>

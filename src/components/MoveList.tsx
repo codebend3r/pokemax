@@ -1,5 +1,6 @@
 import { groupMoves } from '../moves';
 import type { PokemonResponse } from '../types';
+import Detail from './Detail';
 
 const ORDER: Array<{ key: string; label: string; openByDefault?: boolean }> = [
   { key: 'level-up', label: 'LEVEL-UP', openByDefault: true },
@@ -35,12 +36,16 @@ export default function MoveList({ moves }: Props) {
               {label} ({list.length})
             </summary>
             <ul>
-              {list.map((m) => (
-                <li key={m.name}>
-                  {key === 'level-up' && m.level > 0 ? `Lv ${String(m.level).padStart(2, '0')} · ` : '· '}
-                  {pretty(m.name)}
-                </li>
-              ))}
+              {list.map((m) => {
+                const prefix =
+                  key === 'level-up' && m.level > 0 ? `Lv ${String(m.level).padStart(2, '0')} · ` : '· ';
+                return (
+                  <li key={m.name}>
+                    {prefix}
+                    <Detail kind="move" name={m.name} label={pretty(m.name)} />
+                  </li>
+                );
+              })}
             </ul>
           </details>
         );

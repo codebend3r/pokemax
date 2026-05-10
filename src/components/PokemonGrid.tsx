@@ -7,8 +7,8 @@ interface Props {
   onSelect: (name: string) => void;
 }
 
-const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 const ANIM_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
+const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 
 function pretty(name: string): string {
   return name.replace(/-/g, ' ');
@@ -42,23 +42,20 @@ export default function PokemonGrid({ species, query, selected, onSelect }: Prop
             onClick={() => onSelect(s.name)}
           >
             <span className="crt-grid-dex">№{String(s.id).padStart(3, '0')}</span>
-            <span className="crt-grid-sprite">
-              <img
-                className="grid-still"
-                src={`${PIXEL_BASE}/${s.id}.png`}
-                alt={s.name}
-                loading="lazy"
-                decoding="async"
-              />
-              <img
-                className="grid-anim"
-                src={`${ANIM_BASE}/${s.id}.gif`}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                aria-hidden="true"
-              />
-            </span>
+            <img
+              className="crt-grid-img"
+              src={`${ANIM_BASE}/${s.id}.gif`}
+              alt={s.name}
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                const img = e.currentTarget as HTMLImageElement;
+                if (!img.dataset.fallback) {
+                  img.dataset.fallback = '1';
+                  img.src = `${PIXEL_BASE}/${s.id}.png`;
+                }
+              }}
+            />
             <span className="crt-grid-name">{pretty(s.name)}</span>
           </button>
         ))}

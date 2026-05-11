@@ -57,7 +57,18 @@ interface AbilityResponse {
 }
 interface ItemResponse {
   effect_entries: { short_effect: string; effect: string; language: { name: string } }[];
+  flavor_text_entries: { text: string; language: { name: string }; version_group?: { name: string } }[];
   category: { name: string };
+}
+
+function pickItemText(data: ItemResponse): string {
+  // PokeAPI items often have English text only in flavor_text_entries (effect_entries is sometimes localized to other languages or empty).
+  const fromEffect = pickEffect(data.effect_entries);
+  if (fromEffect) return fromEffect;
+  const enFlavors = data.flavor_text_entries.filter((e) => e.language.name === 'en');
+  if (enFlavors.length === 0) return '';
+  // Use the most recent description for clarity
+  return enFlavors[enFlavors.length - 1].text.replace(/[\n\f­ ]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 interface NatureResponse {
   increased_stat: { name: string } | null;
@@ -250,7 +261,7 @@ export default function Detail({
                     {item.data.category.name.replace(/-/g, ' ')}
                   </span>
                   {': '}
-                  {pickEffect(item.data.effect_entries) || 'no description.'}
+                  {pickItemText(item.data) || 'no description.'}
                 </div>
               )}
             </>

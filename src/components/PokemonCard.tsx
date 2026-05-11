@@ -104,10 +104,19 @@ function CardSprite({
   cryVolume: number;
   onCryVolumeChange?: (v: number) => void;
 }) {
-  const [fallback, setFallback] = useState(0);
+  const [fallbacks, setFallbacks] = useState<Record<SpriteView, number>>({ '2d': 0, '3d': 0 });
   const [reacting, setReacting] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
+  const fallback = fallbacks[view];
+  const bumpFallback = () =>
+    setFallbacks((prev) => ({ ...prev, [view]: Math.min(2, prev[view] + 1) }));
   const sprite = pickSprite(pokemon, shiny, view, fallback);
+
+  // Reset the per-view fallback ladder whenever the Pokemon changes — the new species
+  // might have sprites in places the previous one didn't.
+  useEffect(() => {
+    setFallbacks({ '2d': 0, '3d': 0 });
+  }, [pokemon.id]);
   const cryUrl = pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
 
   // Keep the live audio element in sync with the volume slider
@@ -181,7 +190,7 @@ function CardSprite({
         src={sprite.url}
         alt={pokemon.name}
         onClick={handleSpriteClick}
-        onError={() => setFallback((f) => (f < 2 ? f + 1 : f))}
+        onError={bumpFallback}
         title="click to play cry"
       />
       {particles.map((p) => (

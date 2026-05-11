@@ -336,12 +336,6 @@ export default function PokemonCard({
           />
           <SpriteToggle value={view} onChange={setView} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
-          <FormSwitcher
-            varieties={species.varieties}
-            speciesName={species.name}
-            active={activeVariety}
-            onChange={setActiveVariety}
-          />
         </div>
         <div className="crt-card-meta">
           <div className="crt-card-dex">#{String(pokemon.id).padStart(3, '0')}</div>
@@ -379,6 +373,13 @@ export default function PokemonCard({
           </button>
         </div>
       </div>
+
+      <FormSwitcher
+        varieties={species.varieties}
+        speciesName={species.name}
+        active={activeVariety}
+        onChange={setActiveVariety}
+      />
 
       {compareOpen && speciesPool && speciesPool.length > 0 && (
         <ComparePanel

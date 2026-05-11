@@ -690,8 +690,12 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  align-items: center;     /* center sprite + toggles horizontally */
+  align-items: center;
   flex-shrink: 0;
+  /* Pin to roughly the sprite's width so toggles never expand the column and
+     squeeze the name/types meta column on Pokemon with many alt forms. */
+  width: 200px;
+  max-width: 50%;
 }
 .crt-card-top img { display: block; margin: 0 auto; }
 .crt-card-art .crt-shiny { margin-top: 4px; flex-wrap: nowrap; }

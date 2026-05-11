@@ -178,6 +178,13 @@ class ChiptunePlayer {
   private volume = 0.12;
   getVolume(): number { return this.volume; }
 
+  private shuffle = false;
+  isShuffling(): boolean { return this.shuffle; }
+  toggleShuffle(): void {
+    this.shuffle = !this.shuffle;
+    this.emit();
+  }
+
   /**
    * Silence everything already scheduled into the master gain by ramping it to zero
    * and swapping in a brand-new gain node. Any oscillators feeding the old node will
@@ -251,8 +258,10 @@ class ChiptunePlayer {
   private tick = (): void => {
     if (!this.playing || !this.ctx) return;
     const track = TRACKS[this.trackIndex];
-    const targetLoops = track.loops ?? 3;
+    // ~3-4 minutes per track by default. melodyLen×stepDur×loops ≈ 200s
     const stepDuration = 60 / track.bpm / 4; // 16th-note grid
+    const defaultLoops = Math.max(8, Math.round(200 / (track.melody.length * stepDuration)));
+    const targetLoops = track.loops ?? defaultLoops;
     while (this.nextNoteTime < this.ctx.currentTime + 0.2) {
       this.scheduleStep(track, this.nextNoteTime);
       const nextStep = this.step + 1;
@@ -262,7 +271,14 @@ class ChiptunePlayer {
         if (this.loopsDone >= targetLoops) {
           // Track finished — schedule no more notes from it, advance to the next.
           this.loopsDone = 0;
-          this.changeTrack(this.trackIndex + 1);
+          if (this.shuffle && TRACKS.length > 1) {
+            let next = this.trackIndex;
+            // pick a different track than the one that just played
+            while (next === this.trackIndex) next = Math.floor(Math.random() * TRACKS.length);
+            this.changeTrack(next);
+          } else {
+            this.changeTrack(this.trackIndex + 1);
+          }
           return;
         }
       } else {

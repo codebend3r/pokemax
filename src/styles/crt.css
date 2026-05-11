@@ -1584,3 +1584,11 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   .crt-compare-vs { transform: rotate(0); }
   .crt-compare-stat-row { grid-template-columns: 1fr 70px 1fr; }
 }
+
+/* Shuffle toggle (lives in the music player button row) */
+.crt-music-btn.shuffle.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.5);
+  background: rgba(255, 0, 170, 0.1);
+}

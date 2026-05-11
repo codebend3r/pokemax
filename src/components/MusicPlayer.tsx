@@ -48,6 +48,16 @@ export default function MusicPlayer() {
         >
           ▶▶
         </button>
+        <button
+          type="button"
+          className={'crt-music-btn shuffle' + (player.isShuffling() ? ' active' : '')}
+          onClick={() => player.toggleShuffle()}
+          aria-pressed={player.isShuffling()}
+          aria-label="Toggle shuffle"
+          title={player.isShuffling() ? 'Shuffle on' : 'Shuffle off'}
+        >
+          ⇄
+        </button>
         <span className="crt-music-track">
           ♪ {track.name}
           {' '}

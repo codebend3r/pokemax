@@ -33,39 +33,53 @@ function cellLabel(s: Gen8Species): string {
 
 function GridCell({
   s,
+  parentId,
   selected,
   onSelect,
 }: {
   s: Gen8Species;
+  /** Base species' national-dex ID — used as the sprite fallback if this form has none */
+  parentId?: number;
   selected: boolean;
   onSelect: (name: string) => void;
 }) {
+  const [stillOk, setStillOk] = useState(true);
   const [animOk, setAnimOk] = useState(true);
-  const animUrl = animOk
+  const stillSrc = stillOk
+    ? `${PIXEL_BASE}/${s.id}.png`
+    : parentId
+      ? `${PIXEL_BASE}/${parentId}.png`
+      : null;
+  const animSrc = animOk
     ? s.id <= MAX_BW_ID
       ? `${BW_ANIM_BASE}/${s.id}.gif`
       : `${SHOWDOWN_BASE}/${s.id}.gif`
-    : null;
+    : parentId
+      ? `${SHOWDOWN_BASE}/${parentId}.gif`
+      : null;
 
   return (
     <button
       type="button"
-      className={'crt-grid-cell' + (selected ? ' active' : '') + (animUrl ? ' has-anim' : ' no-anim')}
+      className={'crt-grid-cell' + (selected ? ' active' : '') + (animSrc ? ' has-anim' : ' no-anim')}
       onClick={() => onSelect(s.name)}
     >
       <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>
       <span className="crt-grid-sprite">
-        <img
-          className="grid-still"
-          src={`${PIXEL_BASE}/${s.id}.png`}
-          alt={s.name}
-          loading="lazy"
-          decoding="async"
-        />
-        {animUrl && (
+        {stillSrc && (
+          <img
+            className="grid-still"
+            src={stillSrc}
+            alt={s.name}
+            loading="lazy"
+            decoding="async"
+            onError={() => setStillOk(false)}
+          />
+        )}
+        {animSrc && (
           <img
             className="grid-anim"
-            src={animUrl}
+            src={animSrc}
             alt=""
             aria-hidden="true"
             loading="lazy"
@@ -89,6 +103,13 @@ export default function PokemonGrid({
   onToggleType,
   onClearTypes,
 }: Props) {
+  // Lookup parent species's national-dex ID so alt forms whose own sprite is missing
+  // fall back to their parent's sprite instead of showing a broken image.
+  const parentIdByName = new Map<string, number>();
+  for (const s of species) {
+    if (!s.speciesName) parentIdByName.set(s.name, s.id);
+  }
+
   const q = query.trim().toLowerCase();
   const visible = species.filter((s) => {
     if (q && !s.name.includes(q)) return false;
@@ -118,6 +139,7 @@ export default function PokemonGrid({
               <GridCell
                 key={s.id}
                 s={s}
+                parentId={s.speciesName ? parentIdByName.get(s.speciesName) : undefined}
                 selected={s.name === selected}
                 onSelect={onSelect}
               />

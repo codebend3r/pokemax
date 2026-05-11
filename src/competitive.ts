@@ -57,11 +57,34 @@ function pokeapiToSmogon(name: string): string {
     .join('-');
 }
 
+/**
+ * Walk Smogon gens from latest to oldest and return the first complete-ish set
+ * for the given Pokémon. Older gens (1-2) had no abilities/items/natures/EVs, so
+ * preferring the latest gen surfaces the richer modern competitive build.
+ */
+export async function findBestBuild(name: string): Promise<ResolvedBuild | null> {
+  for (const gen of [9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+    try {
+      const data = await fetchSmogonData(gen);
+      const build = pickBuild(data, name);
+      if (build) {
+        build.sourceGen = gen;
+        return build;
+      }
+    } catch {
+      // Try the next gen
+    }
+  }
+  return null;
+}
+
 export interface ResolvedBuild {
   pokemonKey: string;
   tier: string;
   buildName: string;
   set: SmogonSet;
+  /** Which Smogon gen JSON the set came from (1..9). Set by findBestBuild. */
+  sourceGen?: number;
 }
 
 export function pickBuild(data: SmogonData, pokeapiName: string): ResolvedBuild | null {

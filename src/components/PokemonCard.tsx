@@ -425,7 +425,11 @@ export default function PokemonCard({
 
       <Section
         label="▶ COMPETITIVE BUILD"
-        count={competitive.build ? competitive.build.tier.toUpperCase() : undefined}
+        count={
+          competitive.build
+            ? `GEN ${competitive.build.sourceGen ?? '?'} · ${competitive.build.tier.toUpperCase()}`
+            : undefined
+        }
       >
         <CompetitiveBuild
           build={competitive.build}

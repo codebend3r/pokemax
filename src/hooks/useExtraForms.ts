@@ -88,18 +88,20 @@ async function fetchExtraForms(byName: Map<string, Gen8Species>): Promise<Gen8Sp
     const id = parseInt(m[1], 10);
     if (id < 10000) continue; // skip base species (already in main list)
 
-    // Try to find the parent species by stripping form suffixes off the name
-    let parts = entry.name.split('-');
+    // Match the form's name to a parent species by trying progressively shorter
+    // dash-separated prefixes. e.g. 'charizard-mega-x' → tries 'charizard-mega'
+    // then 'charizard'. The previous loop bailed out before checking single-segment
+    // names, which meant nothing ever matched and the forms array stayed empty.
+    const parts = entry.name.split('-');
     let base: Gen8Species | undefined;
     let suffix = '';
-    while (parts.length > 1) {
-      const candidate = parts.join('-');
+    for (let i = parts.length - 1; i >= 1; i--) {
+      const candidate = parts.slice(0, i).join('-');
       base = byName.get(candidate);
       if (base) {
         suffix = entry.name.slice(candidate.length + 1);
         break;
       }
-      parts = parts.slice(0, -1);
     }
     if (!base || !suffix) continue;
 

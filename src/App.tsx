@@ -55,16 +55,29 @@ export default function App() {
   const cardRef = useRef<HTMLDivElement>(null);
   const cryAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Combine base species with selected alternate-form categories, then apply gen filter
+  // With no form chips on, show every base species. With form chips on, show only the
+  // base species that have at least one matching form plus those forms — interleaved
+  // by base species ID so each form sits next to its parent.
   const filteredSpecies = useMemo(() => {
-    const filteredForms =
-      activeFormCats.size > 0
-        ? extraForms.forms.filter((f) => f.formCategory && activeFormCats.has(f.formCategory))
-        : [];
-    const merged = [...list.species, ...filteredForms];
-    const sorted = merged.sort((a, b) => a.id - b.id);
-    if (selectedGens.size === 0) return sorted;
-    return sorted.filter((s) => selectedGens.has(s.gen));
+    let merged: typeof list.species;
+    if (activeFormCats.size === 0) {
+      merged = list.species;
+    } else {
+      const matchingForms = extraForms.forms.filter(
+        (f) => f.formCategory && activeFormCats.has(f.formCategory),
+      );
+      const parentIdByName = new Map(list.species.map((s) => [s.name, s.id]));
+      const baseNames = new Set(matchingForms.map((f) => f.speciesName).filter(Boolean) as string[]);
+      const matchingBases = list.species.filter((s) => baseNames.has(s.name));
+      merged = [...matchingBases, ...matchingForms].sort((a, b) => {
+        const baseIdA = a.speciesName ? parentIdByName.get(a.speciesName) ?? a.id : a.id;
+        const baseIdB = b.speciesName ? parentIdByName.get(b.speciesName) ?? b.id : b.id;
+        if (baseIdA !== baseIdB) return baseIdA - baseIdB;
+        return a.id - b.id; // base before its forms
+      });
+    }
+    if (selectedGens.size === 0) return merged;
+    return merged.filter((s) => selectedGens.has(s.gen));
   }, [list.species, extraForms.forms, selectedGens, activeFormCats]);
 
   const selectedEntry = selected ? fullSpeciesIndex.find((s) => s.name === selected) ?? null : null;

@@ -1,10 +1,12 @@
 :root {
   --bg: #0a0e27;
-  --primary: #00ff9f;
-  --accent: #ff00aa;
-  --dim: rgba(0, 255, 159, 0.6);
-  --border: rgba(0, 255, 159, 0.7);
-  --error: #ff4444;
+  --bg-elev: #131838;          /* slightly elevated panel bg */
+  --primary: #00ff9f;          /* phosphor green */
+  --accent: #ff00aa;           /* magenta */
+  --tertiary: #4dd2ff;         /* electric cyan — third accent for variety */
+  --dim: rgba(168, 240, 215, 0.85);
+  --border: rgba(0, 255, 159, 0.55);
+  --error: #ff6b6b;
 }
 
 * { box-sizing: border-box; }
@@ -1122,11 +1124,13 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
    Same retro structure, swapped palette.
    ──────────────────────────────────────────── */
 :root[data-theme="light"] {
-  --bg: #f6ecd0;          /* aged-paper cream */
-  --primary: #5a3210;     /* dark amber/sepia text */
-  --accent: #b8431a;      /* burnt-orange CRT phosphor */
-  --dim: rgba(90, 50, 16, 0.55);
-  --border: rgba(90, 50, 16, 0.45);
+  --bg: #f6ecd0;             /* aged-paper cream */
+  --bg-elev: #ece1c4;         /* slightly darker paper */
+  --primary: #3a1f06;          /* deep sepia — high contrast against cream */
+  --accent: #9c3415;           /* burnt-orange CRT phosphor */
+  --tertiary: #1f5d83;         /* slate blue — cool complement to the warm cream */
+  --dim: rgba(58, 31, 6, 0.80);
+  --border: rgba(58, 31, 6, 0.45);
   --error: #8a1f1f;
 }
 :root[data-theme="light"] body::after {
@@ -1591,4 +1595,110 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   color: var(--accent);
   text-shadow: 0 0 4px rgba(255, 0, 170, 0.5);
   background: rgba(255, 0, 170, 0.1);
+}
+
+/* ────────────────────────────────────────────
+   Contrast + tertiary-color polish
+   Bumps low-opacity text up to readable levels and threads cyan / slate blue
+   through the play button, status, stat-bars, vitals, and chip counts.
+   ──────────────────────────────────────────── */
+
+/* Stat bar gets a tertiary glow so it reads as a different thing than headings */
+.crt-stat-bar { color: var(--tertiary); text-shadow: 0 0 4px rgba(77, 210, 255, 0.4); }
+:root[data-theme="light"] .crt-stat-bar { text-shadow: none; }
+.crt-stat-value { color: var(--primary); }
+.crt-stat > span:first-child {
+  color: var(--tertiary);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* HT / WT labels in tertiary so they're a distinct accent */
+.crt-card-vitals-label { color: var(--tertiary); }
+.crt-card-gen { color: var(--dim); font-size: 15px; font-weight: 400; }
+
+/* Section count: use tertiary instead of low-alpha dim */
+.crt-section-count { color: var(--tertiary); font-size: 16px; }
+.crt-tf-clear { color: var(--tertiary); border-color: var(--tertiary); }
+
+/* Music play button = tertiary, so it stands apart from prev/next */
+.crt-music-btn.play {
+  border-color: var(--tertiary);
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.5);
+}
+
+/* "Loading dex / scanning" status uses tertiary for distinct feedback */
+.crt-status.scanning { color: var(--tertiary); text-shadow: 0 0 6px rgba(77, 210, 255, 0.5); }
+:root[data-theme="light"] .crt-status.scanning {
+  color: var(--tertiary);
+  text-shadow: none;
+}
+
+/* Compare panel: BASE pokemon gets tertiary as its 'team color' */
+.crt-compare-row > .crt-compare-col:first-child .crt-compare-name { color: var(--tertiary); }
+.crt-compare-stat-num.win { color: var(--accent); }
+.crt-compare-stat-row > .crt-compare-stat-num:first-child.win {
+  color: var(--tertiary);
+  text-shadow: 0 0 6px rgba(77, 210, 255, 0.5);
+}
+:root[data-theme="light"] .crt-compare-stat-row > .crt-compare-stat-num:first-child.win { text-shadow: none; }
+.crt-compare-stat-num.lose { color: var(--dim); }
+
+/* Dimmed text legibility bumps */
+.crt-build-source { color: var(--dim); font-size: 15px; }
+.crt-pokedex-versions { color: var(--accent); opacity: 1; font-size: 14px; }
+.crt-detail-k { color: var(--tertiary); font-size: 15px; letter-spacing: 1px; }
+.crt-build-label { color: var(--tertiary); font-size: 16px; }
+.crt-detail-loading { color: var(--tertiary); }
+
+/* Cell name + dex contrast */
+.crt-grid-dex { color: var(--tertiary); text-shadow: 0 0 4px rgba(77, 210, 255, 0.3); font-size: 16px; }
+:root[data-theme="light"] .crt-grid-dex { text-shadow: none; }
+.crt-grid-name { color: var(--primary); }
+
+/* Music counter readability */
+.crt-music-counter { color: var(--tertiary); }
+
+/* Shiny / SpriteToggle active buttons use tertiary as a third state distinguisher
+   (instead of all toggles looking magenta) — keeps things alive */
+.crt-shiny button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 0, 170, 0.10);
+}
+:root[data-theme="light"] .crt-shiny button[aria-pressed="true"] {
+  background: rgba(156, 52, 21, 0.12);
+}
+
+/* Light-mode specific contrast fixes */
+:root[data-theme="light"] {
+  --border: rgba(58, 31, 6, 0.55);
+}
+:root[data-theme="light"] .crt-search-row { background: rgba(58, 31, 6, 0.05); }
+:root[data-theme="light"] .crt-music { background: rgba(58, 31, 6, 0.04); }
+:root[data-theme="light"] .crt-grid-cell { background: rgba(58, 31, 6, 0.04); }
+:root[data-theme="light"] .crt-grid-cell:hover { background: rgba(58, 31, 6, 0.10); }
+:root[data-theme="light"] .crt-compare { background: rgba(156, 52, 21, 0.06); }
+:root[data-theme="light"] .crt-pokedex-entry-item { background: rgba(156, 52, 21, 0.06); }
+:root[data-theme="light"] .crt-detail-panel { background: rgba(156, 52, 21, 0.06); }
+:root[data-theme="light"] .crt-tab.active,
+:root[data-theme="light"] .crt-gen-chip.active,
+:root[data-theme="light"] .crt-form-chip.active,
+:root[data-theme="light"] .crt-extra-chip.active {
+  background: rgba(156, 52, 21, 0.12);
+}
+
+/* Active grid cell uses bg-elev in both themes for stronger pop */
+.crt-grid-cell.active { background: rgba(255, 0, 170, 0.12); }
+:root[data-theme="light"] .crt-grid-cell.active { background: rgba(156, 52, 21, 0.16); }
+
+/* Header & section labels in light mode keep their punch with a subtle paper-shadow */
+:root[data-theme="light"] .crt-card-dex {
+  text-shadow: 1px 1px 0 rgba(58, 31, 6, 0.15);
+}
+:root[data-theme="light"] .crt-card-name,
+:root[data-theme="light"] .crt-section-label,
+:root[data-theme="light"] .crt-header {
+  text-shadow: none;
 }

@@ -116,7 +116,7 @@ export default function PokemonGrid({
           <div className="crt-grid">
             {visible.map((s) => (
               <GridCell
-                key={s.name}
+                key={s.id}
                 s={s}
                 selected={s.name === selected}
                 onSelect={onSelect}

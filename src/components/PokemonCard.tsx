@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { EvolutionChainResponse, PokemonResponse, SpeciesResponse } from '../types';
+import type { EvolutionChainResponse, Gen8Species, PokemonResponse, SpeciesResponse } from '../types';
 import { groupMoves } from '../moves';
 import { getGen } from '../generations';
 import { fetchPokemon } from '../api';
@@ -11,6 +11,7 @@ import ShinyToggle from './ShinyToggle';
 import SpriteToggle, { type SpriteView } from './SpriteToggle';
 import FormSwitcher from './FormSwitcher';
 import Section from './Section';
+import ComparePanel from './ComparePanel';
 import CompetitiveBuild from './CompetitiveBuild';
 import Detail from './Detail';
 import { useCompetitiveSet } from '../hooks/useCompetitiveSet';
@@ -27,6 +28,8 @@ interface Props {
   cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume?: number;
   onCryVolumeChange?: (v: number) => void;
+  /** Pool of species the compare picker can choose from */
+  speciesPool?: Gen8Species[];
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
@@ -42,17 +45,12 @@ interface SpritePick {
 
 function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallbackLevel: number): SpritePick {
   if (view === '2d') {
-    if (fallbackLevel === 0) {
-      // Gen 1-5: Black/White animated (true flat pixel art)
-      if (p.id <= MAX_BW_ID) {
-        const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
-        return { url, animated: true };
-      }
-      // Gen 6+: Showdown animated GIF (pixelated frame animation)
-      const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+    // 2D = flat pixel art. Real BW animation for Gen 1-5; static flat for Gen 6+ (no
+    // flat animated source exists for those — Showdown is shaded pixel and lives in 3D).
+    if (fallbackLevel === 0 && p.id <= MAX_BW_ID) {
+      const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
       return { url, animated: true };
     }
-    // Fallback: static flat pixel sprite
     return {
       url: shiny
         ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
@@ -60,22 +58,25 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
       animated: false,
     };
   }
-  // 3D — true 3D render from Pokémon HOME (visually distinct from the 2D pixel sprite)
+  // 3D = animated Showdown GIF (real frame-by-frame pixel animation, shaded so it
+  // reads as a 3D-rendered model). This is the actual animated source for every Pokémon.
   if (fallbackLevel === 0) {
+    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+    return { url, animated: true };
+  }
+  // Showdown missing → Pokémon HOME render
+  if (fallbackLevel === 1) {
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };
   }
-  // Tier 1: official artwork (illustration) when HOME isn't available
-  if (fallbackLevel === 1) {
-    const art = p.sprites.other['official-artwork'];
-    const url = shiny ? art.front_shiny : art.front_default;
-    if (url) return { url, animated: false };
-  }
-  // Final fallback: Showdown animated (so something always renders)
+  // Final fallback — official artwork
+  const art = p.sprites.other['official-artwork'];
   return {
-    url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
-    animated: true,
+    url: shiny
+      ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
+      : art.front_default ?? p.sprites.front_default ?? '',
+    animated: false,
   };
 }
 
@@ -246,17 +247,20 @@ export default function PokemonCard({
   cryAudioRef,
   cryVolume = 0.25,
   onCryVolumeChange,
+  speciesPool,
 }: Props) {
-  const [view, setView] = useState<SpriteView>('3d');
+  const [view, setView] = useState<SpriteView>('2d');
+  const [compareOpen, setCompareOpen] = useState(false);
   const [activeVariety, setActiveVariety] = useState<string>(defaultPokemon.name);
   const [varietyData, setVarietyData] = useState<PokemonResponse | null>(null);
   const localCryRef = useRef<HTMLAudioElement | null>(null);
   const audioRef = cryAudioRef ?? localCryRef;
 
-  // Reset to the default variety whenever the underlying species changes
+  // Reset to the default variety AND default to 2D view whenever the species changes
   useEffect(() => {
     setActiveVariety(defaultPokemon.name);
     setVarietyData(null);
+    setView('2d');
   }, [defaultPokemon.name]);
 
   // Fetch alternate variety data when user picks a different form
@@ -300,11 +304,21 @@ export default function PokemonCard({
   // Genus ("Mouse Pokémon", "Lizard Pokémon", etc.)
   const genus = species.genera.find((g) => g.language.name === 'en')?.genus ?? '';
 
-  // Pokédex entry (latest available English flavor text). Replaces NBSPs and form-feed glyphs that PokeAPI text contains.
-  const flavorText = (() => {
-    const en = species.flavor_text_entries.filter((e) => e.language.name === 'en');
-    if (en.length === 0) return '';
-    return en[en.length - 1].flavor_text.replace(/[\n\f­ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  // All unique English Pokédex entries, with the version groups that share each text.
+  const dedupedEntries: { text: string; versions: string[] }[] = (() => {
+    const cleaned = species.flavor_text_entries
+      .filter((e) => e.language.name === 'en')
+      .map((e) => ({
+        text: e.flavor_text.replace(/[\n\f\u00ad\u00a0]/g, ' ').replace(/\s+/g, ' ').trim(),
+        version: e.version.name,
+      }));
+    const byText = new Map<string, string[]>();
+    for (const e of cleaned) {
+      const existing = byText.get(e.text);
+      if (existing) existing.push(e.version);
+      else byText.set(e.text, [e.version]);
+    }
+    return Array.from(byText, ([text, versions]) => ({ text, versions }));
   })();
 
   return (
@@ -354,14 +368,40 @@ export default function PokemonCard({
             <span><span className="crt-card-vitals-label">HT</span> {heightStr}</span>
             <span><span className="crt-card-vitals-label">WT</span> {weightStr}</span>
           </div>
+          <button
+            type="button"
+            className="crt-compare-btn"
+            onClick={() => setCompareOpen((v) => !v)}
+            aria-pressed={compareOpen}
+          >
+            ⇄ {compareOpen ? 'CLOSE COMPARE' : 'COMPARE'}
+          </button>
         </div>
       </div>
 
-      {flavorText && (
-        <div className="crt-pokedex-entry">
-          <span className="crt-pokedex-entry-label">▶ POKéDEX ENTRY</span>
-          <p>{flavorText}</p>
-        </div>
+      {compareOpen && speciesPool && speciesPool.length > 0 && (
+        <ComparePanel
+          base={pokemon}
+          species={speciesPool}
+          onClose={() => setCompareOpen(false)}
+        />
+      )}
+
+      {dedupedEntries.length > 0 && (
+        <Section label="▶ POKéDEX ENTRIES" count={dedupedEntries.length} defaultOpen={false}>
+          <div className="crt-pokedex-entries">
+            {dedupedEntries.map((entry, i) => (
+              <div key={i} className="crt-pokedex-entry-item">
+                <div className="crt-pokedex-versions">
+                  {entry.versions
+                    .map((v) => v.toUpperCase().replace(/-/g, '/'))
+                    .join(' · ')}
+                </div>
+                <p>{entry.text}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
       )}
 
       <Section label="▶ BASE STATS">

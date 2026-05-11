@@ -4,6 +4,7 @@ import StatusLine from './components/StatusLine';
 import PokemonGrid from './components/PokemonGrid';
 import GenFilter from './components/GenFilter';
 import ThemeToggle from './components/ThemeToggle';
+import ShareButton from './components/ShareButton';
 import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
@@ -29,7 +30,15 @@ export default function App() {
   const { theme, toggle: toggleTheme } = useTheme();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<string | null>(null);
+
+  // Deeplink: read ?p=name on first mount so URLs like /pokemax/?p=charizard work
+  const initialSelected = (() => {
+    if (typeof window === 'undefined') return null;
+    const params = new globalThis.URLSearchParams(window.location.search);
+    const p = params.get('p');
+    return p && p.trim() ? p.trim().toLowerCase() : null;
+  })();
+  const [selected, setSelected] = useState<string | null>(initialSelected);
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
@@ -74,9 +83,10 @@ export default function App() {
     }
   }, [result.data]);
 
-  // Browser tab title: "Pokemax" → "Pokemax | Snorlax" while viewing a Pokemon
+  // Browser tab title + URL stay in sync with the selected Pokemon
   useEffect(() => {
     const base = 'Pokemax';
+    const url = new globalThis.URL(window.location.href);
     if (result.data) {
       const raw = result.data.pokemon.name;
       const pretty = raw
@@ -84,8 +94,13 @@ export default function App() {
         .map((p) => (p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p))
         .join(' ');
       document.title = `${base} | ${pretty}`;
+      url.searchParams.set('p', raw);
     } else {
       document.title = base;
+      url.searchParams.delete('p');
+    }
+    if (url.toString() !== window.location.href) {
+      window.history.replaceState({}, '', url.toString());
     }
   }, [result.data]);
 
@@ -140,6 +155,7 @@ export default function App() {
           ▶ POKEMAX
         </button>
         <div className="crt-topbar-controls">
+          <ShareButton selected={selected} />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </div>
@@ -188,6 +204,7 @@ export default function App() {
               cryAudioRef={cryAudioRef}
               cryVolume={cryVolume}
               onCryVolumeChange={setCryVolume}
+              speciesPool={fullSpeciesIndex}
             />
           </Suspense>
         </div>

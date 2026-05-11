@@ -74,6 +74,21 @@ export default function App() {
     }
   }, [result.data]);
 
+  // Browser tab title: "Pokemax" → "Pokemax | Snorlax" while viewing a Pokemon
+  useEffect(() => {
+    const base = 'Pokemax';
+    if (result.data) {
+      const raw = result.data.pokemon.name;
+      const pretty = raw
+        .split('-')
+        .map((p) => (p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p))
+        .join(' ');
+      document.title = `${base} | ${pretty}`;
+    } else {
+      document.title = base;
+    }
+  }, [result.data]);
+
   const handleSelect = (name: string) => {
     setShiny(false);
     setSelected(name);

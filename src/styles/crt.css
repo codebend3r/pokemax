@@ -205,8 +205,8 @@ button.crt-header-link:hover {
   margin-bottom: 16px;
 }
 .crt-card-top img {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   object-fit: contain;
   image-rendering: pixelated;
   background: transparent;
@@ -692,10 +692,13 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   gap: 6px;
   align-items: center;
   flex-shrink: 0;
-  /* Pin to roughly the sprite's width so toggles never expand the column and
-     squeeze the name/types meta column on Pokemon with many alt forms. */
-  width: 200px;
+  /* Wide enough to fit [ NORMAL ] [ SHINY ] on a single row without overflow,
+     while still leaving plenty of room for the meta column on the right. */
+  width: 240px;
   max-width: 50%;
+}
+.crt-card-art .crt-shiny {
+  width: 100%;
 }
 .crt-card-top img { display: block; margin: 0 auto; }
 .crt-card-art .crt-shiny { margin-top: 4px; flex-wrap: nowrap; }

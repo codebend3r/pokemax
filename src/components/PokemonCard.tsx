@@ -60,24 +60,22 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
       animated: false,
     };
   }
-  // 3D — Showdown animated GIF (real frame animation, "pixelated 3D-rendered" style)
+  // 3D — true 3D render from Pokémon HOME (visually distinct from the 2D pixel sprite)
   if (fallbackLevel === 0) {
-    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-    return { url, animated: true };
-  }
-  // Tier 1: HOME static 3D render
-  if (fallbackLevel === 1) {
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };
   }
-  // Final fallback: official artwork
-  const art = p.sprites.other['official-artwork'];
+  // Tier 1: official artwork (illustration) when HOME isn't available
+  if (fallbackLevel === 1) {
+    const art = p.sprites.other['official-artwork'];
+    const url = shiny ? art.front_shiny : art.front_default;
+    if (url) return { url, animated: false };
+  }
+  // Final fallback: Showdown animated (so something always renders)
   return {
-    url: shiny
-      ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
-      : art.front_default ?? p.sprites.front_default ?? '',
-    animated: false,
+    url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
+    animated: true,
   };
 }
 

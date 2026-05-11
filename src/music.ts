@@ -7,6 +7,8 @@ export interface Track {
   melody: number[]; // MIDI note numbers, -1 = rest
   bass?: number[];  // bass line played in parallel (lower octave)
   lead: OscillatorType;
+  /** Number of full loops before auto-advancing to the next track. Defaults to 3. */
+  loops?: number;
 }
 
 const TRACKS: Track[] = [
@@ -62,6 +64,71 @@ const TRACKS: Track[] = [
       40, -1, -1, -1, 40, -1, -1, -1, 41, -1, -1, -1, 41, -1, -1, -1,
     ],
   },
+  {
+    name: 'NEON STREET',
+    bpm: 88,
+    lead: 'square',
+    melody: [
+      69, 72, 76, 79, 76, 72, 69, 67, 65, 69, 72, 76, 72, 69, 65, 64,
+      62, 65, 69, 72, 69, 65, 62, 60, 58, 62, 65, 69, 65, 62, 58, -1,
+    ],
+    bass: [
+      45, -1, 52, -1, 45, -1, 52, -1, 43, -1, 50, -1, 43, -1, 50, -1,
+      41, -1, 48, -1, 41, -1, 48, -1, 46, -1, 53, -1, 46, -1, 53, -1,
+    ],
+  },
+  {
+    name: 'TWILIGHT CHIP',
+    bpm: 68,
+    lead: 'triangle',
+    melody: [
+      57, -1, 60, -1, 64, -1, 60, -1, 62, -1, 65, -1, 69, -1, 65, -1,
+      64, -1, 67, -1, 71, -1, 67, -1, 60, -1, 64, -1, 67, -1, -1, -1,
+    ],
+    bass: [
+      45, -1, -1, -1, 45, -1, -1, -1, 50, -1, -1, -1, 50, -1, -1, -1,
+      52, -1, -1, -1, 52, -1, -1, -1, 48, -1, -1, -1, 48, -1, -1, -1,
+    ],
+  },
+  {
+    name: 'RAINY DEX',
+    bpm: 64,
+    lead: 'sawtooth',
+    melody: [
+      60, 62, 64, 65, 64, 62, 60, -1, 64, 65, 67, 69, 67, 65, 64, -1,
+      67, 69, 71, 72, 71, 69, 67, -1, 64, 65, 67, 69, 67, 65, 64, 60,
+    ],
+    bass: [
+      36, -1, -1, -1, 40, -1, -1, -1, 41, -1, -1, -1, 43, -1, -1, -1,
+      36, -1, -1, -1, 40, -1, -1, -1, 41, -1, -1, -1, 43, -1, -1, -1,
+    ],
+  },
+  {
+    name: 'ARCADE CRT',
+    bpm: 104,
+    lead: 'square',
+    melody: [
+      64, 67, 71, 67, 64, 67, 71, 67, 65, 69, 72, 69, 65, 69, 72, 69,
+      67, 71, 74, 71, 67, 71, 74, 71, 69, 72, 76, 72, 69, 72, 76, -1,
+    ],
+    bass: [
+      40, 47, 40, 47, 40, 47, 40, 47, 41, 48, 41, 48, 41, 48, 41, 48,
+      43, 50, 43, 50, 43, 50, 43, 50, 45, 52, 45, 52, 45, 52, 45, 52,
+    ],
+  },
+  {
+    name: 'CARTRIDGE DREAM',
+    bpm: 76,
+    lead: 'triangle',
+    melody: [
+      67, 69, 72, 74, 72, 69, 67, 65, 64, 65, 67, 69, 67, 65, 64, 62,
+      60, 62, 64, 65, 64, 62, 60, 59, 57, 60, 64, 67, 64, 60, 57, -1,
+    ],
+    bass: [
+      36, -1, 43, -1, 36, -1, 43, -1, 41, -1, 48, -1, 41, -1, 48, -1,
+      40, -1, 47, -1, 40, -1, 47, -1, 33, -1, 40, -1, 33, -1, 40, -1,
+    ],
+  },
 ];
 
 function midiToFreq(n: number): number {
@@ -76,6 +143,7 @@ class ChiptunePlayer {
   private timer: number | null = null;
   private nextNoteTime = 0;
   private step = 0;
+  private loopsDone = 0;
   private playing = false;
   private trackIndex = 0;
   private listeners = new Set<Listener>();
@@ -159,10 +227,17 @@ class ChiptunePlayer {
   private changeTrack(rawIndex: number): void {
     this.trackIndex = rawIndex % TRACKS.length;
     this.step = 0;
+    this.loopsDone = 0;
     if (this.playing && this.ctx) {
       // Kill the in-flight notes of the previous track before scheduling new ones
       this.cutScheduled();
       this.nextNoteTime = this.ctx.currentTime + 0.05;
+      // Auto-advance: re-arm the scheduler with the new track
+      if (this.timer != null) {
+        window.clearTimeout(this.timer);
+        this.timer = null;
+      }
+      this.tick();
     }
     this.emit();
   }
@@ -176,10 +251,23 @@ class ChiptunePlayer {
   private tick = (): void => {
     if (!this.playing || !this.ctx) return;
     const track = TRACKS[this.trackIndex];
+    const targetLoops = track.loops ?? 3;
     const stepDuration = 60 / track.bpm / 4; // 16th-note grid
     while (this.nextNoteTime < this.ctx.currentTime + 0.2) {
       this.scheduleStep(track, this.nextNoteTime);
-      this.step = (this.step + 1) % track.melody.length;
+      const nextStep = this.step + 1;
+      if (nextStep >= track.melody.length) {
+        this.step = 0;
+        this.loopsDone += 1;
+        if (this.loopsDone >= targetLoops) {
+          // Track finished — schedule no more notes from it, advance to the next.
+          this.loopsDone = 0;
+          this.changeTrack(this.trackIndex + 1);
+          return;
+        }
+      } else {
+        this.step = nextStep;
+      }
       this.nextNoteTime += stepDuration;
     }
     this.timer = window.setTimeout(this.tick, 40);

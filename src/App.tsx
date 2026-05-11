@@ -20,6 +20,7 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
   { key: 'other', label: 'BATTLE FORMS' },
 ];
 import type { PokeType } from './typeChart';
+import { CRY_VOLUME_SCALE } from './textUtil';
 
 // Lazy-loaded — only fetched when first needed
 const PokemonCard = lazy(() => import('./components/PokemonCard'));
@@ -136,7 +137,7 @@ export default function App() {
       }
       const audio = new Audio(url);
       audio.preload = 'auto';
-      audio.volume = cryVolume;
+      audio.volume = cryVolume * CRY_VOLUME_SCALE;
       audio.load();
       cryAudioRef.current = audio;
     }

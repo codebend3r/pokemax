@@ -3,6 +3,7 @@ import type { EvolutionChainResponse, Gen8Species, PokemonResponse, SpeciesRespo
 import { groupMoves } from '../moves';
 import { getGen } from '../generations';
 import { fetchPokemon } from '../api';
+import { CRY_VOLUME_SCALE, cleanFlavorText } from '../textUtil';
 import StatBar from './StatBar';
 import AbilityList from './AbilityList';
 import EvolutionChain from './EvolutionChain';
@@ -120,7 +121,7 @@ function CardSprite({
 
   // Keep the live audio element in sync with the volume slider
   useEffect(() => {
-    if (preloadedAudio.current) preloadedAudio.current.volume = cryVolume;
+    if (preloadedAudio.current) preloadedAudio.current.volume = cryVolume * CRY_VOLUME_SCALE;
   }, [cryVolume, preloadedAudio]);
 
   // Auto-play cry once on mount. The audio was pre-warmed when the user clicked
@@ -129,13 +130,13 @@ function CardSprite({
     const a = preloadedAudio.current;
     if (a && a.src) {
       a.currentTime = 0;
-      a.volume = cryVolume;
+      a.volume = cryVolume * CRY_VOLUME_SCALE;
       a.play().catch(() => {});
       return;
     }
     if (cryUrl) {
       const fallbackAudio = new Audio(cryUrl);
-      fallbackAudio.volume = cryVolume;
+      fallbackAudio.volume = cryVolume * CRY_VOLUME_SCALE;
       fallbackAudio.play().catch(() => {});
       preloadedAudio.current = fallbackAudio;
     }
@@ -146,13 +147,13 @@ function CardSprite({
     const a = preloadedAudio.current;
     if (a && a.src) {
       a.currentTime = 0;
-      a.volume = cryVolume;
+      a.volume = cryVolume * CRY_VOLUME_SCALE;
       a.play().catch(() => {});
       return;
     }
     if (cryUrl) {
       const fresh = new Audio(cryUrl);
-      fresh.volume = cryVolume;
+      fresh.volume = cryVolume * CRY_VOLUME_SCALE;
       fresh.play().catch(() => {});
       preloadedAudio.current = fresh;
     }
@@ -309,7 +310,7 @@ export default function PokemonCard({
     const cleaned = species.flavor_text_entries
       .filter((e) => e.language.name === 'en')
       .map((e) => ({
-        text: e.flavor_text.replace(/[\n\f\u00ad\u00a0]/g, ' ').replace(/\s+/g, ' ').trim(),
+        text: cleanFlavorText(e.flavor_text),
         version: e.version.name,
       }));
     const byText = new Map<string, string[]>();

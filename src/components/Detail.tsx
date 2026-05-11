@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useApiDetail } from '../hooks/useApiDetail';
+import { cleanFlavorText } from '../textUtil';
 import {
   defensiveMatchups,
   groupMatchups,
@@ -68,7 +69,7 @@ function pickItemText(data: ItemResponse): string {
   const enFlavors = data.flavor_text_entries.filter((e) => e.language.name === 'en');
   if (enFlavors.length === 0) return '';
   // Use the most recent description for clarity
-  return enFlavors[enFlavors.length - 1].text.replace(/[\n\f­ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  return cleanFlavorText(enFlavors[enFlavors.length - 1].text);
 }
 interface NatureResponse {
   increased_stat: { name: string } | null;

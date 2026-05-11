@@ -435,6 +435,7 @@ export default function PokemonCard({
           build={competitive.build}
           loading={competitive.loading}
           error={competitive.error}
+          pokemon={pokemon}
         />
       </Section>
     </div>

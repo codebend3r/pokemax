@@ -1,11 +1,14 @@
 import type { ResolvedBuild, SmogonSet } from '../competitive';
 import { formatEVs } from '../competitive';
+import type { PokemonResponse } from '../types';
 import Detail from './Detail';
 
 interface Props {
   build: ResolvedBuild | null;
   loading: boolean;
   error: string | null;
+  /** Default ability fallback when the Smogon set omits it (single-ability species). */
+  pokemon?: PokemonResponse;
 }
 
 function smogonToApi(name: string): string {
@@ -48,7 +51,18 @@ function MoveCell({ move }: { move: SmogonSet['moves'][number] }) {
   );
 }
 
-export default function CompetitiveBuild({ build, loading, error }: Props) {
+function defaultAbility(p: PokemonResponse | undefined): string | undefined {
+  if (!p) return undefined;
+  const visible = p.abilities.filter((a) => !a.is_hidden).sort((a, b) => a.slot - b.slot);
+  const a = visible[0] ?? p.abilities[0];
+  if (!a) return undefined;
+  return a.ability.name
+    .split('-')
+    .map((s) => (s ? s[0].toUpperCase() + s.slice(1) : ''))
+    .join(' ');
+}
+
+export default function CompetitiveBuild({ build, loading, error, pokemon }: Props) {
   if (loading) {
     return <div className="crt-build-empty">▶ FETCHING COMPETITIVE DATA<span className="crt-cursor">&nbsp;</span></div>;
   }
@@ -67,6 +81,9 @@ export default function CompetitiveBuild({ build, loading, error }: Props) {
   }
 
   const { tier, buildName, set } = build;
+  // Smogon omits ability when the Pokémon has a single competitive choice. Backfill
+  // from PokeAPI so the field doesn't render as an em-dash.
+  const ability = set.ability ?? defaultAbility(pokemon);
 
   return (
     <div className="crt-build">
@@ -76,7 +93,7 @@ export default function CompetitiveBuild({ build, loading, error }: Props) {
       </div>
 
       <span className="crt-build-label">ABILITY</span>
-      <span className="crt-build-value"><DetailValues kind="ability" value={set.ability} /></span>
+      <span className="crt-build-value"><DetailValues kind="ability" value={ability} /></span>
 
       <span className="crt-build-label">ITEM</span>
       <span className="crt-build-value"><DetailValues kind="item" value={set.item} /></span>

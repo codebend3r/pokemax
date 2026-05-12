@@ -824,18 +824,24 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 }
 .crt-tf-chip {
   padding: 4px 10px;
-  border: 1px solid currentColor;
+  border: 1px solid var(--type-color);
   background: rgba(0, 0, 0, 0.3);
+  color: var(--type-color);
   font: inherit;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: 14px;
   cursor: pointer;
-  text-shadow: 0 0 4px currentColor;
+  text-shadow: 0 0 4px var(--type-color);
   transition: filter 80ms;
 }
 .crt-tf-chip:hover { filter: brightness(1.4); }
-.crt-tf-chip.active { text-shadow: none; font-weight: bold; }
+.crt-tf-chip.active {
+  background: var(--type-color);
+  color: #000;
+  text-shadow: none;
+  font-weight: bold;
+}
 .crt-tf-clear {
   margin-left: 8px;
   padding: 4px 10px;
@@ -1177,6 +1183,27 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   color: var(--primary);
 }
 :root[data-theme="light"] body::after { mix-blend-mode: multiply; }
+
+/* Type filter chips in light mode: keep type-color identity (border + tinted bg)
+   but force dark sepia text for legibility on the cream background. The default
+   dark scheme uses pastel type colors as text, which is unreadable on cream. */
+:root[data-theme="light"] .crt-tf-chip {
+  background: color-mix(in srgb, var(--type-color) 22%, #ffffff);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--type-color) 60%, #3a1f06);
+  text-shadow: none;
+  font-weight: 600;
+}
+:root[data-theme="light"] .crt-tf-chip:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--type-color) 38%, #ffffff);
+}
+:root[data-theme="light"] .crt-tf-chip.active {
+  background: var(--type-color);
+  color: #000;
+  border-color: color-mix(in srgb, var(--type-color) 50%, #000000);
+  text-shadow: none;
+}
 
 /* Lazy-loading placeholder while the PokemonCard chunk downloads */
 .crt-card.crt-card-loading {

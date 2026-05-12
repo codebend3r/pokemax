@@ -18,11 +18,7 @@ export default function TypeFilter({ selected, onToggle, onClear }: Props) {
               key={t}
               type="button"
               className={'crt-tf-chip' + (active ? ' active' : '')}
-              style={
-                active
-                  ? { borderColor: TYPE_COLORS[t], background: TYPE_COLORS[t], color: '#000' }
-                  : { borderColor: TYPE_COLORS[t], color: TYPE_COLORS[t] }
-              }
+              style={{ ['--type-color' as string]: TYPE_COLORS[t] }}
               onClick={() => onToggle(t)}
               aria-pressed={active}
             >

@@ -46,11 +46,30 @@ interface SpritePick {
 
 function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallbackLevel: number): SpritePick {
   if (view === '2d') {
-    // 2D = flat pixel art. Real BW animation for Gen 1-5; static flat for Gen 6+ (no
-    // flat animated source exists for those — Showdown is shaded pixel and lives in 3D).
-    if (fallbackLevel === 0 && p.id <= MAX_BW_ID) {
-      const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
+    // 2D = pixel-art animated where the source is reasonably sized.
+    // Gen 1-5: Black/White animated GIF (true flat pixel animation).
+    // Forms (id ≥ 10000): Showdown sprites are often tiny (Minior cores ≈ 60×60,
+    // padded inside a 200px box). The 475×475 official artwork looks far better at
+    // card size, so we prefer it for forms.
+    // Gen 6+ base species: Showdown animated GIF.
+    if (fallbackLevel === 0) {
+      if (p.id <= MAX_BW_ID) {
+        const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
+        return { url, animated: true };
+      }
+      if (p.id >= 10000) {
+        const art = p.sprites.other['official-artwork'];
+        const url = shiny ? art.front_shiny : art.front_default;
+        if (url) return { url, animated: false };
+      }
+      const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
       return { url, animated: true };
+    }
+    if (fallbackLevel === 1) {
+      // Tier-1 fallback for the pixel chain: high-res official artwork
+      const art = p.sprites.other['official-artwork'];
+      const url = shiny ? art.front_shiny : art.front_default;
+      if (url) return { url, animated: false };
     }
     return {
       url: shiny
@@ -111,6 +130,16 @@ function CardSprite({
   const bumpFallback = () =>
     setFallbacks((prev) => ({ ...prev, [view]: Math.min(2, prev[view] + 1) }));
   const sprite = pickSprite(pokemon, shiny, view, fallback);
+
+  // Some Gen 6+ Showdown sprites (e.g. Minior's 77×71) are too small to fill the card
+  // even after CSS upscale. When that happens, jump to the official-artwork tier.
+  // Gen 1-5 BW sprites are intentionally small pixel art and should stay as-is.
+  const handleSpriteLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    if (view !== '2d' || fallback !== 0) return;
+    if (pokemon.id <= MAX_BW_ID) return;
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalWidth < 100) bumpFallback();
+  };
 
   // Reset the per-view fallback ladder whenever the Pokemon changes — the new species
   // might have sprites in places the previous one didn't.
@@ -191,6 +220,7 @@ function CardSprite({
         alt={pokemon.name}
         onClick={handleSpriteClick}
         onError={bumpFallback}
+        onLoad={handleSpriteLoad}
         title="click to play cry"
       />
       {particles.map((p) => (

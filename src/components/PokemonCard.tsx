@@ -420,7 +420,7 @@ export default function PokemonCard({
       )}
 
       {dedupedEntries.length > 0 && (
-        <Section label="▶ POKéDEX ENTRIES" count={dedupedEntries.length} defaultOpen={false}>
+        <Section label="POKéDEX ENTRIES" count={dedupedEntries.length} defaultOpen={false}>
           <div className="crt-pokedex-entries">
             {dedupedEntries.map((entry, i) => (
               <div key={i} className="crt-pokedex-entry-item">
@@ -436,26 +436,26 @@ export default function PokemonCard({
         </Section>
       )}
 
-      <Section label="▶ BASE STATS">
+      <Section label="BASE STATS">
         {sortedStats.map((s) => (
           <StatBar key={s.stat.name} name={s.stat.name} value={s.base_stat} />
         ))}
       </Section>
 
-      <Section label="▶ ABILITIES">
+      <Section label="ABILITIES">
         <AbilityList abilities={pokemon.abilities} />
       </Section>
 
-      <Section label="▶ EVOLUTION">
+      <Section label="EVOLUTION">
         <EvolutionChain chain={chain.chain} active={pokemon.name} onSelect={onSelectEvolution} />
       </Section>
 
-      <Section label={`▶ MOVES (${movesLabel})`} count={moveCount}>
+      <Section label={`MOVES (${movesLabel})`} count={moveCount}>
         <MoveList moves={pokemon.moves} versionGroup={meta.primaryVersionGroup} />
       </Section>
 
       <Section
-        label="▶ COMPETITIVE BUILD"
+        label="COMPETITIVE BUILD"
         count={
           competitive.build
             ? `GEN ${competitive.build.sourceGen ?? '?'} · ${competitive.build.tier.toUpperCase()}`

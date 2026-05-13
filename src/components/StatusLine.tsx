@@ -11,6 +11,7 @@ const TEXT: Record<Props['state'], string> = {
 };
 
 export default function StatusLine({ state }: Props) {
+  if (state === 'ready') return null;
   const className =
     'crt-status' +
     (state === 'scanning' || state === 'loading-dex' ? ' scanning' : '') +

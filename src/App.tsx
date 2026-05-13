@@ -10,6 +10,7 @@ import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
 import { useTheme } from './hooks/useTheme';
 import { useViewMode } from './hooks/useViewMode';
+import { usePageSize } from './hooks/usePageSize';
 import { useVolume } from './hooks/useVolume';
 import { useExtraForms } from './hooks/useExtraForms';
 import type { FormCategory } from './types';
@@ -31,6 +32,7 @@ export default function App() {
   const list = useAllSpecies();
   const { theme, toggle: toggleTheme } = useTheme();
   const { view, toggle: toggleView } = useViewMode();
+  const { pageSize, setPageSize } = usePageSize();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
 
@@ -301,6 +303,8 @@ export default function App() {
         onSelect={handleSelect}
         view={view}
         onToggleView={toggleView}
+        pageSize={pageSize}
+        onPageSizeChange={setPageSize}
         typeIndex={typeIndex.index}
         selectedTypes={selectedTypes}
         onToggleType={(t) => {

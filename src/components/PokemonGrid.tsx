@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Gen8Species } from '../types';
 import type { PokeType } from '../typeChart';
 import type { ViewMode } from '../hooks/useViewMode';
+import type { PageSize } from '../hooks/usePageSize';
 import TypeFilter from './TypeFilter';
 import ViewModeToggle from './ViewModeToggle';
+import PageSizeSelector from './PageSizeSelector';
+import Pagination from './Pagination';
 
 interface Props {
   species: Gen8Species[];
@@ -12,6 +15,8 @@ interface Props {
   onSelect: (name: string) => void;
   view: ViewMode;
   onToggleView: () => void;
+  pageSize: PageSize;
+  onPageSizeChange: (size: PageSize) => void;
   typeIndex: Map<number, PokeType[]> | null;
   selectedTypes: Set<PokeType>;
   onToggleType: (t: PokeType) => void;
@@ -104,11 +109,14 @@ export default function PokemonGrid({
   onSelect,
   view,
   onToggleView,
+  pageSize,
+  onPageSizeChange,
   typeIndex,
   selectedTypes,
   onToggleType,
   onClearTypes,
 }: Props) {
+  const [page, setPage] = useState(0);
   // Lookup parent species's national-dex ID so alt forms whose own sprite is missing
   // fall back to their parent's sprite instead of showing a broken image.
   const parentIdByName = new Map<string, number>();
@@ -127,6 +135,18 @@ export default function PokemonGrid({
     return true;
   });
 
+  const totalPages = pageSize === Infinity ? 1 : Math.max(1, Math.ceil(visible.length / pageSize));
+  const safePage = Math.min(page, totalPages - 1);
+  const pageStart = pageSize === Infinity ? 0 : safePage * pageSize;
+  const pageEnd = pageSize === Infinity ? visible.length : pageStart + pageSize;
+  const pageItems = visible.slice(pageStart, pageEnd);
+
+  // Reset to page 1 whenever the underlying filtered set changes — keeps the user
+  // from landing on a stale out-of-range page after they narrow results.
+  useEffect(() => {
+    setPage(0);
+  }, [species, query, selectedTypes, pageSize]);
+
   if (species.length === 0) return null;
 
   return (
@@ -141,10 +161,13 @@ export default function PokemonGrid({
             <div className="crt-grid-count">
               ▶ {visible.length} / {species.length} ENTRIES
             </div>
-            <ViewModeToggle view={view} onToggle={onToggleView} />
+            <div className="crt-grid-toolbar-right">
+              <PageSizeSelector pageSize={pageSize} onChange={onPageSizeChange} />
+              <ViewModeToggle view={view} onToggle={onToggleView} />
+            </div>
           </div>
           <div className={'crt-grid' + (view === 'list' ? ' list' : '')}>
-            {visible.map((s) => (
+            {pageItems.map((s) => (
               <GridCell
                 key={s.id}
                 s={s}
@@ -154,6 +177,7 @@ export default function PokemonGrid({
               />
             ))}
           </div>
+          <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
     </div>

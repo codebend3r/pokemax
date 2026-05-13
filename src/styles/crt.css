@@ -584,9 +584,72 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 .crt-grid-toolbar .crt-grid-count {
   margin-bottom: 0;
+}
+.crt-grid-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.crt-pagesize {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dim);
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+.crt-pagesize-select {
+  background: rgba(0, 255, 159, 0.06);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+.crt-pagesize-select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+}
+.crt-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 4px 0;
+}
+.crt-pagination-btn {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 80ms, border-color 80ms;
+}
+.crt-pagination-btn:hover:not(:disabled) {
+  background: rgba(0, 255, 159, 0.13);
+  border-color: var(--primary);
+}
+.crt-pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.crt-pagination-status {
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-size: 17px;
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+  min-width: 120px;
+  text-align: center;
 }
 .crt-grid-count {
   color: var(--accent);

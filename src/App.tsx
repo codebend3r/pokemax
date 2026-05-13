@@ -4,11 +4,13 @@ import StatusLine from './components/StatusLine';
 import PokemonGrid from './components/PokemonGrid';
 import GenFilter from './components/GenFilter';
 import ThemeToggle from './components/ThemeToggle';
+import ViewModeToggle from './components/ViewModeToggle';
 import ShareButton from './components/ShareButton';
 import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
 import { useTypeIndex } from './hooks/useTypeIndex';
 import { useTheme } from './hooks/useTheme';
+import { useViewMode } from './hooks/useViewMode';
 import { useVolume } from './hooks/useVolume';
 import { useExtraForms } from './hooks/useExtraForms';
 import type { FormCategory } from './types';
@@ -29,6 +31,7 @@ const MusicPlayer = lazy(() => import('./components/MusicPlayer'));
 export default function App() {
   const list = useAllSpecies();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { view, toggle: toggleView } = useViewMode();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
 
@@ -183,6 +186,7 @@ export default function App() {
         </button>
         <div className="crt-topbar-controls">
           <ShareButton selected={selected} />
+          <ViewModeToggle view={view} onToggle={toggleView} />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </div>
@@ -297,6 +301,7 @@ export default function App() {
         query={query}
         selected={selected}
         onSelect={handleSelect}
+        view={view}
         typeIndex={typeIndex.index}
         selectedTypes={selectedTypes}
         onToggleType={(t) => {

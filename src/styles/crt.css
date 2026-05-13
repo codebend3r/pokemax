@@ -668,6 +668,38 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
   margin-top: 16px;
 }
 
+/* List view: same cells, flipped layout — single column, sprite on the left */
+.crt-grid.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.crt-grid.list .crt-grid-cell {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 6px 12px;
+  text-align: left;
+}
+.crt-grid.list .crt-grid-cell:hover {
+  transform: none;
+}
+.crt-grid.list .crt-grid-sprite {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+.crt-grid.list .crt-grid-dex {
+  min-width: 58px;
+  font-size: 16px;
+}
+.crt-grid.list .crt-grid-name {
+  text-align: left;
+  font-size: 18px;
+  flex: 1;
+}
+
 @media (max-width: 600px) {
   .crt-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 6px; }
   .crt-grid-cell { padding: 8px 4px 6px; }

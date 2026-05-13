@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Gen8Species } from '../types';
 import type { PokeType } from '../typeChart';
+import type { ViewMode } from '../hooks/useViewMode';
 import TypeFilter from './TypeFilter';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
   query: string;
   selected: string | null;
   onSelect: (name: string) => void;
+  view: ViewMode;
   typeIndex: Map<number, PokeType[]> | null;
   selectedTypes: Set<PokeType>;
   onToggleType: (t: PokeType) => void;
@@ -98,6 +100,7 @@ export default function PokemonGrid({
   query,
   selected,
   onSelect,
+  view,
   typeIndex,
   selectedTypes,
   onToggleType,
@@ -134,7 +137,7 @@ export default function PokemonGrid({
           <div className="crt-grid-count">
             ▶ {visible.length} / {species.length} ENTRIES
           </div>
-          <div className="crt-grid">
+          <div className={'crt-grid' + (view === 'list' ? ' list' : '')}>
             {visible.map((s) => (
               <GridCell
                 key={s.id}

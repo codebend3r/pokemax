@@ -3,6 +3,7 @@ import type { Gen8Species } from '../types';
 import type { PokeType } from '../typeChart';
 import type { ViewMode } from '../hooks/useViewMode';
 import TypeFilter from './TypeFilter';
+import ViewModeToggle from './ViewModeToggle';
 
 interface Props {
   species: Gen8Species[];
@@ -10,6 +11,7 @@ interface Props {
   selected: string | null;
   onSelect: (name: string) => void;
   view: ViewMode;
+  onToggleView: () => void;
   typeIndex: Map<number, PokeType[]> | null;
   selectedTypes: Set<PokeType>;
   onToggleType: (t: PokeType) => void;
@@ -101,6 +103,7 @@ export default function PokemonGrid({
   selected,
   onSelect,
   view,
+  onToggleView,
   typeIndex,
   selectedTypes,
   onToggleType,
@@ -134,8 +137,11 @@ export default function PokemonGrid({
         <div className="crt-grid-empty">▶ NO MATCHES</div>
       ) : (
         <>
-          <div className="crt-grid-count">
-            ▶ {visible.length} / {species.length} ENTRIES
+          <div className="crt-grid-toolbar">
+            <div className="crt-grid-count">
+              ▶ {visible.length} / {species.length} ENTRIES
+            </div>
+            <ViewModeToggle view={view} onToggle={onToggleView} />
           </div>
           <div className={'crt-grid' + (view === 'list' ? ' list' : '')}>
             {visible.map((s) => (

@@ -578,6 +578,16 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 
 /* Pokémon grid */
 .crt-grid-wrap { margin-top: 24px; }
+.crt-grid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.crt-grid-toolbar .crt-grid-count {
+  margin-bottom: 0;
+}
 .crt-grid-count {
   color: var(--accent);
   letter-spacing: 1px;

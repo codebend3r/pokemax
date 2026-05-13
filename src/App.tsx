@@ -4,7 +4,6 @@ import StatusLine from './components/StatusLine';
 import PokemonGrid from './components/PokemonGrid';
 import GenFilter from './components/GenFilter';
 import ThemeToggle from './components/ThemeToggle';
-import ViewModeToggle from './components/ViewModeToggle';
 import ShareButton from './components/ShareButton';
 import { useAllSpecies } from './hooks/useAllSpecies';
 import { usePokemon } from './hooks/usePokemon';
@@ -186,7 +185,6 @@ export default function App() {
         </button>
         <div className="crt-topbar-controls">
           <ShareButton selected={selected} />
-          <ViewModeToggle view={view} onToggle={toggleView} />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </div>
@@ -302,6 +300,7 @@ export default function App() {
         selected={selected}
         onSelect={handleSelect}
         view={view}
+        onToggleView={toggleView}
         typeIndex={typeIndex.index}
         selectedTypes={selectedTypes}
         onToggleType={(t) => {

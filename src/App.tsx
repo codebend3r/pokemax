@@ -166,7 +166,20 @@ export default function App() {
     <div className="crt">
       <div className="crt-topbar">
         <button type="button" className="crt-header crt-header-link" onClick={goHome} aria-label="Go to top">
-          ▶ POKEMAX
+          <svg
+            className="crt-header-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M2 12h7.5M14.5 12H22" />
+            <circle cx="12" cy="12" r="3.25" />
+          </svg>
+          POKEMAX
         </button>
         <div className="crt-topbar-controls">
           <ShareButton selected={selected} />

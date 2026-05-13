@@ -118,6 +118,13 @@ body::after {
   letter-spacing: 2px;
   margin-bottom: 4px;
 }
+.crt-header-icon {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: -0.14em;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 170, 0.55));
+}
 button.crt-header-link {
   background: transparent;
   border: 0;
@@ -1732,6 +1739,9 @@ button.crt-type:hover, .crt-type.crt-detail-trigger:hover {
 /* Header & section labels in light mode keep their punch with a subtle paper-shadow */
 :root[data-theme="light"] .crt-card-dex {
   text-shadow: 1px 1px 0 rgba(58, 31, 6, 0.15);
+}
+:root[data-theme="light"] .crt-header-icon {
+  filter: none;
 }
 :root[data-theme="light"] .crt-card-name,
 :root[data-theme="light"] .crt-section-label,

@@ -28,7 +28,7 @@ export default function SearchBar({ value, onValueChange, onSearch, disabled }: 
           autoFocus
           onChange={(e) => onValueChange(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="filter by name (Esc to clear)..."
+          placeholder="Search for any Pokémon (ESC to clear)"
         />
         <span className="crt-cursor">&nbsp;</span>
       </div>

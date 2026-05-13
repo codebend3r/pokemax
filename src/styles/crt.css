@@ -11,6 +11,8 @@
 
 * { box-sizing: border-box; }
 
+html { zoom: 1.15; }
+
 html, body, #root {
   margin: 0;
   padding: 0;

@@ -19,7 +19,7 @@ html, body, #root {
   min-height: 100vh;
   background: var(--bg);
   color: var(--primary);
-  font-family: 'VT323', 'Courier New', monospace;
+  font-family: 'Pixelify Sans', 'VT323', 'Courier New', monospace;
   font-size: 22px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;

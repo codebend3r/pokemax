@@ -1,4 +1,4 @@
-import type { ChainLink, EvolutionDetail } from '../types';
+import type { ChainLink, EvolutionDetail } from '@/types';
 
 interface Props {
   chain: ChainLink;

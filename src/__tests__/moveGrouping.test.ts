@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { groupMoves } from '../moves';
-import type { PokemonResponse } from '../types';
+import { groupMoves } from '@/moves';
+import type { PokemonResponse } from '@/types';
 
 const moves: PokemonResponse['moves'] = [
   {

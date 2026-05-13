@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { TYPES, type PokeType } from '../typeChart';
+import { TYPES, type PokeType } from '@/typeChart';
 
 const BASE = 'https://pokeapi.co/api/v2';
 

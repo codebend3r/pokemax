@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { FormCategory, Gen8Species } from '../types';
+import type { FormCategory, Gen8Species } from '@/types';
 
 const URL = 'https://pokeapi.co/api/v2/pokemon?limit=20000';
 

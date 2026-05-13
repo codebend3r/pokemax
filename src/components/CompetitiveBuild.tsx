@@ -1,7 +1,7 @@
-import type { ResolvedBuild, SmogonSet } from '../competitive';
-import { formatEVs } from '../competitive';
-import type { PokemonResponse } from '../types';
-import Detail from './Detail';
+import type { ResolvedBuild, SmogonSet } from '@/competitive';
+import { formatEVs } from '@/competitive';
+import type { PokemonResponse } from '@/types';
+import Detail from '@/components/Detail';
 
 interface Props {
   build: ResolvedBuild | null;

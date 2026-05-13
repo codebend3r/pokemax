@@ -1,4 +1,4 @@
-import { PAGE_SIZE_OPTIONS, type PageSize } from '../hooks/usePageSize';
+import { PAGE_SIZE_OPTIONS, type PageSize } from '@/hooks/usePageSize';
 
 interface Props {
   pageSize: PageSize;

@@ -1,19 +1,19 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import SearchBar from './components/SearchBar';
-import StatusLine from './components/StatusLine';
-import PokemonGrid from './components/PokemonGrid';
-import GenFilter from './components/GenFilter';
-import ThemeToggle from './components/ThemeToggle';
-import ShareButton from './components/ShareButton';
-import { useAllSpecies } from './hooks/useAllSpecies';
-import { usePokemon } from './hooks/usePokemon';
-import { useTypeIndex } from './hooks/useTypeIndex';
-import { useTheme } from './hooks/useTheme';
-import { useViewMode } from './hooks/useViewMode';
-import { usePageSize } from './hooks/usePageSize';
-import { useVolume } from './hooks/useVolume';
-import { useExtraForms } from './hooks/useExtraForms';
-import type { FormCategory } from './types';
+import SearchBar from '@/components/SearchBar';
+import StatusLine from '@/components/StatusLine';
+import PokemonGrid from '@/components/PokemonGrid';
+import GenFilter from '@/components/GenFilter';
+import ThemeToggle from '@/components/ThemeToggle';
+import ShareButton from '@/components/ShareButton';
+import { useAllSpecies } from '@/hooks/useAllSpecies';
+import { usePokemon } from '@/hooks/usePokemon';
+import { useTypeIndex } from '@/hooks/useTypeIndex';
+import { useTheme } from '@/hooks/useTheme';
+import { useViewMode } from '@/hooks/useViewMode';
+import { usePageSize } from '@/hooks/usePageSize';
+import { useVolume } from '@/hooks/useVolume';
+import { useExtraForms } from '@/hooks/useExtraForms';
+import type { FormCategory } from '@/types';
 
 const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
   { key: 'mega', label: 'MEGA / PRIMAL' },
@@ -21,12 +21,12 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
   { key: 'regional', label: 'REGIONAL' },
   { key: 'other', label: 'BATTLE FORMS' },
 ];
-import type { PokeType } from './typeChart';
-import { CRY_VOLUME_SCALE } from './textUtil';
+import type { PokeType } from '@/typeChart';
+import { CRY_VOLUME_SCALE } from '@/textUtil';
 
 // Lazy-loaded — only fetched when first needed
-const PokemonCard = lazy(() => import('./components/PokemonCard'));
-const MusicPlayer = lazy(() => import('./components/MusicPlayer'));
+const PokemonCard = lazy(() => import('@/components/PokemonCard'));
+const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
 
 export default function App() {
   const list = useAllSpecies();

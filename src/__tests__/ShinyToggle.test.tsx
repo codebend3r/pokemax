@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ShinyToggle from '../components/ShinyToggle';
+import ShinyToggle from '@/components/ShinyToggle';
 
 describe('ShinyToggle', () => {
   it('marks NORMAL pressed when value is false', () => {

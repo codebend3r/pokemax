@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import PokemonCard from '../components/PokemonCard';
-import type { ChainLink, PokemonResponse, SpeciesResponse, EvolutionChainResponse } from '../types';
+import PokemonCard from '@/components/PokemonCard';
+import type { ChainLink, PokemonResponse, SpeciesResponse, EvolutionChainResponse } from '@/types';
 
 const pokemon: PokemonResponse = {
   id: 887,

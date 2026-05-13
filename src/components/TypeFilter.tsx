@@ -1,4 +1,4 @@
-import { TYPES, TYPE_COLORS, type PokeType } from '../typeChart';
+import { TYPES, TYPE_COLORS, type PokeType } from '@/typeChart';
 
 interface Props {
   selected: Set<PokeType>;

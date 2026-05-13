@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { findBestBuild, type ResolvedBuild } from '../competitive';
+import { findBestBuild, type ResolvedBuild } from '@/competitive';
 
 export interface CompetitiveState {
   build: ResolvedBuild | null;

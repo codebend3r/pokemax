@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { fetchGenerationList } from '../api';
-import { GENERATIONS } from '../generations';
-import type { Gen8Species } from '../types';
+import { fetchGenerationList } from '@/api';
+import { GENERATIONS } from '@/generations';
+import type { Gen8Species } from '@/types';
 
 let cache: Gen8Species[] | null = null;
 let inflight: Promise<Gen8Species[]> | null = null;

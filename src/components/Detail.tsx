@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from 'react';
-import { useApiDetail } from '../hooks/useApiDetail';
-import { cleanFlavorText } from '../textUtil';
+import { useApiDetail } from '@/hooks/useApiDetail';
+import { cleanFlavorText } from '@/textUtil';
 import {
   defensiveMatchups,
   groupMatchups,
   TYPES,
   TYPE_COLORS,
   type PokeType,
-} from '../typeChart';
+} from '@/typeChart';
 
 export type DetailKind = 'move' | 'ability' | 'item' | 'nature' | 'type';
 

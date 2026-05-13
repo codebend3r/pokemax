@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchPokemon } from '../api';
-import type { Gen8Species, PokemonResponse } from '../types';
-import { TYPE_COLORS, TYPES, type PokeType } from '../typeChart';
+import { fetchPokemon } from '@/api';
+import type { Gen8Species, PokemonResponse } from '@/types';
+import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 
 interface Props {
   base: PokemonResponse;

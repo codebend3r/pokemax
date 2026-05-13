@@ -1,4 +1,4 @@
-import type { GroupedMove, PokemonResponse } from './types';
+import type { GroupedMove, PokemonResponse } from '@/types';
 
 export function groupMoves(
   moves: PokemonResponse['moves'],

@@ -4,7 +4,7 @@ import type {
   Gen8Species,
   PokemonResponse,
   SpeciesResponse,
-} from './types';
+} from '@/types';
 
 const BASE = 'https://pokeapi.co/api/v2';
 

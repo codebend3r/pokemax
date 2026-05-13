@@ -3,13 +3,13 @@ import {
   fetchEvolutionChain,
   fetchPokemon,
   fetchSpecies,
-} from '../api';
+} from '@/api';
 import type {
   EvolutionChainResponse,
   Gen8Species,
   PokemonResponse,
   SpeciesResponse,
-} from '../types';
+} from '@/types';
 
 export type PokemonError =
   | { kind: 'not-in-gen-8' }

@@ -1,5 +1,5 @@
-import type { PokemonResponse } from '../types';
-import Detail from './Detail';
+import type { PokemonResponse } from '@/types';
+import Detail from '@/components/Detail';
 
 interface Props {
   abilities: PokemonResponse['abilities'];

@@ -1,6 +1,6 @@
-import { groupMoves } from '../moves';
-import type { PokemonResponse } from '../types';
-import Detail from './Detail';
+import { groupMoves } from '@/moves';
+import type { PokemonResponse } from '@/types';
+import Detail from '@/components/Detail';
 
 const ORDER: Array<{ key: string; label: string; openByDefault?: boolean }> = [
   { key: 'level-up', label: 'LEVEL-UP', openByDefault: true },

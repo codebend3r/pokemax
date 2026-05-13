@@ -1,4 +1,4 @@
-import { GENERATIONS } from '../generations';
+import { GENERATIONS } from '@/generations';
 
 interface Props {
   selected: Set<number>;

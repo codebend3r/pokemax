@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import type { Gen8Species } from '../types';
-import type { PokeType } from '../typeChart';
-import type { ViewMode } from '../hooks/useViewMode';
-import type { PageSize } from '../hooks/usePageSize';
-import TypeFilter from './TypeFilter';
-import ViewModeToggle from './ViewModeToggle';
-import PageSizeSelector from './PageSizeSelector';
-import Pagination from './Pagination';
+import type { Gen8Species } from '@/types';
+import type { PokeType } from '@/typeChart';
+import type { ViewMode } from '@/hooks/useViewMode';
+import type { PageSize } from '@/hooks/usePageSize';
+import TypeFilter from '@/components/TypeFilter';
+import ViewModeToggle from '@/components/ViewModeToggle';
+import PageSizeSelector from '@/components/PageSizeSelector';
+import Pagination from '@/components/Pagination';
 
 interface Props {
   species: Gen8Species[];

@@ -4,7 +4,7 @@ import {
   fetchPokemon,
   fetchSpecies,
   fetchEvolutionChain,
-} from '../api';
+} from '@/api';
 
 const fetchMock = vi.fn();
 

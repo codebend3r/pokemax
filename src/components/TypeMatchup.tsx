@@ -4,7 +4,7 @@ import {
   TYPES,
   TYPE_COLORS,
   type PokeType,
-} from '../typeChart';
+} from '@/typeChart';
 
 interface Props {
   types: string[];

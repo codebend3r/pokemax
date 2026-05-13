@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { player } from '../music';
-import { useVolume } from '../hooks/useVolume';
+import { player } from '@/music';
+import { useVolume } from '@/hooks/useVolume';
 
 export default function MusicPlayer() {
   const [, force] = useState(0);

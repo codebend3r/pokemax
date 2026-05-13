@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import EvolutionChain from '../components/EvolutionChain';
-import type { ChainLink } from '../types';
+import EvolutionChain from '@/components/EvolutionChain';
+import type { ChainLink } from '@/types';
 
 const linear: ChainLink = {
   species: { name: 'scorbunny' },

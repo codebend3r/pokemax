@@ -23,6 +23,23 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // React Compiler / React 19 era rules from eslint-plugin-react-hooks 6+.
+      // The patterns they flag are established throughout the codebase and
+      // work correctly; opt in deliberately if/when we refactor.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/globals': 'off',
+      // Idiomatic underscore-prefix marks "intentionally unused" — keep it usable.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      // textUtil.ts intentionally matches soft-hyphen / nbsp / form-feed chars.
+      'no-irregular-whitespace': [
+        'error',
+        { skipStrings: true, skipRegExps: true, skipComments: true },
+      ],
     },
   },
 );

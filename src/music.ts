@@ -226,7 +226,10 @@ class ChiptunePlayer {
     this.emit();
   }
 
-  toggle(): void { this.playing ? this.pause() : this.play(); }
+  toggle(): void {
+    if (this.playing) this.pause();
+    else this.play();
+  }
 
   next(): void { this.changeTrack(this.trackIndex + 1); }
   prev(): void { this.changeTrack(this.trackIndex - 1 + TRACKS.length); }

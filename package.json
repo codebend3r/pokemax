@@ -13,6 +13,7 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
+    "verify": "npm run format:check && npm run lint && npm test && npm run build",
     "prepare": "husky"
   },
   "dependencies": {

@@ -2386,3 +2386,15 @@ button.crt-type:hover,
 :root[data-theme='light'] .crt-header {
   text-shadow: none;
 }
+
+/* Footer — tiny version stamp at the bottom of the page */
+.crt-footer {
+  margin-top: 28px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  opacity: 0.55;
+}

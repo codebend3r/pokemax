@@ -350,6 +350,7 @@ export default function App() {
         }}
         onClearTypes={() => setSelectedTypes(new Set())}
       />
+      <footer className="crt-footer">v{__APP_VERSION__}</footer>
     </div>
   );
 }

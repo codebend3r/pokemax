@@ -12,7 +12,10 @@ interface Props {
 }
 
 function smogonToApi(name: string): string {
-  return name.toLowerCase().replace(/[\s.]+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return name
+    .toLowerCase()
+    .replace(/[\s.]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
 }
 
 function DetailValues({
@@ -64,7 +67,11 @@ function defaultAbility(p: PokemonResponse | undefined): string | undefined {
 
 export default function CompetitiveBuild({ build, loading, error, pokemon }: Props) {
   if (loading) {
-    return <div className="crt-build-empty">▶ FETCHING COMPETITIVE DATA<span className="crt-cursor">&nbsp;</span></div>;
+    return (
+      <div className="crt-build-empty">
+        ▶ FETCHING COMPETITIVE DATA<span className="crt-cursor">&nbsp;</span>
+      </div>
+    );
   }
   if (error) {
     return <div className="crt-build-empty">ERR: {error}</div>;
@@ -93,13 +100,19 @@ export default function CompetitiveBuild({ build, loading, error, pokemon }: Pro
       </div>
 
       <span className="crt-build-label">ABILITY</span>
-      <span className="crt-build-value"><DetailValues kind="ability" value={ability} /></span>
+      <span className="crt-build-value">
+        <DetailValues kind="ability" value={ability} />
+      </span>
 
       <span className="crt-build-label">ITEM</span>
-      <span className="crt-build-value"><DetailValues kind="item" value={set.item} /></span>
+      <span className="crt-build-value">
+        <DetailValues kind="item" value={set.item} />
+      </span>
 
       <span className="crt-build-label">NATURE</span>
-      <span className="crt-build-value"><DetailValues kind="nature" value={set.nature} /></span>
+      <span className="crt-build-value">
+        <DetailValues kind="nature" value={set.nature} />
+      </span>
 
       <span className="crt-build-label">EVS</span>
       <span className="crt-build-value">{formatEVs(set.evs)}</span>

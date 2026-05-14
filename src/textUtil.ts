@@ -14,16 +14,18 @@
 export const CRY_VOLUME_SCALE = 0.5;
 
 export function cleanFlavorText(raw: string): string {
-  return raw
-    // Soft hyphens were the wrap-syllable marker — a word like "becomes" appears
-    // in the games as "be­\ncomes". Delete the hyphen AND any whitespace that
-    // follows it so the word fragments rejoin into "becomes" instead of "be comes".
-    .replace(/­\s*/g, '')
-    // Regular hyphens left at end-of-line are compound-word breaks like
-    // 'whitish-\nblue'. Strip the trailing newline so 'whitish-blue' stays
-    // glued instead of becoming 'whitish- blue'.
-    .replace(/-[\n\f]/g, '-')
-    .replace(/[\n\r\t\f ]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    raw
+      // Soft hyphens were the wrap-syllable marker — a word like "becomes" appears
+      // in the games as "be­\ncomes". Delete the hyphen AND any whitespace that
+      // follows it so the word fragments rejoin into "becomes" instead of "be comes".
+      .replace(/­\s*/g, '')
+      // Regular hyphens left at end-of-line are compound-word breaks like
+      // 'whitish-\nblue'. Strip the trailing newline so 'whitish-blue' stays
+      // glued instead of becoming 'whitish- blue'.
+      .replace(/-[\n\f]/g, '-')
+      .replace(/[\n\r\t\f ]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }

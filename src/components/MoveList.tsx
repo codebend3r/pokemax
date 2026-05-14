@@ -39,7 +39,9 @@ export default function MoveList({ moves, versionGroup }: Props) {
             <ul>
               {list.map((m) => {
                 const prefix =
-                  key === 'level-up' && m.level > 0 ? `Lv ${String(m.level).padStart(2, '0')} · ` : '· ';
+                  key === 'level-up' && m.level > 0
+                    ? `Lv ${String(m.level).padStart(2, '0')} · `
+                    : '· ';
                 return (
                   <li key={m.name}>
                     {prefix}

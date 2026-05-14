@@ -18,7 +18,10 @@ export default function StatusLine({ state }: Props) {
     (state === 'err-not-found' || state === 'err-api' ? ' err' : '');
   return (
     <div className={className}>
-      {TEXT[state]} {(state === 'scanning' || state === 'loading-dex') && <span className="crt-cursor">&nbsp;</span>}
+      {TEXT[state]}{' '}
+      {(state === 'scanning' || state === 'loading-dex') && (
+        <span className="crt-cursor">&nbsp;</span>
+      )}
     </div>
   );
 }

@@ -10,13 +10,35 @@ const linear: ChainLink = {
     {
       species: { name: 'raboot' },
       evolution_details: [
-        { min_level: 16, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+        {
+          min_level: 16,
+          trigger: { name: 'level-up' },
+          item: null,
+          held_item: null,
+          known_move: null,
+          min_happiness: null,
+          time_of_day: '',
+          location: null,
+          needs_overworld_rain: false,
+          gender: null,
+        },
       ],
       evolves_to: [
         {
           species: { name: 'cinderace' },
           evolution_details: [
-            { min_level: 35, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+            {
+              min_level: 35,
+              trigger: { name: 'level-up' },
+              item: null,
+              held_item: null,
+              known_move: null,
+              min_happiness: null,
+              time_of_day: '',
+              location: null,
+              needs_overworld_rain: false,
+              gender: null,
+            },
           ],
           evolves_to: [],
         },
@@ -32,14 +54,36 @@ const branching: ChainLink = {
     {
       species: { name: 'toxtricity-amped' },
       evolution_details: [
-        { min_level: 30, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+        {
+          min_level: 30,
+          trigger: { name: 'level-up' },
+          item: null,
+          held_item: null,
+          known_move: null,
+          min_happiness: null,
+          time_of_day: '',
+          location: null,
+          needs_overworld_rain: false,
+          gender: null,
+        },
       ],
       evolves_to: [],
     },
     {
       species: { name: 'toxtricity-low-key' },
       evolution_details: [
-        { min_level: 30, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+        {
+          min_level: 30,
+          trigger: { name: 'level-up' },
+          item: null,
+          held_item: null,
+          known_move: null,
+          min_happiness: null,
+          time_of_day: '',
+          location: null,
+          needs_overworld_rain: false,
+          gender: null,
+        },
       ],
       evolves_to: [],
     },

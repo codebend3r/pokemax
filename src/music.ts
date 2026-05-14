@@ -5,12 +5,15 @@ export interface Track {
   name: string;
   bpm: number;
   melody: number[]; // MIDI note numbers, -1 = rest
-  bass?: number[];  // bass line played in parallel (lower octave)
+  bass?: number[]; // bass line played in parallel (lower octave)
   lead: OscillatorType;
   /** Number of full loops before auto-advancing to the next track. Defaults to 3. */
   loops?: number;
 }
 
+// Each track is hand-tuned: rows of 16 represent musical bars, so prettier's
+// "reflow to fit printWidth" would scramble the rhythm visually.
+// prettier-ignore
 const TRACKS: Track[] = [
   {
     name: 'CRT DRIFT',
@@ -148,23 +151,40 @@ class ChiptunePlayer {
   private trackIndex = 0;
   private listeners = new Set<Listener>();
 
-  get isPlaying(): boolean { return this.playing; }
-  get currentTrack(): Track { return TRACKS[this.trackIndex]; }
-  get tracks(): readonly Track[] { return TRACKS; }
-  get currentIndex(): number { return this.trackIndex; }
+  get isPlaying(): boolean {
+    return this.playing;
+  }
+  get currentTrack(): Track {
+    return TRACKS[this.trackIndex];
+  }
+  get tracks(): readonly Track[] {
+    return TRACKS;
+  }
+  get currentIndex(): number {
+    return this.trackIndex;
+  }
 
   subscribe(fn: Listener): () => void {
     this.listeners.add(fn);
-    return () => { this.listeners.delete(fn); };
+    return () => {
+      this.listeners.delete(fn);
+    };
   }
 
-  private emit(): void { this.listeners.forEach((f) => f()); }
+  private emit(): void {
+    this.listeners.forEach((f) => f());
+  }
 
   private ensureContext(): boolean {
     if (this.ctx) return true;
-    const Ctor = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext })
-      .AudioContext
-      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const Ctor =
+      (
+        window as unknown as {
+          AudioContext?: typeof AudioContext;
+          webkitAudioContext?: typeof AudioContext;
+        }
+      ).AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return false;
     const ctx = new Ctor();
     const master = ctx.createGain();
@@ -176,10 +196,14 @@ class ChiptunePlayer {
   }
 
   private volume = 0.12;
-  getVolume(): number { return this.volume; }
+  getVolume(): number {
+    return this.volume;
+  }
 
   private shuffle = false;
-  isShuffling(): boolean { return this.shuffle; }
+  isShuffling(): boolean {
+    return this.shuffle;
+  }
   toggleShuffle(): void {
     this.shuffle = !this.shuffle;
     this.emit();
@@ -198,9 +222,15 @@ class ChiptunePlayer {
       oldGain.gain.cancelScheduledValues(now);
       oldGain.gain.setValueAtTime(oldGain.gain.value, now);
       oldGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     window.setTimeout(() => {
-      try { oldGain.disconnect(); } catch { /* already disconnected */ }
+      try {
+        oldGain.disconnect();
+      } catch {
+        /* already disconnected */
+      }
     }, 120);
     const fresh = this.ctx.createGain();
     fresh.gain.value = this.volume;
@@ -221,7 +251,10 @@ class ChiptunePlayer {
   pause(): void {
     if (!this.playing) return;
     this.playing = false;
-    if (this.timer != null) { window.clearTimeout(this.timer); this.timer = null; }
+    if (this.timer != null) {
+      window.clearTimeout(this.timer);
+      this.timer = null;
+    }
     this.cutScheduled();
     this.emit();
   }
@@ -231,8 +264,12 @@ class ChiptunePlayer {
     else this.play();
   }
 
-  next(): void { this.changeTrack(this.trackIndex + 1); }
-  prev(): void { this.changeTrack(this.trackIndex - 1 + TRACKS.length); }
+  next(): void {
+    this.changeTrack(this.trackIndex + 1);
+  }
+  prev(): void {
+    this.changeTrack(this.trackIndex - 1 + TRACKS.length);
+  }
 
   private changeTrack(rawIndex: number): void {
     this.trackIndex = rawIndex % TRACKS.length;
@@ -302,7 +339,13 @@ class ChiptunePlayer {
     }
   }
 
-  private scheduleNote(time: number, freq: number, type: OscillatorType, dur: number, peak: number): void {
+  private scheduleNote(
+    time: number,
+    freq: number,
+    type: OscillatorType,
+    dur: number,
+    peak: number,
+  ): void {
     if (!this.ctx || !this.masterGain) return;
     const osc = this.ctx.createOscillator();
     const env = this.ctx.createGain();

@@ -46,6 +46,9 @@ const layout = await page.evaluate(() => {
 });
 console.log(JSON.stringify(layout, null, 2));
 
-await page.screenshot({ path: resolve(out, 'minior-layout.png'), clip: { x: 0, y: 0, width: 1280, height: 900 } });
+await page.screenshot({
+  path: resolve(out, 'minior-layout.png'),
+  clip: { x: 0, y: 0, width: 1280, height: 900 },
+});
 await ctx.close();
 await browser.close();

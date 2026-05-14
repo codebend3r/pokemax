@@ -59,12 +59,15 @@ export default function MusicPlayer() {
           ⇄
         </button>
         <span className="crt-music-track">
-          ♪ {track.name}
-          {' '}
-          <span className="crt-music-counter">[{player.currentIndex + 1}/{player.tracks.length}]</span>
+          ♪ {track.name}{' '}
+          <span className="crt-music-counter">
+            [{player.currentIndex + 1}/{player.tracks.length}]
+          </span>
         </span>
         <label className="crt-volume" title="Music volume">
-          <span className="crt-volume-icon" aria-hidden="true">♪</span>
+          <span className="crt-volume-icon" aria-hidden="true">
+            ♪
+          </span>
           <input
             type="range"
             min={0}

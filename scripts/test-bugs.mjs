@@ -23,10 +23,16 @@ const compSection = page.locator('.crt-section').filter({ hasText: 'COMPETITIVE 
 const compText = await compSection.textContent();
 console.log('comp section text:', compText?.slice(0, 600));
 
-const buildBlock = await page.locator('.crt-build').textContent().catch(() => null);
+const buildBlock = await page
+  .locator('.crt-build')
+  .textContent()
+  .catch(() => null);
 console.log('.crt-build text:', buildBlock?.slice(0, 400));
 
-const buildEmpty = await page.locator('.crt-build-empty').textContent().catch(() => null);
+const buildEmpty = await page
+  .locator('.crt-build-empty')
+  .textContent()
+  .catch(() => null);
 console.log('.crt-build-empty text:', buildEmpty);
 
 const buildLabels = await page.locator('.crt-build-label').allTextContents();
@@ -51,8 +57,12 @@ page.on('response', async (r) => {
 });
 
 await page.locator('button.crt-extra-chip:has-text("MEGA / PRIMAL")').click();
-console.log('chip aria-pressed after click:',
-  await page.locator('button.crt-extra-chip:has-text("MEGA / PRIMAL")').getAttribute('aria-pressed'));
+console.log(
+  'chip aria-pressed after click:',
+  await page
+    .locator('button.crt-extra-chip:has-text("MEGA / PRIMAL")')
+    .getAttribute('aria-pressed'),
+);
 
 await page.waitForTimeout(8000);
 
@@ -61,12 +71,14 @@ console.log('forms fetch response:', formsResponse);
 const afterCount = await page.locator('.crt-grid-cell').count();
 console.log('cells after mega:', afterCount);
 
-const megaSampleNames = await page.locator('.crt-grid-cell .crt-grid-name').evaluateAll((els) =>
-  els.slice(0, 12).map((el) => el.textContent),
-);
+const megaSampleNames = await page
+  .locator('.crt-grid-cell .crt-grid-name')
+  .evaluateAll((els) => els.slice(0, 12).map((el) => el.textContent));
 console.log('first 12 names:', megaSampleNames);
 
-const megaChipText = await page.locator('button.crt-extra-chip:has-text("MEGA / PRIMAL")').textContent();
+const megaChipText = await page
+  .locator('button.crt-extra-chip:has-text("MEGA / PRIMAL")')
+  .textContent();
 console.log('MEGA chip text:', megaChipText);
 
 await ctx.close();

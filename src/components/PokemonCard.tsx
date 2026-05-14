@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import type { EvolutionChainResponse, Gen8Species, PokemonResponse, SpeciesResponse } from '@/types';
+import type {
+  EvolutionChainResponse,
+  Gen8Species,
+  PokemonResponse,
+  SpeciesResponse,
+} from '@/types';
 import { groupMoves } from '@/moves';
 import { getGen } from '@/generations';
 import { fetchPokemon } from '@/api';
@@ -34,8 +39,10 @@ interface Props {
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
-const BW_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
-const SHOWDOWN_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
+const BW_BASE =
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+const SHOWDOWN_BASE =
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
 const MAX_BW_ID = 649;
 
 interface SpritePick {
@@ -44,7 +51,12 @@ interface SpritePick {
   animated: boolean;
 }
 
-function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallbackLevel: number): SpritePick {
+function pickSprite(
+  p: PokemonResponse,
+  shiny: boolean,
+  view: SpriteView,
+  fallbackLevel: number,
+): SpritePick {
   if (view === '2d') {
     // 2D = pixel-art animated where the source is reasonably sized.
     // Gen 1-5: Black/White animated GIF (true flat pixel animation).
@@ -73,8 +85,8 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
     }
     return {
       url: shiny
-        ? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
-        : p.sprites.front_default ?? '',
+        ? (p.sprites.front_shiny ?? p.sprites.front_default ?? '')
+        : (p.sprites.front_default ?? ''),
       animated: false,
     };
   }
@@ -94,8 +106,8 @@ function pickSprite(p: PokemonResponse, shiny: boolean, view: SpriteView, fallba
   const art = p.sprites.other['official-artwork'];
   return {
     url: shiny
-      ? art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? ''
-      : art.front_default ?? p.sprites.front_default ?? '',
+      ? (art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? '')
+      : (art.front_default ?? p.sprites.front_default ?? ''),
     animated: false,
   };
 }
@@ -196,7 +208,7 @@ function CardSprite({
       id: Date.now() + i,
       type: types[i] ?? 'heart',
       x: (Math.random() - 0.5) * 120, // -60 to +60 px
-      delay: Math.random() * 180,     // staggered launch
+      delay: Math.random() * 180, // staggered launch
       rotate: (Math.random() - 0.5) * 120,
     }));
     setParticles((p) => [...p, ...newParticles]);
@@ -207,7 +219,8 @@ function CardSprite({
   };
 
   const className =
-    'crt-sprite-' + view +
+    'crt-sprite-' +
+    view +
     (sprite.animated ? ' is-anim' : ' is-static') +
     (reacting ? ' reacting' : '');
 
@@ -302,9 +315,15 @@ export default function PokemonCard({
     }
     let active = true;
     fetchPokemon(activeVariety)
-      .then((p) => { if (active) setVarietyData(p); })
-      .catch(() => { /* leave defaults */ });
-    return () => { active = false; };
+      .then((p) => {
+        if (active) setVarietyData(p);
+      })
+      .catch(() => {
+        /* leave defaults */
+      });
+    return () => {
+      active = false;
+    };
   }, [activeVariety, defaultPokemon.name]);
 
   const pokemon = varietyData ?? defaultPokemon;
@@ -371,7 +390,8 @@ export default function PokemonCard({
           <div className="crt-card-dex">#{String(pokemon.id).padStart(3, '0')}</div>
           <div className="crt-card-name">{pokemon.name.toUpperCase()}</div>
           <div className="crt-card-gen">
-            GEN {meta.roman} · {meta.region.toUpperCase()}{genus ? ` · ${genus.toUpperCase()}` : ''}
+            GEN {meta.roman} · {meta.region.toUpperCase()}
+            {genus ? ` · ${genus.toUpperCase()}` : ''}
           </div>
           <div className="crt-types">
             {pokemon.types.map((t) => {
@@ -390,8 +410,12 @@ export default function PokemonCard({
             })}
           </div>
           <div className="crt-card-vitals">
-            <span><span className="crt-card-vitals-label">HT</span> {heightStr}</span>
-            <span><span className="crt-card-vitals-label">WT</span> {weightStr}</span>
+            <span>
+              <span className="crt-card-vitals-label">HT</span> {heightStr}
+            </span>
+            <span>
+              <span className="crt-card-vitals-label">WT</span> {weightStr}
+            </span>
           </div>
           <button
             type="button"
@@ -412,11 +436,7 @@ export default function PokemonCard({
       />
 
       {compareOpen && speciesPool && speciesPool.length > 0 && (
-        <ComparePanel
-          base={pokemon}
-          species={speciesPool}
-          onClose={() => setCompareOpen(false)}
-        />
+        <ComparePanel base={pokemon} species={speciesPool} onClose={() => setCompareOpen(false)} />
       )}
 
       {dedupedEntries.length > 0 && (
@@ -425,9 +445,7 @@ export default function PokemonCard({
             {dedupedEntries.map((entry, i) => (
               <div key={i} className="crt-pokedex-entry-item">
                 <div className="crt-pokedex-versions">
-                  {entry.versions
-                    .map((v) => v.toUpperCase().replace(/-/g, '/'))
-                    .join(' · ')}
+                  {entry.versions.map((v) => v.toUpperCase().replace(/-/g, '/')).join(' · ')}
                 </div>
                 <p>{entry.text}</p>
               </div>

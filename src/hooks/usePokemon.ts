@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  fetchEvolutionChain,
-  fetchPokemon,
-  fetchSpecies,
-} from '@/api';
+import { fetchEvolutionChain, fetchPokemon, fetchSpecies } from '@/api';
 import type {
   EvolutionChainResponse,
   Gen8Species,
@@ -11,9 +7,7 @@ import type {
   SpeciesResponse,
 } from '@/types';
 
-export type PokemonError =
-  | { kind: 'not-in-gen-8' }
-  | { kind: 'transmission' };
+export type PokemonError = { kind: 'not-in-gen-8' } | { kind: 'transmission' };
 
 export interface PokemonBundle {
   pokemon: PokemonResponse;

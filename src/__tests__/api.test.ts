@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  fetchGen8List,
-  fetchPokemon,
-  fetchSpecies,
-  fetchEvolutionChain,
-} from '@/api';
+import { fetchGen8List, fetchPokemon, fetchSpecies, fetchEvolutionChain } from '@/api';
 
 const fetchMock = vi.fn();
 
@@ -68,7 +63,9 @@ describe('fetchSpecies', () => {
 
 describe('fetchEvolutionChain', () => {
   it('fetches the given URL', async () => {
-    fetchMock.mockReturnValue(ok({ chain: { species: { name: 'scorbunny' }, evolution_details: [], evolves_to: [] } }));
+    fetchMock.mockReturnValue(
+      ok({ chain: { species: { name: 'scorbunny' }, evolution_details: [], evolves_to: [] } }),
+    );
     const result = await fetchEvolutionChain('https://pokeapi.co/api/v2/evolution-chain/123');
     expect(result.chain.species.name).toBe('scorbunny');
     expect(fetchMock).toHaveBeenCalledWith('https://pokeapi.co/api/v2/evolution-chain/123');

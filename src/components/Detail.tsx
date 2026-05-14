@@ -1,13 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { useApiDetail } from '@/hooks/useApiDetail';
 import { cleanFlavorText } from '@/textUtil';
-import {
-  defensiveMatchups,
-  groupMatchups,
-  TYPES,
-  TYPE_COLORS,
-  type PokeType,
-} from '@/typeChart';
+import { defensiveMatchups, groupMatchups, TYPES, TYPE_COLORS, type PokeType } from '@/typeChart';
 
 export type DetailKind = 'move' | 'ability' | 'item' | 'nature' | 'type';
 
@@ -35,9 +29,7 @@ function isPokeType(t: string): t is PokeType {
 }
 
 function pickEffect(
-  entries:
-    | { short_effect?: string; effect?: string; language: { name: string } }[]
-    | undefined,
+  entries: { short_effect?: string; effect?: string; language: { name: string } }[] | undefined,
 ): string {
   if (!entries) return '';
   const en = entries.find((e) => e.language.name === 'en');
@@ -58,7 +50,11 @@ interface AbilityResponse {
 }
 interface ItemResponse {
   effect_entries: { short_effect: string; effect: string; language: { name: string } }[];
-  flavor_text_entries: { text: string; language: { name: string }; version_group?: { name: string } }[];
+  flavor_text_entries: {
+    text: string;
+    language: { name: string };
+    version_group?: { name: string };
+  }[];
   category: { name: string };
 }
 
@@ -101,7 +97,8 @@ function MoveBody({ data }: { data: MoveResponse }) {
 function NatureBody({ data }: { data: NatureResponse }) {
   const inc = data.increased_stat?.name;
   const dec = data.decreased_stat?.name;
-  if (!inc && !dec) return <div className="crt-detail-effect">Neutral nature — no stat changes.</div>;
+  if (!inc && !dec)
+    return <div className="crt-detail-effect">Neutral nature — no stat changes.</div>;
   return (
     <div className="crt-detail-effect">
       <span style={{ color: 'var(--accent)' }}>+10% {pretty(inc ?? '')}</span>
@@ -190,13 +187,7 @@ function TypeBody({ name }: { name: string }) {
   );
 }
 
-export default function Detail({
-  kind,
-  name,
-  label,
-  triggerStyle,
-  triggerClassName,
-}: Props) {
+export default function Detail({ kind, name, label, triggerStyle, triggerClassName }: Props) {
   const [open, setOpen] = useState(false);
 
   const move = useApiDetail<MoveResponse>(

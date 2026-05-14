@@ -14,7 +14,9 @@ export default function ShareButton({ selected }: Props) {
     const text = url.toString();
 
     // Native share on supported devices, clipboard otherwise
-    const nav = navigator as Navigator & { share?: (data: { title?: string; url?: string }) => Promise<void> };
+    const nav = navigator as Navigator & {
+      share?: (data: { title?: string; url?: string }) => Promise<void>;
+    };
     if (nav.share) {
       try {
         await nav.share({

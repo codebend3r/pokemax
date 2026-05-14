@@ -1,3 +1,4 @@
+// prettier-ignore
 export const TYPES = [
   'normal', 'fire', 'water', 'electric', 'grass', 'ice',
   'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
@@ -7,9 +8,10 @@ export const TYPES = [
 export type PokeType = (typeof TYPES)[number];
 
 const X = 0.5; // resists
-const O = 0;   // immune
-const D = 2;   // double (super effective)
+const O = 0; // immune
+const D = 2; // double (super effective)
 
+// prettier-ignore
 const EFFECTIVENESS: Record<PokeType, Partial<Record<PokeType, number>>> = {
   normal:   { fighting: D, ghost: O },
   fire:     { fire: X, water: D, grass: X, ice: X, ground: D, bug: X, rock: D, steel: X, fairy: X },

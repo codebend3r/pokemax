@@ -7,8 +7,8 @@ const NAMES = [
   ['charizard', 'BW'],
   ['lugia', 'BW'],
   ['greninja', 'BW'], // 658, in BW range
-  ['goodra', 'ART'],  // small showdown, should bump
-  ['minior', 'ART'],  // small showdown, should bump
+  ['goodra', 'ART'], // small showdown, should bump
+  ['minior', 'ART'], // small showdown, should bump
   ['koraidon', 'SHOW'],
   ['eternatus', 'SHOW'],
 ];
@@ -23,9 +23,17 @@ for (const [name, expected] of NAMES) {
   await page.waitForTimeout(4000);
   const r = await page.evaluate(() => {
     const img = document.querySelector('.crt-card-top img');
-    return img ? { src: img.getAttribute('src'), nat: img.naturalWidth + 'x' + img.naturalHeight } : null;
+    return img
+      ? { src: img.getAttribute('src'), nat: img.naturalWidth + 'x' + img.naturalHeight }
+      : null;
   });
-  const kind = r.src.includes('black-white') ? 'BW' : r.src.includes('showdown') ? 'SHOW' : r.src.includes('official-artwork') ? 'ART' : 'OTHR';
+  const kind = r.src.includes('black-white')
+    ? 'BW'
+    : r.src.includes('showdown')
+      ? 'SHOW'
+      : r.src.includes('official-artwork')
+        ? 'ART'
+        : 'OTHR';
   const ok = kind === expected ? '✓' : `✗ (got ${kind})`;
   results.push({ name, expected, kind, ok, nat: r.nat });
   await page.close();
@@ -33,7 +41,9 @@ for (const [name, expected] of NAMES) {
 
 console.log('\n=== ISOLATED 2D SPRITE VERIFICATION ===');
 for (const r of results) {
-  console.log(`${r.name.padEnd(12)} expect=${r.expected.padEnd(4)} got=${r.kind.padEnd(4)} ${r.nat.padEnd(10)} ${r.ok}`);
+  console.log(
+    `${r.name.padEnd(12)} expect=${r.expected.padEnd(4)} got=${r.kind.padEnd(4)} ${r.nat.padEnd(10)} ${r.ok}`,
+  );
 }
 await ctx.close();
 await browser.close();

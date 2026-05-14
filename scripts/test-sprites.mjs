@@ -15,17 +15,26 @@ async function check(name) {
   await page.locator(`button.crt-grid-cell:has-text("${name}")`).first().click();
   await page.waitForSelector('.crt-card-top img', { timeout: 15000 });
   await page.waitForTimeout(3000);
-  const def = await page.locator('.crt-card-top img').first().evaluate((el) => el.getAttribute('src'));
+  const def = await page
+    .locator('.crt-card-top img')
+    .first()
+    .evaluate((el) => el.getAttribute('src'));
   console.log('default (should be 2D):', def);
 
   await page.locator('button:has-text("[ 3D ]")').click();
   await page.waitForTimeout(2000);
-  const d3 = await page.locator('.crt-card-top img').first().evaluate((el) => el.getAttribute('src'));
+  const d3 = await page
+    .locator('.crt-card-top img')
+    .first()
+    .evaluate((el) => el.getAttribute('src'));
   console.log('3D:', d3);
 
   await page.locator('button:has-text("[ 2D ]")').click();
   await page.waitForTimeout(2000);
-  const d2 = await page.locator('.crt-card-top img').first().evaluate((el) => el.getAttribute('src'));
+  const d2 = await page
+    .locator('.crt-card-top img')
+    .first()
+    .evaluate((el) => el.getAttribute('src'));
   console.log('2D:', d2);
 
   console.log('2D ≠ 3D?', d2 !== d3);

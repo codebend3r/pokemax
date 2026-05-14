@@ -9,6 +9,7 @@ export interface GenerationMeta {
   primaryVersionGroup: string;
 }
 
+// prettier-ignore
 export const GENERATIONS: GenerationMeta[] = [
   { num: 1, roman: 'I',    region: 'Kanto',   versionGroups: ['red-blue', 'yellow'],                               primaryVersionGroup: 'red-blue' },
   { num: 2, roman: 'II',   region: 'Johto',   versionGroups: ['gold-silver', 'crystal'],                           primaryVersionGroup: 'gold-silver' },

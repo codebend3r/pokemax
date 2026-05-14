@@ -24,8 +24,10 @@ interface Props {
 }
 
 const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
-const BW_ANIM_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
-const SHOWDOWN_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
+const BW_ANIM_BASE =
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+const SHOWDOWN_BASE =
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
 
 const MAX_BW_ID = 649;
 
@@ -70,7 +72,9 @@ function GridCell({
   return (
     <button
       type="button"
-      className={'crt-grid-cell' + (selected ? ' active' : '') + (animSrc ? ' has-anim' : ' no-anim')}
+      className={
+        'crt-grid-cell' + (selected ? ' active' : '') + (animSrc ? ' has-anim' : ' no-anim')
+      }
       onClick={() => onSelect(s.name)}
     >
       <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>

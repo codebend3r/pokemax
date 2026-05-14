@@ -83,7 +83,10 @@ function Branch({
         {link.evolves_to.map((child) => {
           const cond = child.evolution_details[0];
           return (
-            <span key={child.species.name} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span
+              key={child.species.name}
+              style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+            >
               {cond && <span className="crt-evo-cond">{describeCondition(cond)}</span>}
               <span className="crt-evo-arrow">→</span>
               <Branch link={child} active={active} onSelect={onSelect} />

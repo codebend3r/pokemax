@@ -26,10 +26,19 @@ for (const name of NAMES) {
   await page.waitForSelector('.crt-card', { timeout: 15000 });
   await page.waitForTimeout(4500); // Smogon fetch
 
-  const header = await page.locator('.crt-section').filter({ hasText: 'COMPETITIVE BUILD' }).locator('.crt-section-count').textContent().catch(() => '');
+  const header = await page
+    .locator('.crt-section')
+    .filter({ hasText: 'COMPETITIVE BUILD' })
+    .locator('.crt-section-count')
+    .textContent()
+    .catch(() => '');
   const labelValuePairs = await page.evaluate(() => {
-    const labels = Array.from(document.querySelectorAll('.crt-build-label')).map((el) => el.textContent ?? '');
-    const values = Array.from(document.querySelectorAll('.crt-build-value')).map((el) => el.textContent ?? '');
+    const labels = Array.from(document.querySelectorAll('.crt-build-label')).map(
+      (el) => el.textContent ?? '',
+    );
+    const values = Array.from(document.querySelectorAll('.crt-build-value')).map(
+      (el) => el.textContent ?? '',
+    );
     return { labels, values };
   });
 
@@ -43,7 +52,11 @@ for (const name of NAMES) {
   }
 
   // First flavor entry
-  const flavor = await page.locator('.crt-pokedex-entry-item p').first().textContent().catch(() => null);
+  const flavor = await page
+    .locator('.crt-pokedex-entry-item p')
+    .first()
+    .textContent()
+    .catch(() => null);
   if (flavor) console.log('  flavor[0]:', flavor.slice(0, 130));
 
   // Back to grid

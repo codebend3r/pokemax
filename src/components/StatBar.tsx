@@ -20,7 +20,10 @@ export default function StatBar({ name, value }: Props) {
   return (
     <div className="crt-stat">
       <span>{LABELS[name] ?? name.toUpperCase()}</span>
-      <span className="crt-stat-bar">{'█'.repeat(filled)}{'░'.repeat(empty)}</span>
+      <span className="crt-stat-bar">
+        {'█'.repeat(filled)}
+        {'░'.repeat(empty)}
+      </span>
       <span className="crt-stat-value">{value}</span>
     </div>
   );

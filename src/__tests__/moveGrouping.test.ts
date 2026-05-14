@@ -6,25 +6,41 @@ const moves: PokemonResponse['moves'] = [
   {
     move: { name: 'pyro-ball' },
     version_group_details: [
-      { level_learned_at: 1, move_learn_method: { name: 'level-up' }, version_group: { name: 'sword-shield' } },
+      {
+        level_learned_at: 1,
+        move_learn_method: { name: 'level-up' },
+        version_group: { name: 'sword-shield' },
+      },
     ],
   },
   {
     move: { name: 'tackle' },
     version_group_details: [
-      { level_learned_at: 1, move_learn_method: { name: 'level-up' }, version_group: { name: 'sword-shield' } },
+      {
+        level_learned_at: 1,
+        move_learn_method: { name: 'level-up' },
+        version_group: { name: 'sword-shield' },
+      },
     ],
   },
   {
     move: { name: 'flame-charge' },
     version_group_details: [
-      { level_learned_at: 0, move_learn_method: { name: 'machine' }, version_group: { name: 'sword-shield' } },
+      {
+        level_learned_at: 0,
+        move_learn_method: { name: 'machine' },
+        version_group: { name: 'sword-shield' },
+      },
     ],
   },
   {
     move: { name: 'old-move' },
     version_group_details: [
-      { level_learned_at: 5, move_learn_method: { name: 'level-up' }, version_group: { name: 'red-blue' } },
+      {
+        level_learned_at: 5,
+        move_learn_method: { name: 'level-up' },
+        version_group: { name: 'red-blue' },
+      },
     ],
   },
 ];
@@ -32,7 +48,9 @@ const moves: PokemonResponse['moves'] = [
 describe('groupMoves', () => {
   it('only includes sword-shield moves', () => {
     const groups = groupMoves(moves);
-    const all = Object.values(groups).flat().map((m) => m.name);
+    const all = Object.values(groups)
+      .flat()
+      .map((m) => m.name);
     expect(all).not.toContain('old-move');
   });
 
@@ -44,10 +62,46 @@ describe('groupMoves', () => {
 
   it('sorts level-up by level then name; others alphabetical', () => {
     const sample: PokemonResponse['moves'] = [
-      { move: { name: 'b' }, version_group_details: [{ level_learned_at: 10, move_learn_method: { name: 'level-up' }, version_group: { name: 'sword-shield' } }] },
-      { move: { name: 'a' }, version_group_details: [{ level_learned_at: 5, move_learn_method: { name: 'level-up' }, version_group: { name: 'sword-shield' } }] },
-      { move: { name: 'z' }, version_group_details: [{ level_learned_at: 0, move_learn_method: { name: 'egg' }, version_group: { name: 'sword-shield' } }] },
-      { move: { name: 'm' }, version_group_details: [{ level_learned_at: 0, move_learn_method: { name: 'egg' }, version_group: { name: 'sword-shield' } }] },
+      {
+        move: { name: 'b' },
+        version_group_details: [
+          {
+            level_learned_at: 10,
+            move_learn_method: { name: 'level-up' },
+            version_group: { name: 'sword-shield' },
+          },
+        ],
+      },
+      {
+        move: { name: 'a' },
+        version_group_details: [
+          {
+            level_learned_at: 5,
+            move_learn_method: { name: 'level-up' },
+            version_group: { name: 'sword-shield' },
+          },
+        ],
+      },
+      {
+        move: { name: 'z' },
+        version_group_details: [
+          {
+            level_learned_at: 0,
+            move_learn_method: { name: 'egg' },
+            version_group: { name: 'sword-shield' },
+          },
+        ],
+      },
+      {
+        move: { name: 'm' },
+        version_group_details: [
+          {
+            level_learned_at: 0,
+            move_learn_method: { name: 'egg' },
+            version_group: { name: 'sword-shield' },
+          },
+        ],
+      },
     ];
     const groups = groupMoves(sample);
     expect(groups['level-up'].map((m) => m.name)).toEqual(['a', 'b']);

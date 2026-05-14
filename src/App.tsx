@@ -72,11 +72,13 @@ export default function App() {
         (f) => f.formCategory && activeFormCats.has(f.formCategory),
       );
       const parentIdByName = new Map(list.species.map((s) => [s.name, s.id]));
-      const baseNames = new Set(matchingForms.map((f) => f.speciesName).filter(Boolean) as string[]);
+      const baseNames = new Set(
+        matchingForms.map((f) => f.speciesName).filter(Boolean) as string[],
+      );
       const matchingBases = list.species.filter((s) => baseNames.has(s.name));
       merged = [...matchingBases, ...matchingForms].sort((a, b) => {
-        const baseIdA = a.speciesName ? parentIdByName.get(a.speciesName) ?? a.id : a.id;
-        const baseIdB = b.speciesName ? parentIdByName.get(b.speciesName) ?? b.id : b.id;
+        const baseIdA = a.speciesName ? (parentIdByName.get(a.speciesName) ?? a.id) : a.id;
+        const baseIdB = b.speciesName ? (parentIdByName.get(b.speciesName) ?? b.id) : b.id;
         if (baseIdA !== baseIdB) return baseIdA - baseIdB;
         return a.id - b.id; // base before its forms
       });
@@ -85,7 +87,9 @@ export default function App() {
     return merged.filter((s) => selectedGens.has(s.gen));
   }, [list, extraForms.forms, selectedGens, activeFormCats]);
 
-  const selectedEntry = selected ? fullSpeciesIndex.find((s) => s.name === selected) ?? null : null;
+  const selectedEntry = selected
+    ? (fullSpeciesIndex.find((s) => s.name === selected) ?? null)
+    : null;
   const selectedGen = selectedEntry?.gen ?? 8;
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
@@ -133,7 +137,10 @@ export default function App() {
     const sp = fullSpeciesIndex.find((s) => s.name === name);
     if (sp) {
       // For alt forms (id ≥ 10000), the cry endpoint usually only has the base species's cry
-      const cryId = sp.id >= 10000 && sp.speciesName ? (list.species.find((b) => b.name === sp.speciesName)?.id ?? sp.id) : sp.id;
+      const cryId =
+        sp.id >= 10000 && sp.speciesName
+          ? (list.species.find((b) => b.name === sp.speciesName)?.id ?? sp.id)
+          : sp.id;
       const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${cryId}.ogg`;
       if (cryAudioRef.current) {
         cryAudioRef.current.pause();
@@ -169,7 +176,12 @@ export default function App() {
   return (
     <div className="crt">
       <div className="crt-topbar">
-        <button type="button" className="crt-header crt-header-link" onClick={goHome} aria-label="Go to top">
+        <button
+          type="button"
+          className="crt-header crt-header-link"
+          onClick={goHome}
+          aria-label="Go to top"
+        >
           <svg
             className="crt-header-icon"
             viewBox="0 0 24 24"
@@ -191,7 +203,15 @@ export default function App() {
         </div>
       </div>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
-      <Suspense fallback={<div className="crt-music"><div className="crt-music-row"><span className="crt-music-track">♪ loading player…</span></div></div>}>
+      <Suspense
+        fallback={
+          <div className="crt-music">
+            <div className="crt-music-row">
+              <span className="crt-music-track">♪ loading player…</span>
+            </div>
+          </div>
+        }
+      >
         <MusicPlayer />
       </Suspense>
       <StatusLine state={status} />
@@ -206,7 +226,9 @@ export default function App() {
       {list.error && (
         <div className="crt-error">
           ERR: COULD NOT LOAD POKéDEX INDEX
-          <button type="button" onClick={() => window.location.reload()}>[ reload ]</button>
+          <button type="button" onClick={() => window.location.reload()}>
+            [ reload ]
+          </button>
         </div>
       )}
 
@@ -217,13 +239,21 @@ export default function App() {
       {result.error?.kind === 'transmission' && (
         <div className="crt-error">
           ERR: TRANSMISSION LOST
-          <button type="button" onClick={() => setAttempt((n) => n + 1)}>[ retry ]</button>
+          <button type="button" onClick={() => setAttempt((n) => n + 1)}>
+            [ retry ]
+          </button>
         </div>
       )}
 
       {result.data && (
         <div ref={cardRef}>
-          <Suspense fallback={<div className="crt-card crt-card-loading">▶ LOADING CARD<span className="crt-cursor">&nbsp;</span></div>}>
+          <Suspense
+            fallback={
+              <div className="crt-card crt-card-loading">
+                ▶ LOADING CARD<span className="crt-cursor">&nbsp;</span>
+              </div>
+            }
+          >
             <PokemonCard
               pokemon={result.data.pokemon}
               species={result.data.species}
@@ -292,7 +322,9 @@ export default function App() {
           )}
         </div>
         {extraForms.loading && (
-          <span className="crt-extra-status">▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span></span>
+          <span className="crt-extra-status">
+            ▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span>
+          </span>
         )}
       </div>
 

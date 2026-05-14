@@ -5,8 +5,8 @@ export interface Gen8ListResponse {
 export type FormCategory = 'mega' | 'gmax' | 'regional' | 'other';
 
 export interface Gen8Species {
-  name: string;             // pokemon endpoint name (may include form suffix, e.g. 'charizard-mega-x')
-  id: number;               // /pokemon/{id} works for both base species and forms
+  name: string; // pokemon endpoint name (may include form suffix, e.g. 'charizard-mega-x')
+  id: number; // /pokemon/{id} works for both base species and forms
   gen: number;
   /** Species (parent) name used for /pokemon-species/{name}. Defaults to `name` if absent. */
   speciesName?: string;

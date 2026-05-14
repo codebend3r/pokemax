@@ -1,10 +1,4 @@
-import {
-  defensiveMatchups,
-  groupMatchups,
-  TYPES,
-  TYPE_COLORS,
-  type PokeType,
-} from '@/typeChart';
+import { defensiveMatchups, groupMatchups, TYPES, TYPE_COLORS, type PokeType } from '@/typeChart';
 
 interface Props {
   types: string[];

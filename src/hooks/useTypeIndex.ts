@@ -31,7 +31,10 @@ async function fetchTypeIndex(): Promise<Map<number, PokeType[]>> {
     }
   }
   for (const [k, v] of map) {
-    map.set(k, v.filter((t): t is PokeType => Boolean(t)));
+    map.set(
+      k,
+      v.filter((t): t is PokeType => Boolean(t)),
+    );
   }
   return map;
 }

@@ -11,9 +11,14 @@ const pokemon: PokemonResponse = {
   sprites: {
     front_default: 'normal.png',
     front_shiny: 'shiny.png',
-    other: { 'official-artwork': { front_default: 'art-normal.png', front_shiny: 'art-shiny.png' } },
+    other: {
+      'official-artwork': { front_default: 'art-normal.png', front_shiny: 'art-shiny.png' },
+    },
   },
-  types: [{ slot: 1, type: { name: 'dragon' } }, { slot: 2, type: { name: 'ghost' } }],
+  types: [
+    { slot: 1, type: { name: 'dragon' } },
+    { slot: 2, type: { name: 'ghost' } },
+  ],
   stats: [
     { base_stat: 88, stat: { name: 'hp' } },
     { base_stat: 120, stat: { name: 'attack' } },
@@ -28,7 +33,16 @@ const pokemon: PokemonResponse = {
     { ability: { name: 'cursed-body' }, is_hidden: true, slot: 3 },
   ],
   moves: [
-    { move: { name: 'dragon-darts' }, version_group_details: [{ level_learned_at: 48, move_learn_method: { name: 'level-up' }, version_group: { name: 'sword-shield' } }] },
+    {
+      move: { name: 'dragon-darts' },
+      version_group_details: [
+        {
+          level_learned_at: 48,
+          move_learn_method: { name: 'level-up' },
+          version_group: { name: 'sword-shield' },
+        },
+      ],
+    },
   ],
 };
 
@@ -39,13 +53,35 @@ const chainLink: ChainLink = {
     {
       species: { name: 'drakloak' },
       evolution_details: [
-        { min_level: 50, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+        {
+          min_level: 50,
+          trigger: { name: 'level-up' },
+          item: null,
+          held_item: null,
+          known_move: null,
+          min_happiness: null,
+          time_of_day: '',
+          location: null,
+          needs_overworld_rain: false,
+          gender: null,
+        },
       ],
       evolves_to: [
         {
           species: { name: 'dragapult' },
           evolution_details: [
-            { min_level: 60, trigger: { name: 'level-up' }, item: null, held_item: null, known_move: null, min_happiness: null, time_of_day: '', location: null, needs_overworld_rain: false, gender: null },
+            {
+              min_level: 60,
+              trigger: { name: 'level-up' },
+              item: null,
+              held_item: null,
+              known_move: null,
+              min_happiness: null,
+              time_of_day: '',
+              location: null,
+              needs_overworld_rain: false,
+              gender: null,
+            },
           ],
           evolves_to: [],
         },
@@ -59,7 +95,11 @@ const species: SpeciesResponse = {
   evolution_chain: { url: 'X' },
   varieties: [{ is_default: true, pokemon: { name: 'dragapult', url: '' } }],
   flavor_text_entries: [
-    { flavor_text: 'It can teleport 1,000 ft in the blink of an eye.', language: { name: 'en' }, version: { name: 'sword' } },
+    {
+      flavor_text: 'It can teleport 1,000 ft in the blink of an eye.',
+      language: { name: 'en' },
+      version: { name: 'sword' },
+    },
   ],
   genera: [{ genus: 'Stealth Pokémon', language: { name: 'en' } }],
 };
@@ -67,44 +107,107 @@ const chain: EvolutionChainResponse = { chain: chainLink };
 
 describe('PokemonCard', () => {
   it('renders all stat values', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     expect(screen.getByText('88')).toBeInTheDocument();
     expect(screen.getByText('120')).toBeInTheDocument();
     expect(screen.getByText('142')).toBeInTheDocument();
   });
 
   it('marks the hidden ability', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     const item = screen.getByText(/cursed body/i).closest('li');
     expect(item).not.toBeNull();
     expect(item).toHaveTextContent(/HIDDEN/i);
   });
 
   it('renders types as chips', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     expect(screen.getAllByText('dragon').length).toBeGreaterThan(0);
     expect(screen.getAllByText('ghost').length).toBeGreaterThan(0);
   });
 
   it('renders the static flat pixel sprite by default (2D, Gen 6+)', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'normal.png');
   });
 
   it('renders the static shiny sprite by default when shiny is true', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={true} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={true}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'shiny.png');
   });
 
   it('renders the evolution chain', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     expect(screen.getByText('DREEPY')).toBeInTheDocument();
     expect(screen.getByText('DRAKLOAK')).toBeInTheDocument();
     expect(screen.getAllByText('DRAGAPULT').length).toBe(2);
   });
 
   it('renders the move list (level-up open by default)', () => {
-    render(<PokemonCard pokemon={pokemon} species={species} chain={chain} shiny={false} onShinyChange={() => {}} gen={8} />);
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        gen={8}
+      />,
+    );
     expect(screen.getByText(/dragon darts/i)).toBeInTheDocument();
   });
 });

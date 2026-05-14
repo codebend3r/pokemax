@@ -31,7 +31,10 @@ const browser = await chromium.launch();
 
 // Wide desktop — landscape 16:9-ish, never tall.
 {
-  const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 2 });
+  const ctx = await browser.newContext({
+    viewport: { width: 1600, height: 900 },
+    deviceScaleFactor: 2,
+  });
   const page = await ctx.newPage();
 
   // 1. Home — grid + filters in default state
@@ -46,7 +49,10 @@ const browser = await chromium.launch();
   await shot(page, 'desktop-types-filter.png');
 
   // Clear types before the next shot
-  await page.locator('button.crt-tf-clear').click().catch(() => {});
+  await page
+    .locator('button.crt-tf-clear')
+    .click()
+    .catch(() => {});
   await page.waitForTimeout(300);
 
   // 3. Pokemon card — pick an iconic gen-1 species (Charizard) so the card hero
@@ -87,7 +93,11 @@ const browser = await chromium.launch();
 // 3×) so the resulting PNG isn't a giant scroll. Aspect ≈ 414:620, which renders as
 // a tidy phone-shaped tile when placed side-by-side in the README.
 {
-  const ctx = await browser.newContext({ viewport: { width: 414, height: 620 }, deviceScaleFactor: 2, isMobile: true });
+  const ctx = await browser.newContext({
+    viewport: { width: 414, height: 620 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+  });
   const page = await ctx.newPage();
 
   // Home: scroll past the filters so the grid is visible — that's the headline

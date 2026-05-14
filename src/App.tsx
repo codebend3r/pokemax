@@ -83,7 +83,7 @@ export default function App() {
     }
     if (selectedGens.size === 0) return merged;
     return merged.filter((s) => selectedGens.has(s.gen));
-  }, [list.species, extraForms.forms, selectedGens, activeFormCats]);
+  }, [list, extraForms.forms, selectedGens, activeFormCats]);
 
   const selectedEntry = selected ? fullSpeciesIndex.find((s) => s.name === selected) ?? null : null;
   const selectedGen = selectedEntry?.gen ?? 8;

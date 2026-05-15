@@ -15,19 +15,37 @@ mkdirSync(OUT, { recursive: true });
 
 // Snapshot of TYPE_COLORS — kept in sync with src/typeChart.ts.
 const TYPE_COLORS = {
-  normal: '#a8a878', fire: '#f08030', water: '#6890f0', electric: '#f8d030',
-  grass: '#78c850', ice: '#98d8d8', fighting: '#c03028', poison: '#a040a0',
-  ground: '#e0c068', flying: '#a890f0', psychic: '#f85888', bug: '#a8b820',
-  rock: '#b8a038', ghost: '#705898', dragon: '#7038f8', dark: '#705848',
-  steel: '#b8b8d0', fairy: '#ee99ac',
+  normal: '#a8a878',
+  fire: '#f08030',
+  water: '#6890f0',
+  electric: '#f8d030',
+  grass: '#78c850',
+  ice: '#98d8d8',
+  fighting: '#c03028',
+  poison: '#a040a0',
+  ground: '#e0c068',
+  flying: '#a890f0',
+  psychic: '#f85888',
+  bug: '#a8b820',
+  rock: '#b8a038',
+  ghost: '#705898',
+  dragon: '#7038f8',
+  dark: '#705848',
+  steel: '#b8b8d0',
+  fairy: '#ee99ac',
 };
 
 async function fetchSpecies(slug) {
   const pkm = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`).then((r) => r.json());
   const sp = await fetch(pkm.species.url).then((r) => r.json());
   const flavor = sp.flavor_text_entries.find((f) => f.language.name === 'en');
-  const blurb = (flavor?.flavor_text ?? '').replace(/[\n\f]/g, ' ').replace(/\s+/g, ' ').trim();
-  const genus = (sp.genera.find((g) => g.language.name === 'en')?.genus ?? '').replace(/Pokémon/i, '').trim();
+  const blurb = (flavor?.flavor_text ?? '')
+    .replace(/[\n\f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const genus = (sp.genera.find((g) => g.language.name === 'en')?.genus ?? '')
+    .replace(/Pokémon/i, '')
+    .trim();
   return {
     id: pkm.id,
     name: pkm.name,
@@ -119,7 +137,10 @@ const html = renderHtml(data);
 writeFileSync('/tmp/og-preview.html', html);
 
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
+const ctx = await browser.newContext({
+  viewport: { width: 1200, height: 630 },
+  deviceScaleFactor: 1,
+});
 const page = await ctx.newPage();
 await page.goto('file:///tmp/og-preview.html', { waitUntil: 'networkidle' });
 await page.waitForFunction(() => document.fonts && document.fonts.ready).catch(() => {});

@@ -7,14 +7,15 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ### Do
 - Commit and push **directly to `main`** after every discrete change. No feature branches, no PRs.
 - One logical change = one commit. Finish the change → `git add <specific files>` → `git commit` → `git push origin main` → move on.
-- Use the standard `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>` trailer.
 - Write commit messages that explain **why**, not just what.
+- Follow the `pokemax-commit-format` skill (`~/.claude/skills/pokemax-commit-format/SKILL.md`) for subject/body/backtick rules.
 
 ### Don't
 - Don't open pull requests. Don't create branches.
 - Don't bundle unrelated changes into one commit "to save time" — the user explicitly wants tight, change-per-commit history.
 - Don't pause to confirm the push each time. Standing authorization is granted for `git push origin main` in this repo.
 - Don't run `git push --force`, `git reset --hard`, or anything destructive without explicit per-action approval.
+- Don't append `Co-Authored-By: Claude` (or any AI/agent attribution) to commits. See the `pokemax-commit-format` skill — zero AI mentions anywhere in the message.
 
 ## Imports
 

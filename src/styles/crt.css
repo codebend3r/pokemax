@@ -2976,6 +2976,114 @@ button.crt-type:hover,
   text-shadow: none;
 }
 
+/* Teams browser — curated playthrough teams per game */
+.crt-teams-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 8px;
+}
+.crt-teams-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+}
+.crt-teams-search .crt-trainer-search-input {
+  flex: 1;
+}
+.crt-team-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px 18px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.crt-team-card-header {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px dashed rgba(0, 255, 159, 0.25);
+  padding-bottom: 8px;
+}
+.crt-team-card-game {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--tertiary);
+  text-transform: uppercase;
+}
+.crt-team-card-title {
+  font-size: 18px;
+  color: var(--primary);
+  text-shadow: 0 0 4px rgba(0, 255, 159, 0.4);
+}
+.crt-team-card-note {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+}
+.crt-team-card-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.crt-team-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 8px 12px;
+  color: var(--primary);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease;
+}
+.crt-team-pick:hover {
+  transform: scale(1.03);
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(0, 255, 159, 0.35);
+}
+.crt-team-pick-sprite {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+.crt-team-pick-name {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--primary);
+  text-shadow: 0 0 3px rgba(0, 255, 159, 0.4);
+}
+.crt-team-pick-role {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.crt-team-pick-why {
+  font-size: 11px;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.35;
+}
+:root[data-theme='light'] .crt-team-card-title,
+:root[data-theme='light'] .crt-team-pick-name {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-team-pick:hover {
+  box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
+}
+
 /* Footer — tiny version stamp at the bottom of the page */
 .crt-footer {
   margin-top: 28px;

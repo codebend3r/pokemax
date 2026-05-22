@@ -30,6 +30,7 @@ const PokemonCard = lazy(() => import('@/components/PokemonCard'));
 const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
 const TrainerGrid = lazy(() => import('@/components/TrainerGrid'));
 const TrainerCard = lazy(() => import('@/components/TrainerCard'));
+const TeamsBrowser = lazy(() => import('@/components/TeamsBrowser'));
 
 export default function App() {
   const list = useAllSpecies();
@@ -38,7 +39,7 @@ export default function App() {
   const { pageSize, setPageSize } = usePageSize();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
-  const [appMode, setAppMode] = useState<'pokedex' | 'trainers'>('pokedex');
+  const [appMode, setAppMode] = useState<'pokedex' | 'trainers' | 'teams'>('pokedex');
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
 
   // Deeplink: read ?p=name on first mount so URLs like /pokemax/?p=charizard work
@@ -229,6 +230,15 @@ export default function App() {
         >
           TRAINERS
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={appMode === 'teams'}
+          className={'crt-mode-tab' + (appMode === 'teams' ? ' active' : '')}
+          onClick={() => setAppMode('teams')}
+        >
+          TEAMS
+        </button>
       </div>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
       <Suspense
@@ -405,6 +415,23 @@ export default function App() {
           ) : (
             <TrainerGrid trainers={TRAINERS} onSelect={setSelectedTrainer} />
           )}
+        </Suspense>
+      )}
+
+      {appMode === 'teams' && (
+        <Suspense
+          fallback={
+            <div className="crt-card crt-card-loading">
+              ▶ LOADING TEAMS<span className="crt-cursor">&nbsp;</span>
+            </div>
+          }
+        >
+          <TeamsBrowser
+            onSelectPokemon={(name) => {
+              setAppMode('pokedex');
+              handleSelect(name);
+            }}
+          />
         </Suspense>
       )}
       <footer className="crt-footer">v{__APP_VERSION__}</footer>

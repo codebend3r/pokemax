@@ -51,6 +51,13 @@ interface SpritePick {
   animated: boolean;
 }
 
+/**
+ * `front_default` is the canonical 2D game sprite (96×96 GBA/3DS pixel art).
+ * The form id range (≥ 10000) on the Showdown sprite mirror is inconsistent:
+ * some forms are pixel-art animated GIFs (Pikachu cosplay, Deoxys forms),
+ * others are large detailed renders (Gigantamax). For "2D mode" we want the
+ * true pixel sprite, so forms route through `front_default` directly.
+ */
 function pickSprite(
   p: PokemonResponse,
   shiny: boolean,
@@ -58,18 +65,25 @@ function pickSprite(
   fallbackLevel: number,
 ): SpritePick {
   if (view === '2d') {
-    // 2D = pixel-art animated where the source is reasonably sized.
-    // Gen 1-5: Black/White animated GIF (true flat pixel animation).
-    // Everything else (Gen 6+ base species AND forms with id ≥ 10000): try the
-    // Showdown animated GIF first. `handleSpriteLoad` downgrades to artwork when
-    // the loaded sprite is genuinely tiny (e.g. Minior cores).
     if (fallbackLevel === 0) {
+      // Gen 1-5 base species: BW animated pixel art — iconic 2D experience.
       if (p.id <= MAX_BW_ID) {
         const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
         return { url, animated: true };
       }
-      const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-      return { url, animated: true };
+      // Alt forms (id ≥ 10000): use the true 2D game sprite. Showdown sprites
+      // for forms are wildly inconsistent — Gigantamax variants are huge
+      // detailed renders that misrepresent the "2D" mode.
+      if (p.id >= 10000) {
+        const url = shiny
+          ? (p.sprites.front_shiny ?? p.sprites.front_default)
+          : p.sprites.front_default;
+        if (url) return { url, animated: false };
+      } else {
+        // Gen 6+ base species: Showdown animated GIF.
+        const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+        return { url, animated: true };
+      }
     }
     if (fallbackLevel === 1) {
       // Tier-1 fallback for the pixel chain: high-res official artwork
@@ -327,6 +341,13 @@ export default function PokemonCard({
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
   // so the MOVES section isn't blank when viewing those forms.
   const movesPokemon = pokemon.moves.length > 0 ? pokemon : defaultPokemon;
+  // 2D mode is available when there's a true 2D source: BW animated (Gen 1-5
+  // base species, indexed by id) or a `front_default` static sprite. If the
+  // current variety has neither, hide the 2D toggle and force 3D.
+  const has2D = pokemon.id <= MAX_BW_ID || pokemon.sprites.front_default !== null;
+  useEffect(() => {
+    if (!has2D && view === '2d') setView('3d');
+  }, [has2D, view]);
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -383,7 +404,7 @@ export default function PokemonCard({
             cryVolume={cryVolume}
             onCryVolumeChange={onCryVolumeChange}
           />
-          <SpriteToggle value={view} onChange={setView} />
+          <SpriteToggle value={view} onChange={setView} has2D={has2D} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
         </div>
         <div className="crt-card-meta">

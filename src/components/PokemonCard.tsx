@@ -160,10 +160,12 @@ function CardSprite({
   }, [cryVolume, preloadedAudio]);
 
   // Auto-play cry once on mount. The audio was pre-warmed when the user clicked
-  // the grid cell, so this should fire near-instantly.
+  // the grid cell, so this should fire near-instantly. When switching to an
+  // alternate form whose `cries` URL differs from the preloaded source (e.g. a
+  // form with its own unique cry), swap the cached audio to the form's cry.
   useEffect(() => {
     const a = preloadedAudio.current;
-    if (a && a.src) {
+    if (a && a.src && (!cryUrl || a.src === cryUrl)) {
       a.currentTime = 0;
       a.volume = cryVolume * CRY_VOLUME_SCALE;
       a.play().catch(() => {});
@@ -176,11 +178,11 @@ function CardSprite({
       preloadedAudio.current = fallbackAudio;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pokemon.id]);
+  }, [pokemon.id, cryUrl]);
 
   const playCry = () => {
     const a = preloadedAudio.current;
-    if (a && a.src) {
+    if (a && a.src && (!cryUrl || a.src === cryUrl)) {
       a.currentTime = 0;
       a.volume = cryVolume * CRY_VOLUME_SCALE;
       a.play().catch(() => {});

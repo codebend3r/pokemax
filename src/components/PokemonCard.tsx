@@ -22,6 +22,7 @@ import CompetitiveBuild from '@/components/CompetitiveBuild';
 import Detail from '@/components/Detail';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
+import { varietyFromForm, formFromVariety } from '@/routes';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -29,6 +30,11 @@ interface Props {
   chain: EvolutionChainResponse;
   shiny: boolean;
   onShinyChange: (v: boolean) => void;
+  view: SpriteView;
+  onViewChange: (view: SpriteView) => void;
+  /** `base` or a variety-slug suffix (`mega-x`, `gmax`, `alola`, etc.). */
+  form: string;
+  onFormChange: (form: string) => void;
   onSelectEvolution?: (name: string) => void;
   gen: number;
   cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
@@ -296,6 +302,10 @@ export default function PokemonCard({
   chain,
   shiny,
   onShinyChange,
+  view,
+  onViewChange,
+  form,
+  onFormChange,
   onSelectEvolution,
   gen,
   cryAudioRef,
@@ -303,19 +313,19 @@ export default function PokemonCard({
   onCryVolumeChange,
   speciesPool,
 }: Props) {
-  const [view, setView] = useState<SpriteView>('2d');
   const [compareOpen, setCompareOpen] = useState(false);
-  const [activeVariety, setActiveVariety] = useState<string>(defaultPokemon.name);
+  const [activeVariety, setActiveVariety] = useState<string>(() =>
+    varietyFromForm(species.name, form),
+  );
   const [varietyData, setVarietyData] = useState<PokemonResponse | null>(null);
   const localCryRef = useRef<HTMLAudioElement | null>(null);
   const audioRef = cryAudioRef ?? localCryRef;
 
-  // Reset to the default variety AND default to 2D view whenever the species changes
+  // On species (route) change, snap the active variety to whatever the URL says.
   useEffect(() => {
-    setActiveVariety(defaultPokemon.name);
+    setActiveVariety(varietyFromForm(species.name, form));
     setVarietyData(null);
-    setView('2d');
-  }, [defaultPokemon.name]);
+  }, [species.name, form]);
 
   // Fetch alternate variety data when user picks a different form
   useEffect(() => {
@@ -346,8 +356,8 @@ export default function PokemonCard({
   // current variety has neither, hide the 2D toggle and force 3D.
   const has2D = pokemon.id <= MAX_BW_ID || pokemon.sprites.front_default !== null;
   useEffect(() => {
-    if (!has2D && view === '2d') setView('3d');
-  }, [has2D, view]);
+    if (!has2D && view === '2d') onViewChange('3d');
+  }, [has2D, view, onViewChange]);
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -404,7 +414,7 @@ export default function PokemonCard({
             cryVolume={cryVolume}
             onCryVolumeChange={onCryVolumeChange}
           />
-          <SpriteToggle value={view} onChange={setView} has2D={has2D} />
+          <SpriteToggle value={view} onChange={onViewChange} has2D={has2D} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
         </div>
         <div className="crt-card-meta">
@@ -455,6 +465,7 @@ export default function PokemonCard({
         active={activeVariety}
         onChange={(varietyName) => {
           setActiveVariety(varietyName);
+          onFormChange(formFromVariety(species.name, varietyName));
           // Pre-warm + play the new variety's cry synchronously inside this
           // user-gesture handler. The variety data fetch is async — by the
           // time `CardSprite`'s auto-play effect would run, browsers no

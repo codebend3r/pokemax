@@ -91,6 +91,8 @@ export default function App() {
   const [activeFormCats, setActiveFormCats] = useState<Set<FormCategory>>(new Set());
   const extraForms = useExtraForms(list.species, activeFormCats.size > 0);
   const shiny = pokedexSearch.variant === 'shiny';
+  const dimension = pokedexSearch.dimension;
+  const formKey = pokedexSearch.form;
   const [attempt, setAttempt] = useState(0);
   const fullSpeciesIndex = useMemo(
     () => [...list.species, ...extraForms.forms],
@@ -107,6 +109,16 @@ export default function App() {
       }),
       { replace: true },
     );
+  };
+  const setDimension = (next: '2d' | '3d') => {
+    if (!result.data) return;
+    const baseName = result.data.species.name;
+    navigate(pokedexPath(baseName, { ...pokedexSearch, dimension: next }), { replace: true });
+  };
+  const setFormKey = (next: string) => {
+    if (!result.data) return;
+    const baseName = result.data.species.name;
+    navigate(pokedexPath(baseName, { ...pokedexSearch, form: next }), { replace: true });
   };
   const cardRef = useRef<HTMLDivElement>(null);
   const cryAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -352,6 +364,10 @@ export default function App() {
                   chain={result.data.chain}
                   shiny={shiny}
                   onShinyChange={setShiny}
+                  view={dimension}
+                  onViewChange={setDimension}
+                  form={formKey}
+                  onFormChange={setFormKey}
                   onSelectEvolution={handleSelect}
                   gen={selectedGen}
                   cryAudioRef={cryAudioRef}

@@ -114,6 +114,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={false}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );
@@ -130,6 +134,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={false}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );
@@ -146,6 +154,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={false}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );
@@ -166,6 +178,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={false}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );
@@ -180,6 +196,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={true}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );
@@ -194,6 +214,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={false}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );
@@ -210,6 +234,10 @@ describe('PokemonCard', () => {
         chain={chain}
         shiny={false}
         onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
         gen={8}
       />,
     );

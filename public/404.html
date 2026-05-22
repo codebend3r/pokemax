@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pokemax</title>
+    <script type="text/javascript">
+      // rafgraph/spa-github-pages — single Page Apps for GitHub Pages
+      // MIT License — https://github.com/rafgraph/spa-github-pages
+      //
+      // 1 path segment is the project name (`pokemax`) — keep it as-is so
+      // the redirect lands at `https://codebend3r.github.io/pokemax/` and
+      // index.html can decode the rest of the path.
+      var segmentCount = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol +
+          '//' +
+          l.hostname +
+          (l.port ? ':' + l.port : '') +
+          l.pathname
+            .split('/')
+            .slice(0, 1 + segmentCount)
+            .join('/') +
+          '/?/' +
+          l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+          l.hash,
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

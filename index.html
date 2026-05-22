@@ -1,6 +1,23 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script type="text/javascript">
+      // rafgraph/spa-github-pages — decoder
+      // If the URL contains `/?/foo/bar`, rewrite it to `/foo/bar` so the SPA
+      // router sees the real path.
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokemax — full National Pokédex, CRT-styled</title>

@@ -323,11 +323,15 @@ export default function PokemonCard({
   }, [activeVariety, defaultPokemon.name]);
 
   const pokemon = varietyData ?? defaultPokemon;
+  // Cosmetic variants (Gigantamax / Mega / regional) often ship empty `moves`
+  // arrays from PokeAPI — they inherit the base species's learnset. Fall back
+  // so the MOVES section isn't blank when viewing those forms.
+  const movesPokemon = pokemon.moves.length > 0 ? pokemon : defaultPokemon;
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
   );
-  const moveCount = Object.values(groupMoves(pokemon.moves, meta.primaryVersionGroup)).reduce(
+  const moveCount = Object.values(groupMoves(movesPokemon.moves, meta.primaryVersionGroup)).reduce(
     (n, g) => n + g.length,
     0,
   );
@@ -428,7 +432,27 @@ export default function PokemonCard({
         varieties={species.varieties}
         speciesName={species.name}
         active={activeVariety}
-        onChange={setActiveVariety}
+        onChange={(varietyName) => {
+          setActiveVariety(varietyName);
+          // Pre-warm + play the new variety's cry synchronously inside this
+          // user-gesture handler. The variety data fetch is async — by the
+          // time `CardSprite`'s auto-play effect would run, browsers no
+          // longer count the click as a user gesture and `play()` rejects.
+          const v = species.varieties.find((x) => x.pokemon.name === varietyName);
+          const idMatch = v?.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
+          if (idMatch) {
+            const id = parseInt(idMatch[1], 10);
+            const cryUrl = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
+            if (audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current.src = '';
+            }
+            const audio = new Audio(cryUrl);
+            audio.volume = cryVolume * CRY_VOLUME_SCALE;
+            audio.play().catch(() => {});
+            audioRef.current = audio;
+          }
+        }}
       />
 
       {compareOpen && speciesPool && speciesPool.length > 0 && (
@@ -465,7 +489,7 @@ export default function PokemonCard({
       </Section>
 
       <Section label={`MOVES (${movesLabel})`} count={moveCount}>
-        <MoveList moves={pokemon.moves} versionGroup={meta.primaryVersionGroup} />
+        <MoveList moves={movesPokemon.moves} versionGroup={meta.primaryVersionGroup} />
       </Section>
 
       <Section

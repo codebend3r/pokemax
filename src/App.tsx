@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useRoute, useSearch } from 'wouter';
 import SearchBar from '@/components/SearchBar';
 import StatusLine from '@/components/StatusLine';
 import PokemonGrid from '@/components/PokemonGrid';
@@ -14,6 +15,13 @@ import { usePageSize } from '@/hooks/usePageSize';
 import { useVolume } from '@/hooks/useVolume';
 import { useExtraForms } from '@/hooks/useExtraForms';
 import type { FormCategory } from '@/types';
+import {
+  pokedexPath,
+  trainersPath,
+  teamsPath,
+  parsePokedexSearch,
+  formFromVariety,
+} from '@/routes';
 
 const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
   { key: 'mega', label: 'MEGA / PRIMAL' },
@@ -39,30 +47,67 @@ export default function App() {
   const { pageSize, setPageSize } = usePageSize();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
-  const [appMode, setAppMode] = useState<'pokedex' | 'trainers' | 'teams'>('pokedex');
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
 
-  // Deeplink: read ?p=name on first mount so URLs like /pokemax/?p=charizard work
-  const initialSelected = (() => {
-    if (typeof window === 'undefined') return null;
+  const [, navigate] = useLocation();
+  const search = useSearch(); // reactive — re-renders when ?query changes
+  const pokedexSearch = useMemo(() => parsePokedexSearch(search), [search]);
+
+  const [matchPokemonDetail, pokemonDetailParams] = useRoute('/pokedex/:name');
+  const [matchTrainers] = useRoute('/trainers');
+  const [matchTeams] = useRoute('/teams');
+  const [matchRoot] = useRoute('/');
+
+  const appMode: 'pokedex' | 'trainers' | 'teams' = matchTrainers
+    ? 'trainers'
+    : matchTeams
+      ? 'teams'
+      : 'pokedex';
+
+  const selected: string | null = matchPokemonDetail
+    ? (pokemonDetailParams?.name?.toLowerCase() ?? null)
+    : null;
+
+  // Legacy back-compat: ?p=charizard → /pokedex/charizard (one-shot on mount)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     const params = new globalThis.URLSearchParams(window.location.search);
-    const p = params.get('p');
-    return p && p.trim() ? p.trim().toLowerCase() : null;
-  })();
-  const [selected, setSelected] = useState<string | null>(initialSelected);
+    const legacy = params.get('p');
+    if (legacy && legacy.trim() && !matchPokemonDetail) {
+      navigate(pokedexPath(legacy.trim().toLowerCase()), { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Redirect bare `/` to `/pokedex`
+  useEffect(() => {
+    if (matchRoot) navigate(pokedexPath(), { replace: true });
+  }, [matchRoot, navigate]);
+
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
   const typeIndex = useTypeIndex(typeIndexEnabled);
   const [activeFormCats, setActiveFormCats] = useState<Set<FormCategory>>(new Set());
   const extraForms = useExtraForms(list.species, activeFormCats.size > 0);
-  const [shiny, setShiny] = useState(false);
+  const shiny = pokedexSearch.variant === 'shiny';
   const [attempt, setAttempt] = useState(0);
   const fullSpeciesIndex = useMemo(
     () => [...list.species, ...extraForms.forms],
     [list.species, extraForms.forms],
   );
   const result = usePokemon(selected, fullSpeciesIndex, attempt);
+  const setShiny = (v: boolean) => {
+    if (!result.data) return;
+    const baseName = result.data.species.name;
+    navigate(
+      pokedexPath(baseName, {
+        ...pokedexSearch,
+        variant: v ? 'shiny' : 'normal',
+      }),
+      { replace: true },
+    );
+  };
   const cardRef = useRef<HTMLDivElement>(null);
   const cryAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -111,10 +156,9 @@ export default function App() {
     }
   }, [result.data]);
 
-  // Browser tab title + URL stay in sync with the selected Pokemon
+  // Keep document.title in sync with the selected Pokemon. URL is owned by the router.
   useEffect(() => {
     const base = 'Pokemax';
-    const url = new globalThis.URL(window.location.href);
     if (result.data) {
       const raw = result.data.pokemon.name;
       const pretty = raw
@@ -122,19 +166,25 @@ export default function App() {
         .map((p) => (p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p))
         .join(' ');
       document.title = `${base} | ${pretty}`;
-      url.searchParams.set('p', raw);
     } else {
       document.title = base;
-      url.searchParams.delete('p');
-    }
-    if (url.toString() !== window.location.href) {
-      window.history.replaceState({}, '', url.toString());
     }
   }, [result.data]);
 
+  // Canonicalize alt-form path slugs to base-species + ?form=<suffix>.
+  // `/pokedex/charizard-mega-x` → `/pokedex/charizard?form=mega-x`
+  useEffect(() => {
+    if (!result.data || !selected) return;
+    const baseName = result.data.species.name;
+    if (selected !== baseName) {
+      const suffix = formFromVariety(baseName, selected);
+      if (suffix !== 'base') {
+        navigate(pokedexPath(baseName, { ...pokedexSearch, form: suffix }), { replace: true });
+      }
+    }
+  }, [result.data, selected, pokedexSearch, navigate]);
+
   const handleSelect = (name: string) => {
-    setShiny(false);
-    setSelected(name);
     setAttempt((n) => n + 1);
     setQuery('');
 
@@ -152,20 +202,18 @@ export default function App() {
         cryAudioRef.current.pause();
         cryAudioRef.current.src = '';
       }
-      const audio = new Audio(url);
+      const audio = new Audio();
       audio.preload = 'auto';
+      audio.src = url;
       audio.volume = cryVolume * CRY_VOLUME_SCALE;
-      audio.load();
       cryAudioRef.current = audio;
     }
+
+    navigate(pokedexPath(name));
   };
 
   const goHome = () => {
-    setSelected(null);
-    setQuery('');
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    navigate(pokedexPath());
   };
 
   const handleSubmit = (typed: string) => {
@@ -214,7 +262,7 @@ export default function App() {
           role="tab"
           aria-selected={appMode === 'pokedex'}
           className={'crt-mode-tab' + (appMode === 'pokedex' ? ' active' : '')}
-          onClick={() => setAppMode('pokedex')}
+          onClick={() => navigate(pokedexPath())}
         >
           POKÉDEX
         </button>
@@ -224,8 +272,8 @@ export default function App() {
           aria-selected={appMode === 'trainers'}
           className={'crt-mode-tab' + (appMode === 'trainers' ? ' active' : '')}
           onClick={() => {
-            setAppMode('trainers');
             setSelectedTrainer(null);
+            navigate(trainersPath());
           }}
         >
           TRAINERS
@@ -235,7 +283,7 @@ export default function App() {
           role="tab"
           aria-selected={appMode === 'teams'}
           className={'crt-mode-tab' + (appMode === 'teams' ? ' active' : '')}
-          onClick={() => setAppMode('teams')}
+          onClick={() => navigate(teamsPath())}
         >
           TEAMS
         </button>
@@ -406,7 +454,6 @@ export default function App() {
               trainer={selectedTrainer}
               onBack={() => setSelectedTrainer(null)}
               onSelectPokemon={(name) => {
-                setAppMode('pokedex');
                 setSelectedTrainer(null);
                 handleSelect(name);
               }}
@@ -428,7 +475,6 @@ export default function App() {
         >
           <TeamsBrowser
             onSelectPokemon={(name) => {
-              setAppMode('pokedex');
               handleSelect(name);
             }}
           />

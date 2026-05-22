@@ -1827,14 +1827,17 @@ button.crt-type:hover,
   display: flex;
   gap: 16px;
   margin-top: 8px;
-  font-size: 17px;
+  font-family: 'Press Start 2P', 'Pixelify Sans', 'Courier New', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
   color: var(--primary);
   text-shadow: 0 0 4px rgba(0, 255, 159, 0.4);
 }
 .crt-card-vitals-label {
   color: var(--accent);
   letter-spacing: 1px;
-  font-size: 14px;
+  font-size: 11px;
   margin-right: 4px;
 }
 

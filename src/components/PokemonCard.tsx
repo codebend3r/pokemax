@@ -60,19 +60,13 @@ function pickSprite(
   if (view === '2d') {
     // 2D = pixel-art animated where the source is reasonably sized.
     // Gen 1-5: Black/White animated GIF (true flat pixel animation).
-    // Forms (id ≥ 10000): Showdown sprites are often tiny (Minior cores ≈ 60×60,
-    // padded inside a 200px box). The 475×475 official artwork looks far better at
-    // card size, so we prefer it for forms.
-    // Gen 6+ base species: Showdown animated GIF.
+    // Everything else (Gen 6+ base species AND forms with id ≥ 10000): try the
+    // Showdown animated GIF first. `handleSpriteLoad` downgrades to artwork when
+    // the loaded sprite is genuinely tiny (e.g. Minior cores).
     if (fallbackLevel === 0) {
       if (p.id <= MAX_BW_ID) {
         const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
         return { url, animated: true };
-      }
-      if (p.id >= 10000) {
-        const art = p.sprites.other['official-artwork'];
-        const url = shiny ? art.front_shiny : art.front_default;
-        if (url) return { url, animated: false };
       }
       const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
       return { url, animated: true };

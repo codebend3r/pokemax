@@ -2369,6 +2369,62 @@ button.crt-type:hover,
   background: rgba(156, 52, 21, 0.12);
 }
 
+/* Trainer browser — light theme overrides */
+:root[data-theme='light'] .crt-mode-tab {
+  background: rgba(58, 31, 6, 0.04);
+}
+:root[data-theme='light'] .crt-mode-tab:hover {
+  background: rgba(58, 31, 6, 0.1);
+}
+:root[data-theme='light'] .crt-mode-tab.active {
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--primary);
+  text-shadow: none;
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-chip,
+:root[data-theme='light'] .crt-trainer-search-input,
+:root[data-theme='light'] .crt-trainer-list-card,
+:root[data-theme='light'] .crt-trainer-member,
+:root[data-theme='light'] .crt-trainer-detail-header {
+  background: rgba(58, 31, 6, 0.05);
+}
+:root[data-theme='light'] .crt-trainer-chip:hover,
+:root[data-theme='light'] .crt-trainer-list-card:hover,
+:root[data-theme='light'] .crt-trainer-member:hover {
+  background: rgba(58, 31, 6, 0.12);
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-chip.active {
+  background: rgba(156, 52, 21, 0.12);
+  text-shadow: none;
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-chip.all.active {
+  background: rgba(156, 52, 21, 0.12);
+  text-shadow: none;
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-search-input:focus {
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-list-card-name,
+:root[data-theme='light'] .crt-trainer-detail-name,
+:root[data-theme='light'] .crt-trainer-filter-label,
+:root[data-theme='light'] .crt-trainer-list-card-class,
+:root[data-theme='light'] .crt-trainer-detail-class,
+:root[data-theme='light'] .crt-trainer-detail-game,
+:root[data-theme='light'] .crt-trainer-member-level,
+:root[data-theme='light'] .crt-trainer-moves-species,
+:root[data-theme='light'] .crt-trainer-meta-species,
+:root[data-theme='light'] .crt-trainer-section-header:hover {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-section-body {
+  background: rgba(156, 52, 21, 0.05);
+}
+
 /* Active grid cell uses bg-elev in both themes for stronger pop */
 .crt-grid-cell.active {
   background: rgba(255, 0, 170, 0.12);
@@ -2388,6 +2444,455 @@ button.crt-type:hover,
 :root[data-theme='light'] .crt-section-label,
 :root[data-theme='light'] .crt-header {
   text-shadow: none;
+}
+
+/* ────────────────────────────────────────────
+   Trainer browser
+   ──────────────────────────────────────────── */
+
+/* Top-level mode toggle (Pokédex / Trainers) — sits under the topbar */
+.crt-mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+.crt-mode-tab {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 10px 24px;
+  cursor: pointer;
+  letter-spacing: 3px;
+  font-size: 18px;
+  text-transform: uppercase;
+  min-width: 160px;
+  transition:
+    background 80ms,
+    border-color 80ms,
+    color 80ms;
+}
+.crt-mode-tab:hover {
+  background: rgba(0, 255, 159, 0.13);
+  border-color: var(--primary);
+}
+.crt-mode-tab.active {
+  border-color: var(--primary);
+  color: var(--bg);
+  background: var(--primary);
+  text-shadow: none;
+  box-shadow: 0 0 14px rgba(0, 255, 159, 0.45);
+}
+
+@media (max-width: 600px) {
+  .crt-mode-toggle {
+    gap: 4px;
+    margin: 8px 0 16px;
+  }
+  .crt-mode-tab {
+    min-width: 0;
+    flex: 1;
+    padding: 8px 12px;
+    letter-spacing: 2px;
+    font-size: 15px;
+  }
+}
+
+/* Trainer list filter row */
+.crt-trainer-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.crt-trainer-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.crt-trainer-filter-label {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
+  letter-spacing: 2px;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+.crt-trainer-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.crt-trainer-chip {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-size: 14px;
+  white-space: nowrap;
+  transition:
+    background 80ms,
+    border-color 80ms;
+}
+.crt-trainer-chip:hover {
+  background: rgba(0, 255, 159, 0.13);
+  border-color: var(--primary);
+}
+.crt-trainer-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 0, 170, 0.1);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+  box-shadow: 0 0 8px rgba(255, 0, 170, 0.2);
+}
+.crt-trainer-chip.all {
+  border-style: dashed;
+  letter-spacing: 2px;
+}
+.crt-trainer-chip.all.active {
+  border-color: var(--tertiary);
+  color: var(--tertiary);
+  background: rgba(77, 210, 255, 0.1);
+  text-shadow: 0 0 6px rgba(77, 210, 255, 0.5);
+  box-shadow: 0 0 8px rgba(77, 210, 255, 0.2);
+}
+
+/* Search input inside a filter section — slimmer than the global .crt-search */
+.crt-trainer-search-input {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  caret-color: var(--primary);
+  padding: 6px 10px;
+  outline: 0;
+  width: 100%;
+  letter-spacing: 1px;
+  user-select: text;
+  -webkit-user-select: text;
+  transition: border-color 80ms;
+}
+.crt-trainer-search-input::placeholder {
+  color: var(--dim);
+  opacity: 0.7;
+}
+.crt-trainer-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(0, 255, 159, 0.2);
+}
+
+/* Trainer list grid */
+.crt-trainer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 4px 0 12px;
+}
+.crt-trainer-list-card {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  padding: 12px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background 80ms,
+    border-color 80ms,
+    transform 80ms,
+    box-shadow 80ms;
+}
+.crt-trainer-list-card:hover {
+  background: rgba(0, 255, 159, 0.1);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(0, 255, 159, 0.25);
+}
+.crt-trainer-list-card-name {
+  color: var(--primary);
+  text-shadow: 0 0 6px rgba(0, 255, 159, 0.5);
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+.crt-trainer-list-card-class {
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.crt-trainer-list-card-game {
+  color: var(--dim);
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.crt-trainer-list-card-roster-mini {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 4px;
+}
+.crt-trainer-list-card-roster-mini img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+}
+.crt-trainer-empty {
+  text-align: center;
+  color: var(--dim);
+  padding: 32px 12px;
+  letter-spacing: 1px;
+  font-style: italic;
+}
+
+/* Trainer detail page */
+.crt-trainer-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0 24px;
+}
+.crt-trainer-back {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--primary);
+  text-shadow: inherit;
+  cursor: pointer;
+  text-decoration: underline dotted var(--tertiary);
+  text-underline-offset: 2px;
+  letter-spacing: 1px;
+  font-size: 16px;
+}
+.crt-trainer-back:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.crt-trainer-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: rgba(0, 255, 159, 0.04);
+}
+.crt-trainer-detail-name {
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 255, 159, 0.5);
+  font-size: 30px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.crt-trainer-detail-class {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.45);
+  letter-spacing: 2px;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+.crt-trainer-detail-game {
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.3);
+  letter-spacing: 1px;
+  font-size: 15px;
+}
+.crt-trainer-detail-location {
+  color: var(--dim);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* Trainer team (roster grid) */
+.crt-trainer-team {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+.crt-trainer-member {
+  background: rgba(0, 255, 159, 0.04);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition:
+    background 80ms,
+    border-color 80ms,
+    transform 80ms,
+    box-shadow 80ms;
+}
+.crt-trainer-member:hover {
+  background: rgba(0, 255, 159, 0.12);
+  border-color: var(--primary);
+  transform: scale(1.03);
+  box-shadow: 0 0 10px rgba(0, 255, 159, 0.3);
+}
+.crt-trainer-member-sprite {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+}
+.crt-trainer-member-name {
+  color: var(--primary);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.crt-trainer-member-level {
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+/* Expandable sections (MOVES / ABILITY-ITEM-NATURE / LOCATION) */
+.crt-trainer-section {
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+.crt-trainer-section.open {
+  /* presence only — header indicator handles the visual state */
+}
+.crt-trainer-section-header {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+  font: inherit;
+  text-shadow: inherit;
+  color: var(--primary);
+  cursor: pointer;
+  text-align: left;
+  letter-spacing: 2px;
+  font-size: 16px;
+  text-transform: uppercase;
+  transition: color 80ms;
+}
+.crt-trainer-section-header::before {
+  content: '▶ ';
+  color: var(--accent);
+  display: inline-block;
+  margin-right: 4px;
+  transition: transform 120ms;
+}
+.crt-trainer-section.open .crt-trainer-section-header::before {
+  content: '▼ ';
+}
+.crt-trainer-section-header:hover {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 170, 0.45);
+}
+.crt-trainer-section-body {
+  padding: 8px 0 8px 12px;
+  border-left: 2px solid var(--accent);
+  background: rgba(255, 0, 170, 0.03);
+  margin: 4px 0 8px 4px;
+}
+
+/* MOVES section internals */
+.crt-trainer-moves-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.crt-trainer-moves-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.crt-trainer-moves-species {
+  flex: 0 0 110px;
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.3);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.crt-trainer-moves-list {
+  flex: 1 1 240px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.crt-trainer-moves-empty {
+  color: var(--dim);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* ABILITY / ITEM / NATURE section internals */
+.crt-trainer-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.crt-trainer-meta-row {
+  display: grid;
+  grid-template-columns: 110px repeat(3, 1fr);
+  gap: 8px 12px;
+  align-items: start;
+}
+.crt-trainer-meta-species {
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.3);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+.crt-trainer-meta-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.crt-trainer-meta-label {
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.crt-trainer-meta-empty {
+  color: var(--dim);
+  opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+  .crt-trainer-meta-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .crt-trainer-meta-species {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+  .crt-trainer-moves-species {
+    flex: 0 0 100%;
+  }
 }
 
 /* Footer — tiny version stamp at the bottom of the page */

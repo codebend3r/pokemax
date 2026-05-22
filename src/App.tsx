@@ -23,10 +23,13 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
 ];
 import type { PokeType } from '@/typeChart';
 import { CRY_VOLUME_SCALE } from '@/textUtil';
+import { TRAINERS, type Trainer } from '@/trainers';
 
 // Lazy-loaded — only fetched when first needed
 const PokemonCard = lazy(() => import('@/components/PokemonCard'));
 const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
+const TrainerGrid = lazy(() => import('@/components/TrainerGrid'));
+const TrainerCard = lazy(() => import('@/components/TrainerCard'));
 
 export default function App() {
   const list = useAllSpecies();
@@ -35,6 +38,8 @@ export default function App() {
   const { pageSize, setPageSize } = usePageSize();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
+  const [appMode, setAppMode] = useState<'pokedex' | 'trainers'>('pokedex');
+  const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
 
   // Deeplink: read ?p=name on first mount so URLs like /pokemax/?p=charizard work
   const initialSelected = (() => {
@@ -202,6 +207,29 @@ export default function App() {
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </div>
+      <div className="crt-mode-toggle" role="tablist" aria-label="App mode">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={appMode === 'pokedex'}
+          className={'crt-mode-tab' + (appMode === 'pokedex' ? ' active' : '')}
+          onClick={() => setAppMode('pokedex')}
+        >
+          POKÉDEX
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={appMode === 'trainers'}
+          className={'crt-mode-tab' + (appMode === 'trainers' ? ' active' : '')}
+          onClick={() => {
+            setAppMode('trainers');
+            setSelectedTrainer(null);
+          }}
+        >
+          TRAINERS
+        </button>
+      </div>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
       <Suspense
         fallback={
@@ -215,141 +243,169 @@ export default function App() {
         <MusicPlayer />
       </Suspense>
       <StatusLine state={status} />
-      <SearchBar
-        names={list.names}
-        value={query}
-        onValueChange={setQuery}
-        onSearch={handleSubmit}
-        disabled={list.loading}
-      />
+      {appMode === 'pokedex' && (
+        <>
+          <SearchBar
+            names={list.names}
+            value={query}
+            onValueChange={setQuery}
+            onSearch={handleSubmit}
+            disabled={list.loading}
+          />
 
-      {list.error && (
-        <div className="crt-error">
-          ERR: COULD NOT LOAD POKéDEX INDEX
-          <button type="button" onClick={() => window.location.reload()}>
-            [ reload ]
-          </button>
-        </div>
-      )}
-
-      {result.error?.kind === 'not-in-gen-8' && (
-        <div className="crt-error">ERR: "{selected}" NOT FOUND</div>
-      )}
-
-      {result.error?.kind === 'transmission' && (
-        <div className="crt-error">
-          ERR: TRANSMISSION LOST
-          <button type="button" onClick={() => setAttempt((n) => n + 1)}>
-            [ retry ]
-          </button>
-        </div>
-      )}
-
-      {result.data && (
-        <div ref={cardRef}>
-          <Suspense
-            fallback={
-              <div className="crt-card crt-card-loading">
-                ▶ LOADING CARD<span className="crt-cursor">&nbsp;</span>
-              </div>
-            }
-          >
-            <PokemonCard
-              pokemon={result.data.pokemon}
-              species={result.data.species}
-              chain={result.data.chain}
-              shiny={shiny}
-              onShinyChange={setShiny}
-              onSelectEvolution={handleSelect}
-              gen={selectedGen}
-              cryAudioRef={cryAudioRef}
-              cryVolume={cryVolume}
-              onCryVolumeChange={setCryVolume}
-              speciesPool={fullSpeciesIndex}
-            />
-          </Suspense>
-        </div>
-      )}
-
-      <GenFilter
-        selected={selectedGens}
-        onToggle={(g) =>
-          setSelectedGens((prev) => {
-            const next = new Set(prev);
-            if (next.has(g)) next.delete(g);
-            else next.add(g);
-            return next;
-          })
-        }
-        onClear={() => setSelectedGens(new Set())}
-      />
-
-      <div className="crt-extra-toggle">
-        <div className="crt-extra-title">▶ INCLUDE ALT FORMS</div>
-        <div className="crt-extra-chips">
-          {FORM_CATEGORIES.map(({ key, label }) => {
-            const active = activeFormCats.has(key);
-            const count = extraForms.forms.filter((f) => f.formCategory === key).length;
-            return (
-              <button
-                key={key}
-                type="button"
-                className={'crt-extra-chip' + (active ? ' active' : '')}
-                aria-pressed={active}
-                onClick={() => {
-                  setActiveFormCats((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(key)) next.delete(key);
-                    else next.add(key);
-                    return next;
-                  });
-                }}
-              >
-                {label}
-                {count > 0 && <span className="crt-extra-chip-count"> · {count}</span>}
+          {list.error && (
+            <div className="crt-error">
+              ERR: COULD NOT LOAD POKéDEX INDEX
+              <button type="button" onClick={() => window.location.reload()}>
+                [ reload ]
               </button>
-            );
-          })}
-          {activeFormCats.size > 0 && (
-            <button
-              type="button"
-              className="crt-extra-chip clear"
-              onClick={() => setActiveFormCats(new Set())}
-              title="Clear all"
-            >
-              [ clear ]
-            </button>
+            </div>
           )}
-        </div>
-        {extraForms.loading && (
-          <span className="crt-extra-status">
-            ▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span>
-          </span>
-        )}
-      </div>
 
-      <PokemonGrid
-        species={filteredSpecies}
-        query={query}
-        selected={selected}
-        onSelect={handleSelect}
-        view={view}
-        onToggleView={toggleView}
-        pageSize={pageSize}
-        onPageSizeChange={setPageSize}
-        typeIndex={typeIndex.index}
-        selectedTypes={selectedTypes}
-        onToggleType={(t) => {
-          setTypeIndexEnabled(true);
-          setSelectedTypes((prev) => {
-            const next = new Set(prev);
-            if (next.has(t)) next.delete(t);
-            else next.add(t);
-            return next;
-          });
-        }}
-        onClearTypes={() => setSelectedTypes(new Set())}
-      />
+          {result.error?.kind === 'not-in-gen-8' && (
+            <div className="crt-error">ERR: "{selected}" NOT FOUND</div>
+          )}
+
+          {result.error?.kind === 'transmission' && (
+            <div className="crt-error">
+              ERR: TRANSMISSION LOST
+              <button type="button" onClick={() => setAttempt((n) => n + 1)}>
+                [ retry ]
+              </button>
+            </div>
+          )}
+
+          {result.data && (
+            <div ref={cardRef}>
+              <Suspense
+                fallback={
+                  <div className="crt-card crt-card-loading">
+                    ▶ LOADING CARD<span className="crt-cursor">&nbsp;</span>
+                  </div>
+                }
+              >
+                <PokemonCard
+                  pokemon={result.data.pokemon}
+                  species={result.data.species}
+                  chain={result.data.chain}
+                  shiny={shiny}
+                  onShinyChange={setShiny}
+                  onSelectEvolution={handleSelect}
+                  gen={selectedGen}
+                  cryAudioRef={cryAudioRef}
+                  cryVolume={cryVolume}
+                  onCryVolumeChange={setCryVolume}
+                  speciesPool={fullSpeciesIndex}
+                />
+              </Suspense>
+            </div>
+          )}
+
+          <GenFilter
+            selected={selectedGens}
+            onToggle={(g) =>
+              setSelectedGens((prev) => {
+                const next = new Set(prev);
+                if (next.has(g)) next.delete(g);
+                else next.add(g);
+                return next;
+              })
+            }
+            onClear={() => setSelectedGens(new Set())}
+          />
+
+          <div className="crt-extra-toggle">
+            <div className="crt-extra-title">▶ INCLUDE ALT FORMS</div>
+            <div className="crt-extra-chips">
+              {FORM_CATEGORIES.map(({ key, label }) => {
+                const active = activeFormCats.has(key);
+                const count = extraForms.forms.filter((f) => f.formCategory === key).length;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={'crt-extra-chip' + (active ? ' active' : '')}
+                    aria-pressed={active}
+                    onClick={() => {
+                      setActiveFormCats((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(key)) next.delete(key);
+                        else next.add(key);
+                        return next;
+                      });
+                    }}
+                  >
+                    {label}
+                    {count > 0 && <span className="crt-extra-chip-count"> · {count}</span>}
+                  </button>
+                );
+              })}
+              {activeFormCats.size > 0 && (
+                <button
+                  type="button"
+                  className="crt-extra-chip clear"
+                  onClick={() => setActiveFormCats(new Set())}
+                  title="Clear all"
+                >
+                  [ clear ]
+                </button>
+              )}
+            </div>
+            {extraForms.loading && (
+              <span className="crt-extra-status">
+                ▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span>
+              </span>
+            )}
+          </div>
+
+          <PokemonGrid
+            species={filteredSpecies}
+            query={query}
+            selected={selected}
+            onSelect={handleSelect}
+            view={view}
+            onToggleView={toggleView}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            typeIndex={typeIndex.index}
+            selectedTypes={selectedTypes}
+            onToggleType={(t) => {
+              setTypeIndexEnabled(true);
+              setSelectedTypes((prev) => {
+                const next = new Set(prev);
+                if (next.has(t)) next.delete(t);
+                else next.add(t);
+                return next;
+              });
+            }}
+            onClearTypes={() => setSelectedTypes(new Set())}
+          />
+        </>
+      )}
+
+      {appMode === 'trainers' && (
+        <Suspense
+          fallback={
+            <div className="crt-card crt-card-loading">
+              ▶ LOADING TRAINERS<span className="crt-cursor">&nbsp;</span>
+            </div>
+          }
+        >
+          {selectedTrainer ? (
+            <TrainerCard
+              trainer={selectedTrainer}
+              onBack={() => setSelectedTrainer(null)}
+              onSelectPokemon={(name) => {
+                setAppMode('pokedex');
+                setSelectedTrainer(null);
+                handleSelect(name);
+              }}
+            />
+          ) : (
+            <TrainerGrid trainers={TRAINERS} onSelect={setSelectedTrainer} />
+          )}
+        </Suspense>
+      )}
       <footer className="crt-footer">v{__APP_VERSION__}</footer>
     </div>
   );

@@ -3084,6 +3084,74 @@ button.crt-type:hover,
   box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
 }
 
+/* Item OBTAIN block — surfaces inside item `Detail` panels */
+.crt-item-obtain {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 255, 159, 0.2);
+}
+.crt-item-obtain-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.crt-item-obtain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.crt-item-obtain-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--primary);
+}
+.crt-item-obtain-game {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--tertiary);
+  text-transform: uppercase;
+}
+.crt-item-obtain-where {
+  color: var(--primary);
+}
+.crt-item-obtain-price {
+  font-size: 11px;
+  color: var(--accent);
+}
+.crt-item-craft {
+  margin-top: 2px;
+  padding: 4px 6px;
+  border: 1px dashed rgba(0, 255, 159, 0.25);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.15);
+}
+.crt-item-craft-lp {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.crt-item-craft-mats {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 11px;
+  color: var(--dim);
+}
+.crt-item-craft-mat-count {
+  color: var(--primary);
+}
+
 /* Footer — tiny version stamp at the bottom of the page */
 .crt-footer {
   margin-top: 28px;

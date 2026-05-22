@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { useApiDetail } from '@/hooks/useApiDetail';
 import { cleanFlavorText } from '@/textUtil';
 import { defensiveMatchups, groupMatchups, TYPES, TYPE_COLORS, type PokeType } from '@/typeChart';
+import { ITEM_SOURCES, formatSourceLine, type ItemSource } from '@/itemSources';
 
 export type DetailKind = 'move' | 'ability' | 'item' | 'nature' | 'type';
 
@@ -91,6 +92,43 @@ function MoveBody({ data }: { data: MoveResponse }) {
       </div>
       <div className="crt-detail-effect">{pickEffect(data.effect_entries)}</div>
     </>
+  );
+}
+
+function ItemObtain({ slug }: { slug: string }) {
+  const sources = ITEM_SOURCES[slug];
+  if (!sources || sources.length === 0) return null;
+  return (
+    <div className="crt-item-obtain">
+      <div className="crt-item-obtain-label">▶ HOW TO OBTAIN</div>
+      <ul className="crt-item-obtain-list">
+        {sources.map((src, i) => (
+          <li key={i} className="crt-item-obtain-row">
+            <span className="crt-item-obtain-game">{formatSourceLine(src)}</span>
+            {src.where && <span className="crt-item-obtain-where">{src.where}</span>}
+            {typeof src.buy === 'number' && (
+              <span className="crt-item-obtain-price">${src.buy.toLocaleString()}</span>
+            )}
+            {src.crafting && <CraftingRecipe recipe={src.crafting} />}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CraftingRecipe({ recipe }: { recipe: NonNullable<ItemSource['crafting']> }) {
+  return (
+    <div className="crt-item-craft">
+      <span className="crt-item-craft-lp">{recipe.lp.toLocaleString()} LP</span>
+      <ul className="crt-item-craft-mats">
+        {recipe.materials.map((m, i) => (
+          <li key={i}>
+            <span className="crt-item-craft-mat-count">×{m.count}</span> {m.item.replace(/-/g, ' ')}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -256,6 +294,7 @@ export default function Detail({ kind, name, label, triggerStyle, triggerClassNa
                   {pickItemText(item.data) || 'no description.'}
                 </div>
               )}
+              <ItemObtain slug={name} />
             </>
           )}
           {kind === 'nature' && (

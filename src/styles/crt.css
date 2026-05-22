@@ -2895,6 +2895,87 @@ button.crt-type:hover,
   }
 }
 
+/* Counter-team section — recommended player roster vs a trainer */
+.crt-trainer-counters-status {
+  color: var(--dim);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 8px 0;
+  text-transform: uppercase;
+}
+.crt-trainer-counters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 4px 0;
+}
+.crt-trainer-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 8px 12px;
+  color: var(--primary);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease;
+}
+.crt-trainer-counter:hover {
+  transform: scale(1.03);
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(0, 255, 159, 0.35);
+}
+.crt-trainer-counter-sprite {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+.crt-trainer-counter-name {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--primary);
+  text-shadow: 0 0 3px rgba(0, 255, 159, 0.4);
+}
+.crt-trainer-counter-types {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.crt-trainer-counter-type {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+.crt-trainer-counter-vs {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.crt-trainer-counter-why {
+  font-size: 11px;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.3;
+}
+:root[data-theme='light'] .crt-trainer-counter:hover {
+  box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
+}
+:root[data-theme='light'] .crt-trainer-counter-name {
+  text-shadow: none;
+}
+
 /* Footer — tiny version stamp at the bottom of the page */
 .crt-footer {
   margin-top: 28px;

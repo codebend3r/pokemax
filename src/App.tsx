@@ -400,6 +400,7 @@ export default function App() {
                 setSelectedTrainer(null);
                 handleSelect(name);
               }}
+              speciesIndex={fullSpeciesIndex}
             />
           ) : (
             <TrainerGrid trainers={TRAINERS} onSelect={setSelectedTrainer} />

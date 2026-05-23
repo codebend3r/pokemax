@@ -92,6 +92,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Pewter City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/brock.png',
     team: [
       { species: 'geodude', level: 12, moves: ['tackle', 'defense-curl'] },
       { species: 'onix', level: 14, moves: ['tackle', 'bide'] },
@@ -103,6 +104,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Cerulean City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/misty.png',
     team: [
       { species: 'staryu', level: 18, moves: ['tackle', 'water-gun'] },
       { species: 'starmie', level: 21, moves: ['water-gun', 'harden', 'tackle', 'bubble-beam'] },
@@ -114,6 +116,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Vermilion City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/ltsurge.png',
     team: [
       { species: 'voltorb', level: 21, moves: ['tackle', 'screech', 'sonicboom'] },
       { species: 'pikachu', level: 18, moves: ['thundershock', 'growl', 'thunder-wave'] },
@@ -126,6 +129,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Celadon City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/erika.png',
     team: [
       { species: 'victreebel', level: 29, moves: ['razor-leaf', 'sleep-powder', 'wrap'] },
       { species: 'tangela', level: 24, moves: ['constrict', 'sleep-powder', 'bind'] },
@@ -138,6 +142,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Fuchsia City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/koga.png',
     team: [
       { species: 'koffing', level: 37, moves: ['smog', 'smokescreen', 'tackle'] },
       { species: 'muk', level: 39, moves: ['minimize', 'sludge', 'smokescreen'] },
@@ -151,6 +156,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Saffron City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/sabrina.png',
     team: [
       { species: 'kadabra', level: 38, moves: ['psybeam', 'disable', 'psych-up'] },
       { species: 'mr-mime', level: 37, moves: ['psybeam', 'barrier', 'meditate'] },
@@ -164,6 +170,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'red-blue',
     location: 'Cinnabar Island Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/blaine.png',
     team: [
       { species: 'growlithe', level: 42, moves: ['ember', 'leer', 'bite'] },
       { species: 'ponyta', level: 40, moves: ['ember', 'tail-whip', 'stomp'] },
@@ -177,6 +184,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Team Boss',
     game: 'red-blue',
     location: 'Viridian City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png',
     team: [
       { species: 'rhyhorn', level: 45, moves: ['stomp', 'tail-whip', 'fury-attack'] },
       { species: 'dugtrio', level: 42, moves: ['dig', 'growl', 'scratch'] },
@@ -191,6 +199,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'red-blue',
     location: 'Indigo Plateau',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/lorelei-gen1.png',
     team: [
       { species: 'dewgong', level: 54, moves: ['aurora-beam', 'rest', 'ice-beam', 'double-edge'] },
       { species: 'cloyster', level: 53, moves: ['aurora-beam', 'supersonic', 'clamp', 'blizzard'] },
@@ -205,6 +214,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'red-blue',
     location: 'Indigo Plateau',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bruno.png',
     team: [
       { species: 'onix', level: 53, moves: ['bide', 'slam', 'tackle'] },
       {
@@ -227,6 +237,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'red-blue',
     location: 'Indigo Plateau',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/agatha-gen1.png',
     team: [
       {
         species: 'gengar',
@@ -249,6 +260,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'red-blue',
     location: 'Indigo Plateau',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/lance.png',
     team: [
       { species: 'gyarados', level: 56, moves: ['hydro-pump', 'bite', 'dragon-rage', 'leer'] },
       {
@@ -275,6 +287,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'red-blue',
     location: 'Indigo Plateau',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/blue.png',
     team: [
       {
         species: 'pidgeot',
@@ -296,6 +309,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Violet City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/falkner.png',
     team: [
       { species: 'pidgey', level: 7, moves: ['tackle', 'sand-attack'] },
       { species: 'pidgeotto', level: 9, moves: ['tackle', 'sand-attack', 'gust'] },
@@ -307,6 +321,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Azalea Town Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bugsy.png',
     team: [
       { species: 'metapod', level: 14, moves: ['harden'] },
       { species: 'kakuna', level: 14, moves: ['harden'] },
@@ -319,6 +334,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Goldenrod City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/whitney.png',
     team: [
       { species: 'clefairy', level: 17, moves: ['mimic', 'encore', 'doubleslap', 'metronome'] },
       { species: 'miltank', level: 19, moves: ['rollout', 'attract', 'stomp', 'milk-drink'] },
@@ -330,6 +346,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Ecruteak City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/morty.png',
     team: [
       { species: 'gastly', level: 21, moves: ['lick', 'spite', 'hypnosis', 'mean-look'] },
       { species: 'haunter', level: 21, moves: ['lick', 'spite', 'hypnosis', 'mean-look'] },
@@ -343,6 +360,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Cianwood City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/chuck.png',
     team: [
       { species: 'primeape', level: 27, moves: ['karate-chop', 'thrash', 'leer', 'focus-energy'] },
       { species: 'poliwrath', level: 30, moves: ['surf', 'dynamicpunch', 'hypnosis', 'body-slam'] },
@@ -354,6 +372,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Olivine City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/jasmine.png',
     team: [
       { species: 'magnemite', level: 30, moves: ['thundershock', 'sonicboom', 'thunder-wave'] },
       { species: 'magnemite', level: 30, moves: ['thundershock', 'sonicboom', 'thunder-wave'] },
@@ -366,6 +385,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Mahogany Town Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/pryce.png',
     team: [
       { species: 'seel', level: 27, moves: ['icy-wind', 'aurora-beam', 'rest'] },
       { species: 'dewgong', level: 29, moves: ['icy-wind', 'aurora-beam', 'rest', 'take-down'] },
@@ -382,6 +402,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'gold-silver',
     location: 'Blackthorn City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/clair.png',
     team: [
       { species: 'dragonair', level: 37, moves: ['dragon-rage', 'slam', 'thunder-wave', 'surf'] },
       { species: 'dragonair', level: 37, moves: ['dragon-rage', 'slam', 'thunder-wave', 'surf'] },
@@ -399,6 +420,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'gold-silver',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/will.png',
     team: [
       {
         species: 'xatu',
@@ -421,6 +443,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'gold-silver',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/koga.png',
     team: [
       {
         species: 'ariados',
@@ -447,6 +470,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'gold-silver',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bruno.png',
     team: [
       {
         species: 'hitmontop',
@@ -473,6 +497,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'gold-silver',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/karen.png',
     team: [
       {
         species: 'umbreon',
@@ -503,6 +528,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'gold-silver',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/lance.png',
     team: [
       { species: 'gyarados', level: 44, moves: ['hyper-beam', 'surf', 'dragon-rage', 'bite'] },
       {
@@ -534,6 +560,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Rival',
     game: 'gold-silver',
     location: 'Mt. Silver',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/silver.png',
     team: [
       {
         species: 'sneasel',
@@ -563,6 +590,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Rustboro City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/roxanne.png',
     team: [
       { species: 'geodude', level: 12, ability: 'rock-head', moves: ['tackle', 'defense-curl'] },
       { species: 'geodude', level: 12, ability: 'rock-head', moves: ['tackle', 'defense-curl'] },
@@ -580,6 +608,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Dewford Town Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/brawly.png',
     team: [
       {
         species: 'machop',
@@ -607,6 +636,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Mauville City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/wattson.png',
     team: [
       {
         species: 'voltorb',
@@ -640,6 +670,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Lavaridge Town Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/flannery.png',
     team: [
       {
         species: 'slugma',
@@ -667,6 +698,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Petalburg City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/norman.png',
     team: [
       {
         species: 'spinda',
@@ -700,6 +732,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Fortree City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/winona.png',
     team: [
       {
         species: 'swellow',
@@ -733,6 +766,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Mossdeep City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/tateandliza-gen3.png',
     team: [
       {
         species: 'lunatone',
@@ -754,6 +788,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'ruby-sapphire',
     location: 'Sootopolis City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/wallace.png',
     team: [
       {
         species: 'luvdisc',
@@ -793,6 +828,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'ruby-sapphire',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/sidney.png',
     team: [
       {
         species: 'mightyena',
@@ -832,6 +868,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'ruby-sapphire',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/phoebe-gen3.png',
     team: [
       {
         species: 'dusclops',
@@ -871,6 +908,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'ruby-sapphire',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/glacia.png',
     team: [
       {
         species: 'sealeo',
@@ -910,6 +948,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'ruby-sapphire',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/drake-gen3.png',
     team: [
       {
         species: 'shelgon',
@@ -949,6 +988,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'ruby-sapphire',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/steven.png',
     team: [
       {
         species: 'skarmory',
@@ -997,6 +1037,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Oreburgh City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/roark.png',
     team: [
       {
         species: 'geodude',
@@ -1024,6 +1065,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Eterna City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/gardenia.png',
     team: [
       {
         species: 'cherubi',
@@ -1051,6 +1093,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Veilstone City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/maylene.png',
     team: [
       {
         species: 'meditite',
@@ -1078,6 +1121,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Pastoria City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/crasherwake.png',
     team: [
       {
         species: 'gyarados',
@@ -1105,6 +1149,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Hearthome City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/fantina.png',
     team: [
       {
         species: 'drifblim',
@@ -1132,6 +1177,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Canalave City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/byron.png',
     team: [
       {
         species: 'bronzor',
@@ -1159,6 +1205,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Snowpoint City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/candice.png',
     team: [
       {
         species: 'snover',
@@ -1192,6 +1239,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'diamond-pearl',
     location: 'Sunyshore City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/volkner.png',
     team: [
       {
         species: 'jolteon',
@@ -1225,6 +1273,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'diamond-pearl',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/aaron.png',
     team: [
       {
         species: 'dustox',
@@ -1264,6 +1313,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'diamond-pearl',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bertha.png',
     team: [
       {
         species: 'whiscash',
@@ -1303,6 +1353,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'diamond-pearl',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/flint.png',
     team: [
       {
         species: 'rapidash',
@@ -1342,6 +1393,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'diamond-pearl',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/lucian.png',
     team: [
       {
         species: 'mr-mime',
@@ -1381,6 +1433,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'diamond-pearl',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/cynthia.png',
     team: [
       {
         species: 'spiritomb',
@@ -1427,6 +1480,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Rival',
     game: 'diamond-pearl',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/barry.png',
     team: [
       {
         species: 'staraptor',
@@ -1474,6 +1528,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Striaton City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/cilan.png',
     team: [
       {
         species: 'lillipup',
@@ -1495,6 +1550,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Nacrene City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/lenora.png',
     team: [
       {
         species: 'herdier',
@@ -1516,6 +1572,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Castelia City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/burgh.png',
     team: [
       {
         species: 'whirlipede',
@@ -1543,6 +1600,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Nimbasa City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/elesa.png',
     team: [
       {
         species: 'emolga',
@@ -1570,6 +1628,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Driftveil City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/clay.png',
     team: [
       {
         species: 'krokorok',
@@ -1597,6 +1656,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Mistralton City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/skyla.png',
     team: [
       {
         species: 'swoobat',
@@ -1624,6 +1684,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Icirrus City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/brycen.png',
     team: [
       {
         species: 'vanillish',
@@ -1651,6 +1712,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'black-white',
     location: 'Opelucid City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/drayden.png',
     team: [
       {
         species: 'fraxure',
@@ -1678,6 +1740,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'black-white',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/shauntal.png',
     team: [
       {
         species: 'cofagrigus',
@@ -1711,6 +1774,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'black-white',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/marshal.png',
     team: [
       {
         species: 'throh',
@@ -1744,6 +1808,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'black-white',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/grimsley.png',
     team: [
       {
         species: 'scrafty',
@@ -1777,6 +1842,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'black-white',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/caitlin.png',
     team: [
       {
         species: 'musharna',
@@ -1810,6 +1876,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'black-white',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/alder.png',
     team: [
       {
         species: 'accelgor',
@@ -1860,7 +1927,8 @@ export const TRAINERS: Trainer[] = [
     name: 'N',
     trainerClass: 'Team Boss',
     game: 'black-white',
-    location: 'N’s Castle',
+    location: "N's Castle",
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/n.png',
     team: [
       {
         species: 'zekrom',
@@ -1912,6 +1980,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Rival',
     game: 'black-white',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/cheren.png',
     team: [
       {
         species: 'unfezant',
@@ -1957,6 +2026,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Rival',
     game: 'black-white',
     location: 'Victory Road',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bianca.png',
     team: [
       {
         species: 'musharna',
@@ -2004,6 +2074,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Santalune City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/viola.png',
     team: [
       {
         species: 'surskit',
@@ -2025,6 +2096,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Cyllage City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/grant.png',
     team: [
       {
         species: 'amaura',
@@ -2046,6 +2118,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Shalour City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/korrina.png',
     team: [
       {
         species: 'mienfoo',
@@ -2073,6 +2146,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Coumarine City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/ramos.png',
     team: [
       {
         species: 'jumpluff',
@@ -2100,6 +2174,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Lumiose City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/clemont.png',
     team: [
       {
         species: 'emolga',
@@ -2127,6 +2202,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Laverre City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/valerie.png',
     team: [
       {
         species: 'mawile',
@@ -2154,6 +2230,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Anistar City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/olympia.png',
     team: [
       {
         species: 'sigilyph',
@@ -2181,6 +2258,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'x-y',
     location: 'Snowbelle City Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/wulfric.png',
     team: [
       {
         species: 'abomasnow',
@@ -2208,6 +2286,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'x-y',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/malva.png',
     team: [
       {
         species: 'pyroar',
@@ -2241,6 +2320,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'x-y',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/siebold.png',
     team: [
       {
         species: 'clawitzer',
@@ -2274,6 +2354,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'x-y',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/wikstrom.png',
     team: [
       {
         species: 'klefki',
@@ -2307,6 +2388,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'x-y',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/drasna.png',
     team: [
       {
         species: 'dragalge',
@@ -2340,6 +2422,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'x-y',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/diantha.png',
     team: [
       {
         species: 'hawlucha',
@@ -2394,6 +2477,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sun-moon',
     location: 'Iki Town',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/hala.png',
     team: [
       {
         species: 'mankey',
@@ -2421,6 +2505,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sun-moon',
     location: 'Ruins of Life',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/olivia.png',
     team: [
       {
         species: 'nosepass',
@@ -2448,6 +2533,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sun-moon',
     location: "Ula'ula Island",
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/nanu.png',
     team: [
       {
         species: 'sableye',
@@ -2475,6 +2561,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sun-moon',
     location: 'Vast Poni Canyon',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/hapu.png',
     team: [
       {
         species: 'dugtrio-alola',
@@ -2508,6 +2595,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'sun-moon',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/acerola.png',
     team: [
       {
         species: 'drifblim',
@@ -2547,6 +2635,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'sun-moon',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/kahili.png',
     team: [
       {
         species: 'oricorio',
@@ -2586,6 +2675,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'sun-moon',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/kukui.png',
     team: [
       {
         species: 'lycanroc',
@@ -2639,6 +2729,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Turffield Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/milo.png',
     team: [
       {
         species: 'gossifleur',
@@ -2660,6 +2751,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Hulbury Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/nessa.png',
     team: [
       {
         species: 'goldeen',
@@ -2687,6 +2779,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Motostoke Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/kabu.png',
     team: [
       {
         species: 'ninetales',
@@ -2714,6 +2807,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Stow-on-Side Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bea.png',
     team: [
       {
         species: 'hitmontop',
@@ -2747,6 +2841,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Ballonlea Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/opal.png',
     team: [
       {
         species: 'weezing-galar',
@@ -2780,6 +2875,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Circhester Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/gordie.png',
     team: [
       {
         species: 'barbaracle',
@@ -2813,6 +2909,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Spikemuth',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/piers.png',
     team: [
       {
         species: 'scrafty',
@@ -2846,6 +2943,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'sword-shield',
     location: 'Hammerlocke Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/raihan.png',
     team: [
       {
         species: 'gigalith',
@@ -2879,6 +2977,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'sword-shield',
     location: 'Wyndon Stadium',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/leon.png',
     team: [
       {
         species: 'aegislash',
@@ -2938,6 +3037,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Cortondo Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/katy.png',
     team: [
       {
         species: 'nymble',
@@ -2965,6 +3065,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Artazon Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/brassius.png',
     team: [
       {
         species: 'smoliv',
@@ -2992,6 +3093,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Levincia Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/iono.png',
     team: [
       {
         species: 'wattrel',
@@ -3025,6 +3127,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Cascarrafa Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/kofu.png',
     team: [
       {
         species: 'veluza',
@@ -3052,6 +3155,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Medali Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/larry.png',
     team: [
       {
         species: 'komala',
@@ -3079,6 +3183,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Montenevera Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/ryme.png',
     team: [
       {
         species: 'banette',
@@ -3112,6 +3217,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Alfornada Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/tulip.png',
     team: [
       {
         species: 'farigiraf',
@@ -3145,6 +3251,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Gym Leader',
     game: 'scarlet-violet',
     location: 'Glaseado Gym',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/grusha.png',
     team: [
       {
         species: 'frosmoth',
@@ -3178,6 +3285,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'scarlet-violet',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/rika.png',
     team: [
       {
         species: 'whiscash',
@@ -3217,6 +3325,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'scarlet-violet',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/poppy.png',
     team: [
       {
         species: 'copperajah',
@@ -3256,6 +3365,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Elite Four',
     game: 'scarlet-violet',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/hassel.png',
     team: [
       {
         species: 'noivern',
@@ -3295,6 +3405,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Champion',
     game: 'scarlet-violet',
     location: 'Pokémon League',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/geeta.png',
     team: [
       {
         species: 'espathra',
@@ -3346,6 +3457,7 @@ export const TRAINERS: Trainer[] = [
     trainerClass: 'Rival',
     game: 'scarlet-violet',
     location: 'Poco Path Lighthouse',
+    spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/nemona-s.png',
     team: [
       {
         species: 'pawmot',

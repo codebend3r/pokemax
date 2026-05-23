@@ -302,9 +302,19 @@ class ChiptunePlayer {
     const stepDuration = 60 / track.bpm / 4; // 16th-note grid
     const defaultLoops = Math.max(8, Math.round(200 / (track.melody.length * stepDuration)));
     const targetLoops = track.loops ?? defaultLoops;
-    // 1.0s look-ahead so the scheduler survives main-thread blocks from
-    // route changes / lazy-chunk loads without dropping into silence.
-    while (this.nextNoteTime < this.ctx.currentTime + 1.0) {
+    // If a long main-thread block (tab switch, big React re-render) pushed
+    // the scheduler past its buffer, the catch-up loop would otherwise burst
+    // every missed step into the past — Web Audio plays past-time notes
+    // immediately, so you'd hear a flurry of overlapping notes. Snap forward
+    // instead and accept the brief silence.
+    const now = this.ctx.currentTime;
+    if (this.nextNoteTime < now - stepDuration) {
+      this.nextNoteTime = now + 0.05;
+    }
+    // 2.0s look-ahead so the scheduler survives main-thread blocks from
+    // route changes / lazy-chunk loads / list re-renders without dropping
+    // into silence.
+    while (this.nextNoteTime < this.ctx.currentTime + 2.0) {
       this.scheduleStep(track, this.nextNoteTime);
       const nextStep = this.step + 1;
       if (nextStep >= track.melody.length) {

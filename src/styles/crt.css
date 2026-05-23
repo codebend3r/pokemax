@@ -2696,11 +2696,35 @@ button.crt-type:hover,
 }
 .crt-trainer-detail-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
   padding: 12px 14px;
   border: 1px solid var(--border);
   background: rgba(0, 255, 159, 0.04);
+}
+.crt-trainer-detail-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.crt-trainer-detail-portrait {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 159, 0.35));
+}
+@media (max-width: 480px) {
+  .crt-trainer-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .crt-trainer-detail-portrait {
+    align-self: center;
+  }
 }
 .crt-trainer-detail-name {
   color: var(--primary);
@@ -3208,6 +3232,20 @@ button.crt-type:hover,
 .crt-item-craft,
 .crt-item-craft-mats {
   font-family: var(--font-body);
+}
+
+/* Trainer list-card portrait — small Showdown VS sprite above the name */
+.crt-trainer-list-card-portrait {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  object-fit: contain;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 4px rgba(0, 255, 159, 0.3));
+}
+:root[data-theme='light'] .crt-trainer-list-card-portrait,
+:root[data-theme='light'] .crt-trainer-detail-portrait {
+  filter: none;
 }
 
 /* Footer — tiny version stamp at the bottom of the page */

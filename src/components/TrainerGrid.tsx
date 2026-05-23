@@ -108,6 +108,14 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
               type="button"
               onClick={() => onSelect(t)}
             >
+              {t.spriteUrl && (
+                <img
+                  className="crt-trainer-list-card-portrait"
+                  src={t.spriteUrl}
+                  alt={t.name}
+                  loading="lazy"
+                />
+              )}
               <div className="crt-trainer-list-card-name">{t.name}</div>
               <div className="crt-trainer-list-card-class">{t.trainerClass.toUpperCase()}</div>
               <div className="crt-trainer-list-card-game">{GAME_LABELS[t.game]}</div>

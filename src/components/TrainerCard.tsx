@@ -74,10 +74,17 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
       </button>
 
       <div className="crt-trainer-detail-header">
-        <div className="crt-trainer-detail-name">{trainer.name.toUpperCase()}</div>
-        <div className="crt-trainer-detail-class">{trainer.trainerClass.toUpperCase()}</div>
-        <div className="crt-trainer-detail-game">{GAME_LABELS[trainer.game]}</div>
-        {trainer.location && <div className="crt-trainer-detail-location">{trainer.location}</div>}
+        {trainer.spriteUrl && (
+          <img className="crt-trainer-detail-portrait" src={trainer.spriteUrl} alt={trainer.name} />
+        )}
+        <div className="crt-trainer-detail-header-text">
+          <div className="crt-trainer-detail-name">{trainer.name.toUpperCase()}</div>
+          <div className="crt-trainer-detail-class">{trainer.trainerClass.toUpperCase()}</div>
+          <div className="crt-trainer-detail-game">{GAME_LABELS[trainer.game]}</div>
+          {trainer.location && (
+            <div className="crt-trainer-detail-location">{trainer.location}</div>
+          )}
+        </div>
       </div>
 
       <div className="crt-trainer-team">

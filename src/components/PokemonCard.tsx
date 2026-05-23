@@ -138,6 +138,7 @@ function CardSprite({
   preloadedAudio,
   cryVolume,
   onCryVolumeChange,
+  expectedVariety,
 }: {
   pokemon: PokemonResponse;
   shiny: boolean;
@@ -145,6 +146,10 @@ function CardSprite({
   preloadedAudio: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume: number;
   onCryVolumeChange?: (v: number) => void;
+  /** The variety the URL says should be displayed. We're mid-transition when
+   * `pokemon.name !== expectedVariety`; auto-play should sit out those frames
+   * to avoid playing the base cry over a Mega/Gmax/regional pre-warm. */
+  expectedVariety: string;
 }) {
   const [fallbacks, setFallbacks] = useState<Record<SpriteView, number>>({ '2d': 0, '3d': 0 });
   const [reacting, setReacting] = useState(false);
@@ -181,6 +186,11 @@ function CardSprite({
   // alternate form whose `cries` URL differs from the preloaded source (e.g. a
   // form with its own unique cry), swap the cached audio to the form's cry.
   useEffect(() => {
+    // Stay silent while React is still resolving the form. Without this, the
+    // base species's cry plays during the brief window between URL canonicalize
+    // and the variety fetch landing — and clobbers the pre-warmed Mega/Gmax/
+    // regional audio with a fresh base-cry `Audio()` instance.
+    if (pokemon.name !== expectedVariety) return;
     const a = preloadedAudio.current;
     if (a && a.src && (!cryUrl || a.src === cryUrl)) {
       a.currentTime = 0;
@@ -195,7 +205,7 @@ function CardSprite({
       preloadedAudio.current = fallbackAudio;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pokemon.id, cryUrl]);
+  }, [pokemon.id, pokemon.name, cryUrl, expectedVariety]);
 
   const playCry = () => {
     const a = preloadedAudio.current;
@@ -419,6 +429,7 @@ export default function PokemonCard({
             preloadedAudio={audioRef}
             cryVolume={cryVolume}
             onCryVolumeChange={onCryVolumeChange}
+            expectedVariety={activeVariety}
           />
           <SpriteToggle value={view} onChange={onViewChange} has2D={has2D} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />

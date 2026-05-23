@@ -546,19 +546,19 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Ralts on Route 102; Mega Gardevoir’s Pixilate Hyper Voice is uncounterable before the League.',
       },
       {
-        species: 'flygon',
-        role: 'Coverage / Flyer',
-        why: 'Trapinch in the Desert — Earthquake + Dragon Claw covers the DexNav-hunted route trainers.',
+        species: 'salamence',
+        role: 'Pseudo-Legend / Flyer',
+        why: 'Bagon via DexNav on Meteor Falls; Mega Salamence Aerilate is the most powerful mid-game attacker in ORAS.',
       },
       {
         species: 'manectric',
         role: 'Mega Speed Pivot',
-        why: 'Electrike on Route 110; Mega Manectric’s Intimidate switch resets are huge for the long ORAS postgame.',
+        why: "Electrike on Route 110; Mega Manectric's Intimidate switch resets are huge for the long ORAS postgame.",
       },
       {
-        species: 'aggron',
-        role: 'Mega Physical Wall',
-        why: 'Aron in Granite Cave; Mega Aggron Filter + Heavy Slam tanks the Delta Episode Rayquaza fight.',
+        species: 'metagross',
+        role: 'Mega Physical Tank',
+        why: 'Steven gifts a Beldum in Mossdeep City; Mega Metagross is the strongest non-legendary attacker in ORAS.',
       },
       {
         species: 'latios',

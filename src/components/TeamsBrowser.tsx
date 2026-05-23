@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { TEAM_BUILDS, TEAM_GAMES } from '@/teams';
 import { GAME_LABELS, type GameId } from '@/trainers';
+import { showdownSpriteUrl } from '@/showdownSprite';
 
 interface Props {
   onSelectPokemon: (speciesSlug: string) => void;
@@ -76,7 +77,7 @@ function GameTeamCard({
           >
             <img
               className="crt-team-pick-sprite"
-              src={`https://play.pokemonshowdown.com/sprites/gen5/${pick.species}.png`}
+              src={showdownSpriteUrl(pick.species)}
               alt={pick.species}
             />
             <div className="crt-team-pick-name">

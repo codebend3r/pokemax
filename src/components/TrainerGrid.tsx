@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
 import { GAME_LABELS, type GameId, type Trainer } from '@/trainers';
+import { showdownSpriteUrl } from '@/showdownSprite';
 
 interface Props {
   trainers: Trainer[];
@@ -114,7 +115,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                 {t.team.map((m, i) => (
                   <img
                     key={`${t.id}-${i}-${m.species}`}
-                    src={`https://play.pokemonshowdown.com/sprites/gen5/${m.species}.png`}
+                    src={showdownSpriteUrl(m.species)}
                     alt={m.species}
                     loading="lazy"
                   />

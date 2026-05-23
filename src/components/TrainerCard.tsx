@@ -5,6 +5,7 @@ import Detail from '@/components/Detail';
 import { useTypeIndex } from '@/hooks/useTypeIndex';
 import { TYPE_COLORS } from '@/typeChart';
 import type { Gen8Species } from '@/types';
+import { showdownSpriteUrl } from '@/showdownSprite';
 
 interface Props {
   trainer: Trainer;
@@ -90,7 +91,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
           >
             <img
               className="crt-trainer-member-sprite"
-              src={`https://play.pokemonshowdown.com/sprites/gen5/${m.species}.png`}
+              src={showdownSpriteUrl(m.species)}
               alt={m.species}
             />
             <div className="crt-trainer-member-name">
@@ -190,7 +191,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
               >
                 <img
                   className="crt-trainer-counter-sprite"
-                  src={`https://play.pokemonshowdown.com/sprites/gen5/${pick.name}.png`}
+                  src={showdownSpriteUrl(pick.name)}
                   alt={pick.name}
                 />
                 <div className="crt-trainer-counter-name">

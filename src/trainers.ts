@@ -3150,7 +3150,7 @@ export const TRAINERS: Trainer[] = [
         species: 'frosmoth',
         level: 47,
         ability: 'ice-scales',
-        moves: ['blizzard', 'bug-buzz', 'ice-scales', 'quiver-dance'],
+        moves: ['blizzard', 'bug-buzz', 'icy-wind', 'quiver-dance'],
       },
       {
         species: 'beartic',

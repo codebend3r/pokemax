@@ -302,7 +302,9 @@ class ChiptunePlayer {
     const stepDuration = 60 / track.bpm / 4; // 16th-note grid
     const defaultLoops = Math.max(8, Math.round(200 / (track.melody.length * stepDuration)));
     const targetLoops = track.loops ?? defaultLoops;
-    while (this.nextNoteTime < this.ctx.currentTime + 0.2) {
+    // 1.0s look-ahead so the scheduler survives main-thread blocks from
+    // route changes / lazy-chunk loads without dropping into silence.
+    while (this.nextNoteTime < this.ctx.currentTime + 1.0) {
       this.scheduleStep(track, this.nextNoteTime);
       const nextStep = this.step + 1;
       if (nextStep >= track.melody.length) {

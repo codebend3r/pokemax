@@ -59,13 +59,14 @@ interface SpritePick {
   animated: boolean;
 }
 
-/**
- * `front_default` is the canonical 2D game sprite (96×96 GBA/3DS pixel art).
- * The form id range (≥ 10000) on the Showdown sprite mirror is inconsistent:
- * some forms are pixel-art animated GIFs (Pikachu cosplay, Deoxys forms),
- * others are large detailed renders (Gigantamax). For "2D mode" we want the
- * true pixel sprite, so forms route through `front_default` directly.
- */
+/** Variety suffixes whose Showdown sprite is a 3D-style render, not pixel-art animation. */
+const NO_PIXEL_2D_SUFFIXES = ['-gmax', '-eternamax'];
+
+/** A pokemon has a pixel-art animated 2D sprite UNLESS its variety is render-only. */
+function hasPixelArt2D(name: string): boolean {
+  return !NO_PIXEL_2D_SUFFIXES.some((suffix) => name.endsWith(suffix));
+}
+
 function pickSprite(
   p: PokemonResponse,
   shiny: boolean,
@@ -79,19 +80,13 @@ function pickSprite(
         const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
         return { url, animated: true };
       }
-      // Alt forms (id ≥ 10000): use the true 2D game sprite. Showdown sprites
-      // for forms are wildly inconsistent — Gigantamax variants are huge
-      // detailed renders that misrepresent the "2D" mode.
-      if (p.id >= 10000) {
-        const url = shiny
-          ? (p.sprites.front_shiny ?? p.sprites.front_default)
-          : p.sprites.front_default;
-        if (url) return { url, animated: false };
-      } else {
-        // Gen 6+ base species: Showdown animated GIF.
-        const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-        return { url, animated: true };
-      }
+      // Everything else: Showdown animated GIF (pixel art for base species and
+      // most forms — cosplay Pikachu, Mega evolutions, Alolan / Galarian /
+      // Hisuian / Paldean forms). Gigantamax + Eternamax are excluded
+      // upstream via `hasPixelArt2D`, so we never reach this code path for
+      // those varieties in 2D mode.
+      const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+      return { url, animated: true };
     }
     if (fallbackLevel === 1) {
       // Tier-1 fallback for the pixel chain: high-res official artwork
@@ -357,7 +352,10 @@ export default function PokemonCard({
   // 2D mode is available when there's a true 2D source: BW animated (Gen 1-5
   // base species, indexed by id) or a `front_default` static sprite. If the
   // current variety has neither, hide the 2D toggle and force 3D.
-  const has2D = pokemon.id <= MAX_BW_ID || pokemon.sprites.front_default !== null;
+  // 2D mode is only meaningful when a pixel-art animated GIF exists. Gigantamax /
+  // Eternamax variants ship 3D-style renders in the Showdown mirror, so we hide
+  // the 2D toggle entirely for those forms.
+  const has2D = hasPixelArt2D(pokemon.name);
   useEffect(() => {
     if (!has2D && view === '2d') onViewChange('3d');
   }, [has2D, view, onViewChange]);

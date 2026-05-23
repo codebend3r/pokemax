@@ -7,6 +7,10 @@
   --dim: rgba(168, 240, 215, 0.85);
   --border: rgba(0, 255, 159, 0.55);
   --error: #ff6b6b;
+  /* `Pixelify Sans` is the global retro display font (logo, names, headers).
+   * `Space Mono` swaps in for small body text + stat numbers where pixel-art
+   * letterforms get cramped (Pokédex entries, descriptions, base stats, etc.). */
+  --font-body: 'Space Mono', 'Courier New', monospace;
 }
 
 * {
@@ -1831,8 +1835,8 @@ button.crt-type:hover,
   display: flex;
   gap: 16px;
   margin-top: 8px;
-  font-family: 'Press Start 2P', 'Pixelify Sans', 'Courier New', monospace;
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 14px;
   line-height: 1.6;
   letter-spacing: 0.5px;
   color: var(--primary);
@@ -1841,7 +1845,7 @@ button.crt-type:hover,
 .crt-card-vitals-label {
   color: var(--accent);
   letter-spacing: 1px;
-  font-size: 11px;
+  font-size: 12px;
   margin-right: 4px;
 }
 
@@ -3178,6 +3182,32 @@ button.crt-type:hover,
 }
 :root[data-theme='light'] .crt-card-back:hover {
   box-shadow: 0 0 4px rgba(40, 120, 70, 0.3);
+}
+
+/* Body-font overrides — `Pixelify Sans` is the global retro display font,
+ * but it gets cramped on dense prose and stat numerals. The selectors below
+ * swap in `Space Mono` (`--font-body`) where legibility matters most. */
+.crt-stat,
+.crt-stat-value,
+.crt-stat-bar,
+.crt-detail-effect,
+.crt-detail-v,
+.crt-pokedex-entry-item p,
+.crt-pokedex-versions,
+.crt-team-pick-why,
+.crt-team-pick-role,
+.crt-team-card-note,
+.crt-trainer-counter-why,
+.crt-trainer-counter-vs,
+.crt-trainer-counter-type,
+.crt-trainer-meta-empty,
+.crt-trainer-moves-empty,
+.crt-trainer-detail-location,
+.crt-item-obtain-where,
+.crt-item-obtain-price,
+.crt-item-craft,
+.crt-item-craft-mats {
+  font-family: var(--font-body);
 }
 
 /* Footer — tiny version stamp at the bottom of the page */

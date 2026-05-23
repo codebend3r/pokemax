@@ -97,8 +97,8 @@ body::after {
     gap: 10px;
   }
   .crt-card-top img {
-    width: 180px;
-    height: 180px;
+    width: 260px;
+    height: 260px;
   }
 }
 
@@ -120,8 +120,8 @@ body::after {
     gap: 24px;
   }
   .crt-card-top img {
-    width: 220px;
-    height: 220px;
+    width: 320px;
+    height: 320px;
   }
   .crt-card-name {
     font-size: 32px;
@@ -158,8 +158,8 @@ body::after {
     padding: 48px 48px 80px;
   }
   .crt-card-top img {
-    width: 260px;
-    height: 260px;
+    width: 400px;
+    height: 400px;
   }
   .crt-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -177,8 +177,8 @@ body::after {
 /* Ultra-wide screens — keep content centered, don't stretch further */
 @media (min-width: 1600px) {
   .crt-card-top img {
-    width: 280px;
-    height: 280px;
+    width: 480px;
+    height: 480px;
   }
 }
 
@@ -307,8 +307,8 @@ button.crt-header-link:hover {
   margin-bottom: 16px;
 }
 .crt-card-top img {
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
   object-fit: contain;
   image-rendering: pixelated;
   background: transparent;
@@ -774,7 +774,7 @@ button.crt-type:hover,
   .crt-card-top img.crt-sprite-3d {
     width: 100%;
     height: auto;
-    max-height: 280px;
+    max-height: 340px;
     object-fit: contain;
     margin: 0 auto;
   }
@@ -1165,11 +1165,8 @@ button.crt-type:hover,
   image-rendering: auto;
   transform-origin: center bottom;
 }
-.crt-card-top img.crt-sprite-3d {
-  /* 3D mode is bigger to differentiate from 2D when both end up on Showdown */
-  width: 220px;
-  height: 220px;
-}
+/* 3D and 2D sprite sizes are driven by the responsive `.crt-card-top img`
+ * rules at each breakpoint, so 3D no longer needs a separate override. */
 .crt-card-top img.crt-sprite-3d.is-static {
   /* Last-resort static fallback — user rejected the prior "PNG bouncing
    * around" CSS animation, so this stays truly still. */

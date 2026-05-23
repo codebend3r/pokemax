@@ -64,26 +64,17 @@ const SD_GEN5_ANI = 'https://play.pokemonshowdown.com/sprites/gen5ani';
 const SD_GEN5_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5ani-shiny';
 const MAX_BW_ID = 649;
 
-// Sword/Shield Dynamax/Gigantamax intro jingle. Drop the audio file at
-// `public/audio/dynamax-intro.ogg`; Vite serves it at `<BASE_URL>audio/...`
-// so the deploy under `/pokemax/` on GitHub Pages keeps working.
-const DYNAMAX_INTRO_URL = `${import.meta.env.BASE_URL}audio/dynamax-intro.ogg`;
-
 function isGmaxVariety(name: string): boolean {
   return /-(g|eterna)max$/.test(name);
 }
 
 /**
- * Plays a Pokémon cry. For non-Gmax forms it's a direct `<audio>` play. For
- * Gmax/Eternamax:
- *   1. The Dynamax intro jingle plays first (if `public/audio/dynamax-intro.ogg`
- *      exists); on `ended` / `error` we chain to the cry.
- *   2. If the variety has an explicit override in `cryOverrides.ts` (or the
- *      intro file is the chosen sound), play the `<audio>` as-is.
- *   3. Otherwise route the cry URL through `playGmaxCryWithEffects` — pitch
- *      drop + bass boost + reverb, mirroring how SwSh constructs Gmax cries
- *      at runtime from the base cry. Falls back to `<audio>` playback if the
- *      Web Audio path fails (no AudioContext, decode error, CORS).
+ * Plays a Pokémon cry.
+ * - Non-Gmax: direct `<audio>` play.
+ * - Gmax with override (every Gmax form has one): the override clip already
+ *   contains the Dynamax jingle + per-form cry baked together — play as-is.
+ * - Gmax without override (fallback only): route through
+ *   `playGmaxCryWithEffects` for the Web Audio pitch/reverb/bass chain.
  */
 function playCryWithIntro(
   cryAudio: HTMLAudioElement,
@@ -95,25 +86,17 @@ function playCryWithIntro(
     cryAudio.volume = volume * CRY_VOLUME_SCALE;
     cryAudio.play().catch(() => {});
   };
-  if (!isGmaxVariety(pokemonName)) {
+  if (!isGmaxVariety(pokemonName) || cryOverrideFor(pokemonName) !== null) {
     playDirect();
     return;
   }
-  const useEffects = cryOverrideFor(pokemonName) === null && !!cryAudio.src;
-  const playMain = () => {
-    if (!useEffects) {
-      playDirect();
-      return;
-    }
+  if (cryAudio.src) {
     playGmaxCryWithEffects(cryAudio.src, volume * CRY_VOLUME_SCALE).then((ok) => {
       if (!ok) playDirect();
     });
-  };
-  const intro = new Audio(DYNAMAX_INTRO_URL);
-  intro.volume = volume * CRY_VOLUME_SCALE;
-  intro.addEventListener('ended', playMain, { once: true });
-  intro.addEventListener('error', playMain, { once: true });
-  intro.play().catch(playMain);
+  } else {
+    playDirect();
+  }
 }
 
 interface SpritePick {

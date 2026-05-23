@@ -1,34 +1,61 @@
-// Per-variety cry URL overrides. When the PokeAPI clip for a specific form
-// isn't what the user wants (e.g. PokeAPI's Pikachu-Gmax cry is the short
-// in-game cry but the iconic "pii" is the moment people remember), this
-// map wins over `pokemon.cries.latest`.
+// Per-variety cry URL overrides. Wins over `pokemon.cries.latest` in
+// `PokemonCard.tsx`. Keys are PokeAPI variety slugs (`pokemon.name`).
 //
-// Keys are PokeAPI variety slugs (`pokemon.name`), not species names.
-// Values are absolute audio URLs.
+// Every Gmax form has a self-hosted clip extracted from a SwSh "All
+// Gigantamax" compilation: ~4 s each, captures the Dynamax intro jingle
+// followed by the Pokémon's Gmax cry — the "first time you see it"
+// moment the user wanted. Eternatus-Eternamax + Meowth-Gmax are sourced
+// directly from SwSh's audio bank (cleaner) and aren't in the comp video.
 //
-// Two ways to add an entry:
-//   1. Hotlink — any CORS-friendly MP3/OGG works for `<audio>` playback
-//      (CORS only matters for Web Audio buffer reads / canvas, neither
-//      of which we do).
-//   2. Self-host — drop the file at `public/audio/cries/<file>.mp3` and
-//      reference it as `${import.meta.env.BASE_URL}audio/cries/<file>.mp3`.
-//      Survives any third-party CDN changes.
+// Add a new entry: drop the file at `public/audio/cries/<file>.{mp3,ogg}`
+// and reference it as `${import.meta.env.BASE_URL}audio/cries/<file>.<ext>`.
+const A = (file: string): string => `${import.meta.env.BASE_URL}audio/cries/${file}`;
+
 export const CRY_OVERRIDES: Record<string, string> = {
-  // Iconic "pii" from Gmax Pikachu's SwSh appearance (myinstants mirror,
-  // Cloudflare-served, 58 KB MP3). Reported by user as the right sound.
-  'pikachu-gmax': 'https://www.myinstants.com/media/sounds/pikachu-pee.mp3',
-  // Full ~8 s Gmax Corviknight roar from SwSh (same CDN, 136 KB MP3).
-  'corviknight-gmax': 'https://www.myinstants.com/media/sounds/gigantamaxcorviknight.mp3',
-  // Eternamax — full 3.44 s dramatic version, ripped from SwSh's audio bank.
-  // PokeAPI's clip is the 0.88 s snippet.
-  'eternatus-eternamax': `${import.meta.env.BASE_URL}audio/cries/eternatus-eternamax.ogg`,
-  // Meowth-Gmax — SwSh's `Play_PV_052_sp_roar.ogg` is a dedicated 1.74 s,
-  // 48 kHz HD roar (separate from the 5 standard cry samples and 2.4× longer
-  // than PokeAPI's 0.72 s version). The only `sp_roar` file in the entire
-  // SwSh sound bank — Meowth-Gmax and Eternamax are the only two forms that
-  // ship with a truly distinct "Gmax cry" rather than a runtime-processed
-  // base cry. Every other Gmax falls through to the Web Audio effect chain.
-  'meowth-gmax': `${import.meta.env.BASE_URL}audio/cries/meowth-gmax.ogg`,
+  // Gen 1 starters' Gmax forms — from the compilation
+  'venusaur-gmax': A('venusaur-gmax.mp3'),
+  'charizard-gmax': A('charizard-gmax.mp3'),
+  'blastoise-gmax': A('blastoise-gmax.mp3'),
+  // Other Gen 1 Gmax-capable species
+  'butterfree-gmax': A('butterfree-gmax.mp3'),
+  'pikachu-gmax': A('pikachu-gmax.mp3'),
+  'machamp-gmax': A('machamp-gmax.mp3'),
+  'gengar-gmax': A('gengar-gmax.mp3'),
+  'kingler-gmax': A('kingler-gmax.mp3'),
+  'lapras-gmax': A('lapras-gmax.mp3'),
+  'eevee-gmax': A('eevee-gmax.mp3'),
+  'snorlax-gmax': A('snorlax-gmax.mp3'),
+  // Gen 5
+  'garbodor-gmax': A('garbodor-gmax.mp3'),
+  // Gen 7 (Pokémon GO origin)
+  'melmetal-gmax': A('melmetal-gmax.mp3'),
+  // Gen 8 starters
+  'rillaboom-gmax': A('rillaboom-gmax.mp3'),
+  'cinderace-gmax': A('cinderace-gmax.mp3'),
+  'inteleon-gmax': A('inteleon-gmax.mp3'),
+  // Gen 8 native
+  'corviknight-gmax': A('corviknight-gmax.mp3'),
+  'orbeetle-gmax': A('orbeetle-gmax.mp3'),
+  'drednaw-gmax': A('drednaw-gmax.mp3'),
+  'coalossal-gmax': A('coalossal-gmax.mp3'),
+  'flapple-gmax': A('flapple-gmax.mp3'),
+  'appletun-gmax': A('appletun-gmax.mp3'),
+  'sandaconda-gmax': A('sandaconda-gmax.mp3'),
+  'toxtricity-amped-gmax': A('toxtricity-amped-gmax.mp3'),
+  'centiskorch-gmax': A('centiskorch-gmax.mp3'),
+  'hatterene-gmax': A('hatterene-gmax.mp3'),
+  'grimmsnarl-gmax': A('grimmsnarl-gmax.mp3'),
+  'alcremie-gmax': A('alcremie-gmax.mp3'),
+  'copperajah-gmax': A('copperajah-gmax.mp3'),
+  'duraludon-gmax': A('duraludon-gmax.mp3'),
+  'urshifu-single-strike-gmax': A('urshifu-single-strike-gmax.mp3'),
+  'urshifu-rapid-strike-gmax': A('urshifu-rapid-strike-gmax.mp3'),
+  // Meowth-Gmax — sourced directly from SwSh's audio bank
+  // (`Play_PV_052_sp_roar.ogg`, 1.74 s @ 48 kHz HD)
+  'meowth-gmax': A('meowth-gmax.ogg'),
+  // Eternamax — from SwSh's audio bank (`Play_PV_890_01_00.ogg`, 3.44 s).
+  // Not in the compilation video.
+  'eternatus-eternamax': A('eternatus-eternamax.ogg'),
 };
 
 /** Returns the override URL for a variety, or `null` to fall through to PokeAPI. */

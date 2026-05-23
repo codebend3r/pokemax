@@ -23,6 +23,7 @@ import Detail from '@/components/Detail';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
+import { pokeapiToShowdownSlug } from '@/showdownSprite';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -51,6 +52,13 @@ const BW_BASE =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
 const SHOWDOWN_BASE =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
+// Smogon Sprite Project / fan animations, mirrored by Pokémon Showdown.
+// `ani/` and `ani-shiny/` are frame-animated GIFs in 5th-gen BW pixel-art style;
+// `gen5/` and `gen5-shiny/` are static PNGs in the same style.
+const SD_ANI = 'https://play.pokemonshowdown.com/sprites/ani';
+const SD_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/ani-shiny';
+const SD_GEN5 = 'https://play.pokemonshowdown.com/sprites/gen5';
+const SD_GEN5_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5-shiny';
 const MAX_BW_ID = 649;
 
 interface SpritePick {
@@ -59,20 +67,13 @@ interface SpritePick {
   animated: boolean;
 }
 
-/** Variety suffixes whose Showdown sprite is a 3D-style render, not pixel-art animation. */
-const NO_PIXEL_2D_SUFFIXES = ['-gmax', '-eternamax'];
-
-/** A pokemon has a pixel-art animated 2D sprite UNLESS its variety is render-only. */
-function hasPixelArt2D(name: string): boolean {
-  return !NO_PIXEL_2D_SUFFIXES.some((suffix) => name.endsWith(suffix));
-}
-
 function pickSprite(
   p: PokemonResponse,
   shiny: boolean,
   view: SpriteView,
   fallbackLevel: number,
 ): SpritePick {
+  const sdSlug = pokeapiToShowdownSlug(p.name);
   if (view === '2d') {
     if (fallbackLevel === 0) {
       // Gen 1-5 base species: BW animated pixel art — iconic 2D experience.
@@ -80,16 +81,23 @@ function pickSprite(
         const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
         return { url, animated: true };
       }
-      // Everything else: Showdown animated GIF (pixel art for base species and
-      // most forms — cosplay Pikachu, Mega evolutions, Alolan / Galarian /
-      // Hisuian / Paldean forms). Gigantamax + Eternamax are excluded
-      // upstream via `hasPixelArt2D`, so we never reach this code path for
-      // those varieties in 2D mode.
+      // Gen 6+ official: PokeAPI's Showdown mirror, indexed by id.
       const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
       return { url, animated: true };
     }
     if (fallbackLevel === 1) {
-      // Tier-1 fallback for the pixel chain: high-res official artwork
+      // Smogon fan animation (5th-gen BW style) — covers most Gen 6-9 forms
+      // including Gmax / Eternamax that the PokeAPI mirror is missing.
+      const dir = shiny ? SD_ANI_SHINY : SD_ANI;
+      return { url: `${dir}/${sdSlug}.gif`, animated: true };
+    }
+    if (fallbackLevel === 2) {
+      // Smogon fan static (same project, non-animated). The CSS `.is-static`
+      // class adds the bob animation so the sprite still visibly moves.
+      const dir = shiny ? SD_GEN5_SHINY : SD_GEN5;
+      return { url: `${dir}/${sdSlug}.png`, animated: false };
+    }
+    if (fallbackLevel === 3) {
       const art = p.sprites.other['official-artwork'];
       const url = shiny ? art.front_shiny : art.front_default;
       if (url) return { url, animated: false };
@@ -103,14 +111,19 @@ function pickSprite(
   }
   // 3D = animated Showdown GIF. For Gmax / Eternamax / Dynamax forms these are
   // proper 3D-style render animations; for regular Gen 6+ they're shaded pixel
-  // art that still reads as a 3D model. Either way they're frame-animated, which
-  // matters more than pixel-sharpness in 3D mode.
+  // art that still reads as a 3D model. Either way they're frame-animated.
   if (fallbackLevel === 0) {
     const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
     return { url, animated: true };
   }
-  // Showdown missing → smooth Pokémon HOME render (static).
   if (fallbackLevel === 1) {
+    // PokeAPI mirror missing — try the Showdown direct ani (fan animation).
+    const dir = shiny ? SD_ANI_SHINY : SD_ANI;
+    return { url: `${dir}/${sdSlug}.gif`, animated: true };
+  }
+  if (fallbackLevel === 2) {
+    // Smooth Pokémon HOME render. Static, but `.crt-sprite-3d.is-static` gets
+    // the `crt-3d-dance` CSS bob so it doesn't sit motionless.
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };
@@ -157,7 +170,7 @@ function CardSprite({
   const [particles, setParticles] = useState<Particle[]>([]);
   const fallback = fallbacks[view];
   const bumpFallback = () =>
-    setFallbacks((prev) => ({ ...prev, [view]: Math.min(2, prev[view] + 1) }));
+    setFallbacks((prev) => ({ ...prev, [view]: Math.min(4, prev[view] + 1) }));
   const sprite = pickSprite(pokemon, shiny, view, fallback);
 
   // Reset the per-view fallback ladder whenever the Pokemon changes — the new species
@@ -349,37 +362,10 @@ export default function PokemonCard({
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
   // so the MOVES section isn't blank when viewing those forms.
   const movesPokemon = pokemon.moves.length > 0 ? pokemon : defaultPokemon;
-  // 2D mode needs a true pixel-art animated GIF. Gen 1-5 base species always
-  // have one (BW animated, indexed by id). Gigantamax / Eternamax forms ship
-  // 3D-style renders even on the Showdown mirror, so we exclude them by name.
-  // Everything else: probe the Showdown URL — newer additions like Terapagos
-  // (id 1024) and a handful of other entries 404 there, and we hide the toggle
-  // for those rather than offer a static-only "2D" experience.
-  const namePermits2D = hasPixelArt2D(pokemon.name);
-  const [showdownExists, setShowdownExists] = useState(true);
-  useEffect(() => {
-    if (!namePermits2D || pokemon.id <= MAX_BW_ID) {
-      setShowdownExists(true);
-      return;
-    }
-    setShowdownExists(true);
-    const probe = new Image();
-    let cancelled = false;
-    probe.onload = () => {
-      if (!cancelled) setShowdownExists(true);
-    };
-    probe.onerror = () => {
-      if (!cancelled) setShowdownExists(false);
-    };
-    probe.src = `${SHOWDOWN_BASE}/${pokemon.id}.gif`;
-    return () => {
-      cancelled = true;
-    };
-  }, [pokemon.id, namePermits2D]);
-  const has2D = namePermits2D && showdownExists;
-  useEffect(() => {
-    if (!has2D && view === '2d') onViewChange('3d');
-  }, [has2D, view, onViewChange]);
+  // Both 2D and 3D toggles always have something to show — the sprite ladder
+  // cascades through PokeAPI mirror → Smogon fan animation → Smogon fan static
+  // → official artwork. Even the static tail gets a CSS bob so the sprite is
+  // never motionless.
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
@@ -442,7 +428,7 @@ export default function PokemonCard({
             onCryVolumeChange={onCryVolumeChange}
             expectedVariety={activeVariety}
           />
-          <SpriteToggle value={view} onChange={onViewChange} has2D={has2D} />
+          <SpriteToggle value={view} onChange={onViewChange} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />
         </div>
         <div className="crt-card-meta">

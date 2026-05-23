@@ -1172,8 +1172,10 @@ button.crt-type:hover,
   transform-origin: center 70%;
 }
 .crt-card-top img.crt-sprite-2d.is-static {
+  /* Static fallback only — gentle CSS bob so the sprite never sits motionless */
   image-rendering: pixelated;
   transform-origin: center bottom;
+  animation: crt-3d-dance 3.6s ease-in-out infinite;
 }
 
 /* Click-to-react sprite */

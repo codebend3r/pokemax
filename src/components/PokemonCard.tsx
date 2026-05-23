@@ -52,12 +52,14 @@ const BW_BASE =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
 const SHOWDOWN_BASE =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
-// Smogon Sprite Project animations, mirrored by Pokémon Showdown. `ani/` and
-// `ani-shiny/` are frame-animated GIFs in 5th-gen BW pixel-art style — the
-// closest fan match to the original non-animated pixel art for any Gen 6-9
-// form the PokeAPI mirror doesn't cover.
+// Frame-animated fan sprites in 5th-gen BW pixel-art style, mirrored by
+// Pokémon Showdown. `ani/` is the main Smogon Sprite Project set; `gen5ani/`
+// is an older alternate set that covers some newer DLC/legendary additions
+// (e.g. Terapagos, Miraidon) that `ani/` doesn't have yet.
 const SD_ANI = 'https://play.pokemonshowdown.com/sprites/ani';
 const SD_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/ani-shiny';
+const SD_GEN5_ANI = 'https://play.pokemonshowdown.com/sprites/gen5ani';
+const SD_GEN5_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5ani-shiny';
 const MAX_BW_ID = 649;
 
 interface SpritePick {
@@ -74,10 +76,9 @@ function pickSprite(
 ): SpritePick {
   const sdSlug = pokeapiToShowdownSlug(p.name);
   if (view === '2d') {
-    // 2D shows ONLY frame-animated pixel art. The two tiers below are both
-    // animated GIFs; the parent component probes both before rendering and
-    // hides the 2D toggle entirely if neither URL exists, so we never need a
-    // static fallback here.
+    // 2D shows ONLY frame-animated pixel art. All three tiers below are
+    // animated GIFs; the parent probes them before rendering and hides the 2D
+    // toggle entirely if none resolves, so there's no static fallback here.
     if (fallbackLevel === 0) {
       // Gen 1-5 base species: BW animated pixel art — iconic 2D experience.
       if (p.id <= MAX_BW_ID) {
@@ -88,9 +89,16 @@ function pickSprite(
       const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
       return { url, animated: true };
     }
-    // Smogon fan animation (5th-gen BW style) — covers most Gen 6-9 forms
-    // including Gmax / Eternamax that the PokeAPI mirror is missing.
-    const dir = shiny ? SD_ANI_SHINY : SD_ANI;
+    if (fallbackLevel === 1) {
+      // Smogon Sprite Project fan animation — covers most Gen 6-9 forms
+      // including Gmax / Eternamax that the PokeAPI mirror is missing.
+      const dir = shiny ? SD_ANI_SHINY : SD_ANI;
+      return { url: `${dir}/${sdSlug}.gif`, animated: true };
+    }
+    // Showdown's older `gen5ani/` set — has fan animations for newer DLC
+    // additions (Terapagos, Miraidon, Terapagos-Terastal) that the main
+    // `ani/` directory hasn't picked up yet.
+    const dir = shiny ? SD_GEN5_ANI_SHINY : SD_GEN5_ANI;
     return { url: `${dir}/${sdSlug}.gif`, animated: true };
   }
   // 3D mode: for Gmax / Eternamax forms the Showdown GIF is a true 3D-render
@@ -150,7 +158,7 @@ function CardSprite({
   const [particles, setParticles] = useState<Particle[]>([]);
   const fallback = fallbacks[view];
   const bumpFallback = () =>
-    setFallbacks((prev) => ({ ...prev, [view]: Math.min(1, prev[view] + 1) }));
+    setFallbacks((prev) => ({ ...prev, [view]: Math.min(2, prev[view] + 1) }));
   const sprite = pickSprite(pokemon, shiny, view, fallback);
 
   // Reset the per-view fallback ladder whenever the Pokemon changes — the new species
@@ -366,7 +374,8 @@ export default function PokemonCard({
       const slug = pokeapiToShowdownSlug(pokemon.name);
       const found =
         (await probe(`${SHOWDOWN_BASE}/${pokemon.id}.gif`)) ||
-        (await probe(`${SD_ANI}/${slug}.gif`));
+        (await probe(`${SD_ANI}/${slug}.gif`)) ||
+        (await probe(`${SD_GEN5_ANI}/${slug}.gif`));
       if (!cancelled) setHas2D(found);
     })();
     return () => {

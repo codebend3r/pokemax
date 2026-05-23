@@ -101,19 +101,13 @@ function pickSprite(
       animated: false,
     };
   }
-  // 3D = animated Showdown GIF (real frame-by-frame pixel animation, shaded so it
-  // reads as a 3D-rendered model). This is the actual animated source for every Pokémon.
+  // 3D = Pokémon HOME render. Smooth modeled artwork — distinctly NOT pixel art.
+  // Falls back to official artwork for the handful of varieties without HOME.
   if (fallbackLevel === 0) {
-    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-    return { url, animated: true };
-  }
-  // Showdown missing → Pokémon HOME render
-  if (fallbackLevel === 1) {
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };
   }
-  // Final fallback — official artwork
   const art = p.sprites.other['official-artwork'];
   return {
     url: shiny
@@ -158,16 +152,6 @@ function CardSprite({
   const bumpFallback = () =>
     setFallbacks((prev) => ({ ...prev, [view]: Math.min(2, prev[view] + 1) }));
   const sprite = pickSprite(pokemon, shiny, view, fallback);
-
-  // Some Gen 6+ Showdown sprites (e.g. Minior's 77×71) are too small to fill the card
-  // even after CSS upscale. When that happens, jump to the official-artwork tier.
-  // Gen 1-5 BW sprites are intentionally small pixel art and should stay as-is.
-  const handleSpriteLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    if (view !== '2d' || fallback !== 0) return;
-    if (pokemon.id <= MAX_BW_ID) return;
-    const img = e.currentTarget;
-    if (img.naturalWidth > 0 && img.naturalWidth < 100) bumpFallback();
-  };
 
   // Reset the per-view fallback ladder whenever the Pokemon changes — the new species
   // might have sprites in places the previous one didn't.
@@ -256,7 +240,6 @@ function CardSprite({
         alt={pokemon.name}
         onClick={handleSpriteClick}
         onError={bumpFallback}
-        onLoad={handleSpriteLoad}
         title="click to play cry"
       />
       {particles.map((p) => (
@@ -359,13 +342,34 @@ export default function PokemonCard({
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
   // so the MOVES section isn't blank when viewing those forms.
   const movesPokemon = pokemon.moves.length > 0 ? pokemon : defaultPokemon;
-  // 2D mode is available when there's a true 2D source: BW animated (Gen 1-5
-  // base species, indexed by id) or a `front_default` static sprite. If the
-  // current variety has neither, hide the 2D toggle and force 3D.
-  // 2D mode is only meaningful when a pixel-art animated GIF exists. Gigantamax /
-  // Eternamax variants ship 3D-style renders in the Showdown mirror, so we hide
-  // the 2D toggle entirely for those forms.
-  const has2D = hasPixelArt2D(pokemon.name);
+  // 2D mode needs a true pixel-art animated GIF. Gen 1-5 base species always
+  // have one (BW animated, indexed by id). Gigantamax / Eternamax forms ship
+  // 3D-style renders even on the Showdown mirror, so we exclude them by name.
+  // Everything else: probe the Showdown URL — newer additions like Terapagos
+  // (id 1024) and a handful of other entries 404 there, and we hide the toggle
+  // for those rather than offer a static-only "2D" experience.
+  const namePermits2D = hasPixelArt2D(pokemon.name);
+  const [showdownExists, setShowdownExists] = useState(true);
+  useEffect(() => {
+    if (!namePermits2D || pokemon.id <= MAX_BW_ID) {
+      setShowdownExists(true);
+      return;
+    }
+    setShowdownExists(true);
+    const probe = new Image();
+    let cancelled = false;
+    probe.onload = () => {
+      if (!cancelled) setShowdownExists(true);
+    };
+    probe.onerror = () => {
+      if (!cancelled) setShowdownExists(false);
+    };
+    probe.src = `${SHOWDOWN_BASE}/${pokemon.id}.gif`;
+    return () => {
+      cancelled = true;
+    };
+  }, [pokemon.id, namePermits2D]);
+  const has2D = namePermits2D && showdownExists;
   useEffect(() => {
     if (!has2D && view === '2d') onViewChange('3d');
   }, [has2D, view, onViewChange]);

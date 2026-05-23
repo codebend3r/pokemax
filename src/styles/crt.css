@@ -317,6 +317,12 @@ button.crt-header-link:hover {
 }
 .crt-card-meta {
   flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  /* Uniform vertical rhythm between rows — replaces the ad-hoc
+   * `margin-top` / `margin-bottom` declarations the children used to carry. */
+  row-gap: 10px;
+  align-content: start;
 }
 .crt-card-dex {
   color: var(--accent);
@@ -324,24 +330,24 @@ button.crt-header-link:hover {
   font-size: 38px;
   letter-spacing: 2px;
   line-height: 1;
-  margin-bottom: 4px;
+  /* Tighter coupling with the name underneath (they read as one unit). */
+  margin-bottom: -4px;
 }
 .crt-card-name {
   color: var(--primary);
   text-shadow: 0 0 6px rgba(0, 255, 159, 0.5);
   font-size: 28px;
   letter-spacing: 1px;
+  line-height: 1;
 }
 .crt-card-gen {
   color: var(--dim);
   font-size: 14px;
   letter-spacing: 2px;
-  margin-top: 4px;
 }
 .crt-types {
   display: flex;
   gap: 6px;
-  margin-top: 8px;
 }
 .crt-type {
   padding: 2px 12px;
@@ -1838,7 +1844,6 @@ button.crt-type:hover,
 .crt-card-vitals {
   display: flex;
   gap: 16px;
-  margin-top: 8px;
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
@@ -2000,7 +2005,6 @@ button.crt-type:hover,
 
 /* Compare button on the card */
 .crt-compare-btn {
-  margin-top: 12px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--accent);
@@ -2010,7 +2014,7 @@ button.crt-type:hover,
   letter-spacing: 2px;
   font-size: 14px;
   padding: 6px 12px;
-  align-self: flex-start;
+  justify-self: start;
   transition:
     background 80ms,
     border-color 80ms;

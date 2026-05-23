@@ -1154,10 +1154,15 @@ button.crt-type:hover,
   margin-top: 6px;
 }
 
-.crt-card-top img.crt-sprite-3d.is-anim,
 .crt-card-top img.crt-sprite-2d.is-anim {
-  /* Real frame-animated GIF — don't fight its frames with CSS */
+  /* 2D pixel-art animation — keep pixels crisp */
   image-rendering: pixelated;
+  transform-origin: center bottom;
+}
+.crt-card-top img.crt-sprite-3d.is-anim {
+  /* 3D mode is always a Showdown GIF. Smooth-scale the upscale so the result
+   * reads as a soft 3D-ish render rather than chunky pixels. */
+  image-rendering: auto;
   transform-origin: center bottom;
 }
 .crt-card-top img.crt-sprite-3d {
@@ -1166,9 +1171,9 @@ button.crt-type:hover,
   height: 220px;
 }
 .crt-card-top img.crt-sprite-3d.is-static {
-  /* Final fallback only (HOME static or art) — gentle CSS motion */
+  /* Last-resort static fallback — user rejected the prior "PNG bouncing
+   * around" CSS animation, so this stays truly still. */
   image-rendering: auto;
-  animation: crt-3d-dance 3.6s ease-in-out infinite;
   transform-origin: center 70%;
 }
 .crt-card-top img.crt-sprite-2d.is-static {

@@ -101,21 +101,21 @@ function pickSprite(
     const dir = shiny ? SD_GEN5_ANI_SHINY : SD_GEN5_ANI;
     return { url: `${dir}/${sdSlug}.gif`, animated: true };
   }
-  // 3D mode: for Gmax / Eternamax forms the Showdown GIF is a true 3D-render
-  // animation (smooth, frame-animated, big files). For every other form the
-  // Showdown GIF is pixel art that reads hard at 220px — so default 3D to the
-  // smooth Pokémon HOME render (PNG with a CSS bob via `.is-static`), and
-  // reserve the Showdown GIF for forms where it's actually a 3D-style render.
-  const is3DRenderForm = /-(g|eterna)max$/.test(p.name);
-  if (fallbackLevel === 0 && is3DRenderForm) {
+  // 3D mode: always a frame-animated Showdown GIF. For Gmax / Eternamax it's
+  // a true 3D-render animation; for everything else it's pixel art that
+  // animates. CSS scales the GIF smoothly (no `image-rendering: pixelated`)
+  // so the upscale reads as a soft 3D-ish render rather than chunky pixels.
+  if (fallbackLevel === 0) {
     const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
     return { url, animated: true };
   }
-  if (fallbackLevel === 0) {
-    const home = p.sprites.other.home;
-    const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
-    if (url) return { url, animated: false };
+  if (fallbackLevel === 1) {
+    // PokeAPI mirror missing — try Showdown's direct ani as another animated source.
+    const dir = shiny ? SD_ANI_SHINY : SD_ANI;
+    return { url: `${dir}/${sdSlug}.gif`, animated: true };
   }
+  // Last resort — official artwork. Stays truly static (no CSS bob); should
+  // only ever appear for the handful of forms with no animated source at all.
   const art = p.sprites.other['official-artwork'];
   return {
     url: shiny

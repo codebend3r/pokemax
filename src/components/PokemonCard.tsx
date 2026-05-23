@@ -101,9 +101,16 @@ function pickSprite(
       animated: false,
     };
   }
-  // 3D = Pokémon HOME render. Smooth modeled artwork — distinctly NOT pixel art.
-  // Falls back to official artwork for the handful of varieties without HOME.
+  // 3D = animated Showdown GIF. For Gmax / Eternamax / Dynamax forms these are
+  // proper 3D-style render animations; for regular Gen 6+ they're shaded pixel
+  // art that still reads as a 3D model. Either way they're frame-animated, which
+  // matters more than pixel-sharpness in 3D mode.
   if (fallbackLevel === 0) {
+    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
+    return { url, animated: true };
+  }
+  // Showdown missing → smooth Pokémon HOME render (static).
+  if (fallbackLevel === 1) {
     const home = p.sprites.other.home;
     const url = home ? (shiny ? home.front_shiny : home.front_default) : null;
     if (url) return { url, animated: false };

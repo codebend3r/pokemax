@@ -206,12 +206,7 @@ export default function App() {
     // The cry URL is predictable from the species ID, so we don't need to wait.
     const sp = fullSpeciesIndex.find((s) => s.name === name);
     if (sp) {
-      // For alt forms (id ≥ 10000), the cry endpoint usually only has the base species's cry
-      const cryId =
-        sp.id >= 10000 && sp.speciesName
-          ? (list.species.find((b) => b.name === sp.speciesName)?.id ?? sp.id)
-          : sp.id;
-      const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${cryId}.ogg`;
+      const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
       if (cryAudioRef.current) {
         cryAudioRef.current.pause();
         cryAudioRef.current.src = '';

@@ -32,6 +32,7 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
 ];
 import type { PokeType } from '@/typeChart';
 import { CRY_VOLUME_SCALE } from '@/textUtil';
+import { cryOverrideFor } from '@/cryOverrides';
 import { TRAINERS, type Trainer } from '@/trainers';
 
 // Lazy-loaded — only fetched when first needed
@@ -206,7 +207,9 @@ export default function App() {
     // The cry URL is predictable from the species ID, so we don't need to wait.
     const sp = fullSpeciesIndex.find((s) => s.name === name);
     if (sp) {
-      const url = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
+      const url =
+        cryOverrideFor(sp.name) ??
+        `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
       if (cryAudioRef.current) {
         cryAudioRef.current.pause();
         cryAudioRef.current.src = '';

@@ -24,6 +24,7 @@ import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
 import { pokeapiToShowdownSlug } from '@/showdownSprite';
+import { cryOverrideFor } from '@/cryOverrides';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -201,7 +202,8 @@ function CardSprite({
   useEffect(() => {
     setFallbacks({ '2d': 0, '3d': 0 });
   }, [pokemon.id]);
-  const cryUrl = pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
+  const cryUrl =
+    cryOverrideFor(pokemon.name) ?? pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
 
   // Keep the live audio element in sync with the volume slider
   useEffect(() => {
@@ -536,7 +538,9 @@ export default function PokemonCard({
           const idMatch = v?.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
           if (idMatch) {
             const id = parseInt(idMatch[1], 10);
-            const cryUrl = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
+            const cryUrl =
+              cryOverrideFor(varietyName) ??
+              `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
             if (audioRef.current) {
               audioRef.current.pause();
               audioRef.current.src = '';

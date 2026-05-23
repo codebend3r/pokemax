@@ -25,6 +25,7 @@ import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
 import { pokeapiToShowdownSlug } from '@/showdownSprite';
 import { cryOverrideFor } from '@/cryOverrides';
+import { playGmaxCryWithEffects } from '@/gmaxAudio';
 
 interface Props {
   pokemon: PokemonResponse;
@@ -73,29 +74,46 @@ function isGmaxVariety(name: string): boolean {
 }
 
 /**
- * Plays `cryAudio` directly — or, for Gmax/Eternamax, plays the Dynamax intro
- * first and chains the cry on `ended`. If the intro file is missing or fails
- * to load, fall through to the cry so the user still hears something.
+ * Plays a Pokémon cry. For non-Gmax forms it's a direct `<audio>` play. For
+ * Gmax/Eternamax:
+ *   1. The Dynamax intro jingle plays first (if `public/audio/dynamax-intro.ogg`
+ *      exists); on `ended` / `error` we chain to the cry.
+ *   2. If the variety has an explicit override in `cryOverrides.ts` (or the
+ *      intro file is the chosen sound), play the `<audio>` as-is.
+ *   3. Otherwise route the cry URL through `playGmaxCryWithEffects` — pitch
+ *      drop + bass boost + reverb, mirroring how SwSh constructs Gmax cries
+ *      at runtime from the base cry. Falls back to `<audio>` playback if the
+ *      Web Audio path fails (no AudioContext, decode error, CORS).
  */
 function playCryWithIntro(
   cryAudio: HTMLAudioElement,
   pokemonName: string,
   volume: number,
 ): void {
-  cryAudio.currentTime = 0;
-  cryAudio.volume = volume * CRY_VOLUME_SCALE;
-  if (!isGmaxVariety(pokemonName)) {
-    cryAudio.play().catch(() => {});
-    return;
-  }
-  const intro = new Audio(DYNAMAX_INTRO_URL);
-  intro.volume = volume * CRY_VOLUME_SCALE;
-  const playCryNow = () => {
+  const playDirect = () => {
+    cryAudio.currentTime = 0;
+    cryAudio.volume = volume * CRY_VOLUME_SCALE;
     cryAudio.play().catch(() => {});
   };
-  intro.addEventListener('ended', playCryNow, { once: true });
-  intro.addEventListener('error', playCryNow, { once: true });
-  intro.play().catch(playCryNow);
+  if (!isGmaxVariety(pokemonName)) {
+    playDirect();
+    return;
+  }
+  const useEffects = cryOverrideFor(pokemonName) === null && !!cryAudio.src;
+  const playMain = () => {
+    if (!useEffects) {
+      playDirect();
+      return;
+    }
+    playGmaxCryWithEffects(cryAudio.src, volume * CRY_VOLUME_SCALE).then((ok) => {
+      if (!ok) playDirect();
+    });
+  };
+  const intro = new Audio(DYNAMAX_INTRO_URL);
+  intro.volume = volume * CRY_VOLUME_SCALE;
+  intro.addEventListener('ended', playMain, { once: true });
+  intro.addEventListener('error', playMain, { once: true });
+  intro.play().catch(playMain);
 }
 
 interface SpritePick {

@@ -530,13 +530,12 @@ button.crt-type:hover,
 }
 
 .crt-shiny {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 4px;
   margin-top: 8px;
 }
 .crt-shiny button {
-  flex: 1 0 auto;
-  min-width: max-content;
   white-space: nowrap;
   background: transparent;
   border: 1px solid var(--border);
@@ -547,6 +546,11 @@ button.crt-type:hover,
   cursor: pointer;
   letter-spacing: 1px;
   text-align: center;
+}
+/* When the 2D button is hidden (Gigantamax / Eternamax), let the lone
+ * 3D button take the full row so it stays aligned with NORMAL/SHINY below. */
+.crt-shiny:has(button:only-child) button {
+  grid-column: 1 / -1;
 }
 .crt-shiny button[aria-pressed='true'] {
   border-color: var(--accent);

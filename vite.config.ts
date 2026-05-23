@@ -19,4 +19,9 @@ export default defineConfig(({ mode }) => ({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
+  server: {
+    // Allow tunnel hosts for phone testing (`cloudflared`, `ngrok`).
+    // Vite 6 blocks unknown `Host` headers by default.
+    allowedHosts: ['.trycloudflare.com', '.ngrok-free.app', '.ngrok.io'],
+  },
 }));

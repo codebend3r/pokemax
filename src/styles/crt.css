@@ -243,7 +243,11 @@ button.crt-header-link:hover {
 }
 
 .crt-search {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
+  padding-top: 6px;
   margin-bottom: 24px;
 }
 .crt-search-row {
@@ -3150,6 +3154,30 @@ button.crt-type:hover,
 }
 .crt-item-craft-mat-count {
   color: var(--primary);
+}
+
+/* Back button — top of the Pokémon detail card */
+.crt-card-back {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.crt-card-back:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 6px rgba(0, 255, 159, 0.35);
+}
+:root[data-theme='light'] .crt-card-back:hover {
+  box-shadow: 0 0 4px rgba(40, 120, 70, 0.3);
 }
 
 /* Footer — tiny version stamp at the bottom of the page */

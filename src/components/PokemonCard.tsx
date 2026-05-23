@@ -36,6 +36,8 @@ interface Props {
   form: string;
   onFormChange: (form: string) => void;
   onSelectEvolution?: (name: string) => void;
+  /** Navigates back to the Pokédex grid. */
+  onBack?: () => void;
   gen: number;
   cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume?: number;
@@ -307,6 +309,7 @@ export default function PokemonCard({
   form,
   onFormChange,
   onSelectEvolution,
+  onBack,
   gen,
   cryAudioRef,
   cryVolume = 0.25,
@@ -404,6 +407,11 @@ export default function PokemonCard({
 
   return (
     <div className="crt-card">
+      {onBack && (
+        <button type="button" className="crt-card-back" onClick={onBack}>
+          ← BACK TO POKéDEX
+        </button>
+      )}
       <div className="crt-card-top">
         <div className="crt-card-art">
           <CardSprite

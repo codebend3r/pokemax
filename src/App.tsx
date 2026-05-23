@@ -369,6 +369,7 @@ export default function App() {
                   form={formKey}
                   onFormChange={setFormKey}
                   onSelectEvolution={handleSelect}
+                  onBack={goHome}
                   gen={selectedGen}
                   cryAudioRef={cryAudioRef}
                   cryVolume={cryVolume}

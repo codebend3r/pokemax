@@ -33,7 +33,7 @@ function Section({
         onClick={onToggle}
         aria-expanded={open}
       >
-        {open ? '▼' : '▶'} {title}
+        {title}
       </button>
       {open && <div className="crt-trainer-section-body">{children}</div>}
     </div>

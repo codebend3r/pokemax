@@ -18,6 +18,7 @@ import type { FormCategory } from '@/types';
 import {
   pokedexPath,
   trainersPath,
+  trainerPath,
   teamsPath,
   parsePokedexSearch,
   formFromVariety,
@@ -47,7 +48,6 @@ export default function App() {
   const { pageSize, setPageSize } = usePageSize();
   const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
   const [query, setQuery] = useState('');
-  const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
 
   const [, navigate] = useLocation();
   const search = useSearch(); // reactive — re-renders when ?query changes
@@ -55,17 +55,19 @@ export default function App() {
 
   const [matchPokemonDetail, pokemonDetailParams] = useRoute('/pokedex/:name');
   const [matchTrainers] = useRoute('/trainers');
+  const [matchTrainerDetail, trainerDetailParams] = useRoute('/trainers/:id');
   const [matchTeams] = useRoute('/teams');
   const [matchRoot] = useRoute('/');
 
-  const appMode: 'pokedex' | 'trainers' | 'teams' = matchTrainers
-    ? 'trainers'
-    : matchTeams
-      ? 'teams'
-      : 'pokedex';
+  const appMode: 'pokedex' | 'trainers' | 'teams' =
+    matchTrainers || matchTrainerDetail ? 'trainers' : matchTeams ? 'teams' : 'pokedex';
 
   const selected: string | null = matchPokemonDetail
     ? (pokemonDetailParams?.name?.toLowerCase() ?? null)
+    : null;
+
+  const selectedTrainer: Trainer | null = matchTrainerDetail
+    ? (TRAINERS.find((t) => t.id === trainerDetailParams?.id) ?? null)
     : null;
 
   // Legacy back-compat: ?p=charizard → /pokedex/charizard (one-shot on mount)
@@ -287,10 +289,7 @@ export default function App() {
           role="tab"
           aria-selected={appMode === 'trainers'}
           className={'crt-mode-tab' + (appMode === 'trainers' ? ' active' : '')}
-          onClick={() => {
-            setSelectedTrainer(null);
-            navigate(trainersPath());
-          }}
+          onClick={() => navigate(trainersPath())}
         >
           TRAINERS
         </button>
@@ -470,18 +469,22 @@ export default function App() {
             </div>
           }
         >
+          {matchTrainerDetail && !selectedTrainer && (
+            <div className="crt-error">ERR: TRAINER "{trainerDetailParams?.id}" NOT FOUND</div>
+          )}
           {selectedTrainer ? (
             <TrainerCard
               trainer={selectedTrainer}
-              onBack={() => setSelectedTrainer(null)}
+              onBack={() => navigate(trainersPath())}
               onSelectPokemon={(name) => {
-                setSelectedTrainer(null);
                 handleSelect(name);
               }}
               speciesIndex={fullSpeciesIndex}
             />
           ) : (
-            <TrainerGrid trainers={TRAINERS} onSelect={setSelectedTrainer} />
+            !matchTrainerDetail && (
+              <TrainerGrid trainers={TRAINERS} onSelect={(t) => navigate(trainerPath(t.id))} />
+            )
           )}
         </Suspense>
       )}

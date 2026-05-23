@@ -26,6 +26,10 @@ export function trainersPath(): string {
   return '/trainers';
 }
 
+export function trainerPath(id: string): string {
+  return `/trainers/${id}`;
+}
+
 export function teamsPath(): string {
   return '/teams';
 }

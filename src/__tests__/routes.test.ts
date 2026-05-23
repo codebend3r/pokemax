@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   pokedexPath,
   trainersPath,
+  trainerPath,
   teamsPath,
   parsePokedexSearch,
   buildPokedexSearch,
@@ -32,10 +33,14 @@ describe('routes', () => {
     });
   });
 
-  describe('trainersPath / teamsPath', () => {
+  describe('trainersPath / teamsPath / trainerPath', () => {
     it('returns the literals', () => {
       expect(trainersPath()).toBe('/trainers');
       expect(teamsPath()).toBe('/teams');
+    });
+    it('builds the trainer detail path', () => {
+      expect(trainerPath('rb-brock')).toBe('/trainers/rb-brock');
+      expect(trainerPath('sv-geeta')).toBe('/trainers/sv-geeta');
     });
   });
 

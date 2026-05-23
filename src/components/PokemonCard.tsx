@@ -62,6 +62,41 @@ const SD_GEN5_ANI = 'https://play.pokemonshowdown.com/sprites/gen5ani';
 const SD_GEN5_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5ani-shiny';
 const MAX_BW_ID = 649;
 
+// Sword/Shield Dynamax/Gigantamax intro jingle. Drop the audio file at
+// `public/audio/dynamax-intro.ogg`; Vite serves it at `<BASE_URL>audio/...`
+// so the deploy under `/pokemax/` on GitHub Pages keeps working.
+const DYNAMAX_INTRO_URL = `${import.meta.env.BASE_URL}audio/dynamax-intro.ogg`;
+
+function isGmaxVariety(name: string): boolean {
+  return /-(g|eterna)max$/.test(name);
+}
+
+/**
+ * Plays `cryAudio` directly — or, for Gmax/Eternamax, plays the Dynamax intro
+ * first and chains the cry on `ended`. If the intro file is missing or fails
+ * to load, fall through to the cry so the user still hears something.
+ */
+function playCryWithIntro(
+  cryAudio: HTMLAudioElement,
+  pokemonName: string,
+  volume: number,
+): void {
+  cryAudio.currentTime = 0;
+  cryAudio.volume = volume * CRY_VOLUME_SCALE;
+  if (!isGmaxVariety(pokemonName)) {
+    cryAudio.play().catch(() => {});
+    return;
+  }
+  const intro = new Audio(DYNAMAX_INTRO_URL);
+  intro.volume = volume * CRY_VOLUME_SCALE;
+  const playCryNow = () => {
+    cryAudio.play().catch(() => {});
+  };
+  intro.addEventListener('ended', playCryNow, { once: true });
+  intro.addEventListener('error', playCryNow, { once: true });
+  intro.play().catch(playCryNow);
+}
+
 interface SpritePick {
   url: string;
   /** true when the rendered image is a real frame-animated GIF */
@@ -185,16 +220,13 @@ function CardSprite({
     if (pokemon.name !== expectedVariety) return;
     const a = preloadedAudio.current;
     if (a && a.src && (!cryUrl || a.src === cryUrl)) {
-      a.currentTime = 0;
-      a.volume = cryVolume * CRY_VOLUME_SCALE;
-      a.play().catch(() => {});
+      playCryWithIntro(a, pokemon.name, cryVolume);
       return;
     }
     if (cryUrl) {
       const fallbackAudio = new Audio(cryUrl);
-      fallbackAudio.volume = cryVolume * CRY_VOLUME_SCALE;
-      fallbackAudio.play().catch(() => {});
       preloadedAudio.current = fallbackAudio;
+      playCryWithIntro(fallbackAudio, pokemon.name, cryVolume);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pokemon.id, pokemon.name, cryUrl, expectedVariety]);
@@ -202,16 +234,13 @@ function CardSprite({
   const playCry = () => {
     const a = preloadedAudio.current;
     if (a && a.src && (!cryUrl || a.src === cryUrl)) {
-      a.currentTime = 0;
-      a.volume = cryVolume * CRY_VOLUME_SCALE;
-      a.play().catch(() => {});
+      playCryWithIntro(a, pokemon.name, cryVolume);
       return;
     }
     if (cryUrl) {
       const fresh = new Audio(cryUrl);
-      fresh.volume = cryVolume * CRY_VOLUME_SCALE;
-      fresh.play().catch(() => {});
       preloadedAudio.current = fresh;
+      playCryWithIntro(fresh, pokemon.name, cryVolume);
     }
   };
 
@@ -513,9 +542,8 @@ export default function PokemonCard({
               audioRef.current.src = '';
             }
             const audio = new Audio(cryUrl);
-            audio.volume = cryVolume * CRY_VOLUME_SCALE;
-            audio.play().catch(() => {});
             audioRef.current = audio;
+            playCryWithIntro(audio, varietyName, cryVolume);
           }
         }}
       />

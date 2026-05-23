@@ -120,45 +120,47 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         </div>
       </Section>
 
-      <Section
-        title="ABILITY / ITEM / NATURE"
-        open={openMeta}
-        onToggle={() => setOpenMeta((v) => !v)}
-      >
-        <div className="crt-trainer-meta-grid">
-          {trainer.team.map((m, i) => (
-            <div key={`${m.species}-${i}`} className="crt-trainer-meta-row">
-              <div className="crt-trainer-meta-species">
-                {m.species.replace(/-/g, ' ').toUpperCase()}
+      {trainer.team.some((m) => m.ability || m.item || m.nature) && (
+        <Section
+          title="ABILITY / ITEM / NATURE"
+          open={openMeta}
+          onToggle={() => setOpenMeta((v) => !v)}
+        >
+          <div className="crt-trainer-meta-grid">
+            {trainer.team.map((m, i) => (
+              <div key={`${m.species}-${i}`} className="crt-trainer-meta-row">
+                <div className="crt-trainer-meta-species">
+                  {m.species.replace(/-/g, ' ').toUpperCase()}
+                </div>
+                <div className="crt-trainer-meta-cell">
+                  <span className="crt-trainer-meta-label">ABILITY</span>
+                  {m.ability ? (
+                    <Detail kind="ability" name={m.ability} />
+                  ) : (
+                    <span className="crt-trainer-meta-empty">—</span>
+                  )}
+                </div>
+                <div className="crt-trainer-meta-cell">
+                  <span className="crt-trainer-meta-label">ITEM</span>
+                  {m.item ? (
+                    <Detail kind="item" name={m.item} />
+                  ) : (
+                    <span className="crt-trainer-meta-empty">—</span>
+                  )}
+                </div>
+                <div className="crt-trainer-meta-cell">
+                  <span className="crt-trainer-meta-label">NATURE</span>
+                  {m.nature ? (
+                    <Detail kind="nature" name={m.nature} />
+                  ) : (
+                    <span className="crt-trainer-meta-empty">—</span>
+                  )}
+                </div>
               </div>
-              <div className="crt-trainer-meta-cell">
-                <span className="crt-trainer-meta-label">ABILITY</span>
-                {m.ability ? (
-                  <Detail kind="ability" name={m.ability} />
-                ) : (
-                  <span className="crt-trainer-meta-empty">—</span>
-                )}
-              </div>
-              <div className="crt-trainer-meta-cell">
-                <span className="crt-trainer-meta-label">ITEM</span>
-                {m.item ? (
-                  <Detail kind="item" name={m.item} />
-                ) : (
-                  <span className="crt-trainer-meta-empty">—</span>
-                )}
-              </div>
-              <div className="crt-trainer-meta-cell">
-                <span className="crt-trainer-meta-label">NATURE</span>
-                {m.nature ? (
-                  <Detail kind="nature" name={m.nature} />
-                ) : (
-                  <span className="crt-trainer-meta-empty">—</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <Section
         title={`BEST COUNTER TEAM (Gen ≤ ${GAME_MAX_GEN[trainer.game]})`}

@@ -20,10 +20,15 @@ export const CRY_OVERRIDES: Record<string, string> = {
   // Full ~8 s Gmax Corviknight roar from SwSh (same CDN, 136 KB MP3).
   'corviknight-gmax': 'https://www.myinstants.com/media/sounds/gigantamaxcorviknight.mp3',
   // Eternamax — full 3.44 s dramatic version, ripped from SwSh's audio bank.
-  // Self-hosted because PokeAPI's clip is the 0.88 s snippet. This is the
-  // only Gmax/Eternamax cry that exists as a distinct file in the game data;
-  // every other Gmax cry is the base species cry processed at runtime.
+  // PokeAPI's clip is the 0.88 s snippet.
   'eternatus-eternamax': `${import.meta.env.BASE_URL}audio/cries/eternatus-eternamax.ogg`,
+  // Meowth-Gmax — SwSh's `Play_PV_052_sp_roar.ogg` is a dedicated 1.74 s,
+  // 48 kHz HD roar (separate from the 5 standard cry samples and 2.4× longer
+  // than PokeAPI's 0.72 s version). The only `sp_roar` file in the entire
+  // SwSh sound bank — Meowth-Gmax and Eternamax are the only two forms that
+  // ship with a truly distinct "Gmax cry" rather than a runtime-processed
+  // base cry. Every other Gmax falls through to the Web Audio effect chain.
+  'meowth-gmax': `${import.meta.env.BASE_URL}audio/cries/meowth-gmax.ogg`,
 };
 
 /** Returns the override URL for a variety, or `null` to fall through to PokeAPI. */

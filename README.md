@@ -100,26 +100,26 @@ The whole layout is responsive. Card top stacks, stat bars compress, type chips 
 ## Run it
 
 ```bash
-npm install
-npm run dev      # vite dev server
+bun install
+bun run dev      # vite dev server
 ```
 
 Pass `--host` to expose on your LAN (great for testing on a phone):
 
 ```bash
-npm run dev -- --host
+bun run dev --host
 ```
 
 ## Test
 
 ```bash
-npm test         # vitest run
+bun run test     # vitest run (NOT `bun test` — that invokes bun's built-in runner)
 ```
 
 ## Build
 
 ```bash
-npm run build    # production bundle to dist/
+bun run build    # production bundle to dist/
 ```
 
 ---
@@ -182,9 +182,9 @@ scripts/screenshot.mjs         # Playwright script that produced them
 ## Re-generating the screenshots
 
 ```bash
-npm run dev &                                    # in one shell
-npx playwright install chromium                  # one-time
-node scripts/screenshot.mjs                      # writes to docs/screenshots/
+bun run dev &                                    # in one shell
+bunx playwright install chromium                 # one-time
+bun scripts/screenshot.mjs                       # writes to docs/screenshots/
 ```
 
 The script clips to the viewport (no `fullPage: true`) so README images stay landscape-shaped. Tweak the viewports at the top of `scripts/screenshot.mjs` if you want a different aspect.

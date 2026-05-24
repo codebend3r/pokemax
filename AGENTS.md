@@ -40,7 +40,7 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ## Tests
 
 ### Do
-- Use `npm test` (vitest). New components/hooks get a minimal test for default state + the main interactions.
+- Use `bun run test` (vitest). New components/hooks get a minimal test for default state + the main interactions. **Never** invoke `bun test` directly — that runs bun's built-in test runner, which this project does not use.
 - Use `@testing-library/react` patterns: query by role/label, drive with `userEvent`.
 - Put tests in `src/__tests__/<name>.test.{ts,tsx}`.
 

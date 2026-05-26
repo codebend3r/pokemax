@@ -3258,7 +3258,7 @@ button.crt-type:hover,
   filter: none;
 }
 
-/* Footer — tiny version stamp at the bottom of the page */
+/* Footer — tiny version + credit stamp at the bottom of the page */
 .crt-footer {
   margin-top: 28px;
   padding-top: 10px;
@@ -3268,4 +3268,26 @@ button.crt-type:hover,
   letter-spacing: 2px;
   color: var(--dim);
   opacity: 0.55;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 10px;
+}
+.crt-footer-sep {
+  color: var(--border);
+}
+.crt-footer-link {
+  color: var(--tertiary);
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+  transition:
+    color 120ms ease,
+    text-shadow 120ms ease;
+}
+.crt-footer-link:hover,
+.crt-footer-link:focus-visible {
+  color: var(--accent);
+  text-shadow: 0 0 6px currentColor;
+  outline: none;
 }

@@ -502,7 +502,34 @@ export default function App() {
           />
         </Suspense>
       )}
-      <footer className="crt-footer">v{__APP_VERSION__}</footer>
+      <footer className="crt-footer">
+        <span>v{__APP_VERSION__}</span>
+        <span className="crt-footer-sep" aria-hidden="true">
+          ·
+        </span>
+        <span>
+          built by{' '}
+          <a
+            className="crt-footer-link"
+            href="https://github.com/codebend3r"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            CJ Rivas
+          </a>
+        </span>
+        <span className="crt-footer-sep" aria-hidden="true">
+          ·
+        </span>
+        <a
+          className="crt-footer-link"
+          href="https://github.com/codebend3r/pokemax"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          source on github
+        </a>
+      </footer>
     </div>
   );
 }

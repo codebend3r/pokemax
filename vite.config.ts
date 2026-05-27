@@ -10,7 +10,10 @@ const pkg = JSON.parse(readFileSync(path.resolve(__dirname, './package.json'), '
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: mode === 'production' ? '/pokemax/' : '/',
+  // GitHub Pages serves the site under `/pokemax/`, but Netlify serves it from
+  // the root. Netlify auto-sets `NETLIFY=true` on its build env, so we use that
+  // to pick the right base without an extra build flag.
+  base: mode === 'production' && !process.env.NETLIFY ? '/pokemax/' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

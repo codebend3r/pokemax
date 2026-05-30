@@ -508,7 +508,7 @@ export default function App() {
           ·
         </span>
         <span>
-          built by{' '}
+          built by Max Rivas-Alfaro and{' '}
           <a
             className="crt-footer-link"
             href="https://github.com/codebend3r"

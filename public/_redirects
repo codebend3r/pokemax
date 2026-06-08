@@ -1,0 +1,8 @@
+# Netlify SPA fallback. GitHub Pages ignores this file and keeps using
+# `404.html` + the rafgraph/spa-github-pages decoder in `index.html`.
+#
+# Without this rule, refreshing any non-root path on Netlify falls through to
+# `404.html`, which re-encodes the URL (`&` → `~and~`) and redirects. The new
+# URL is still not a real file, so 404.html runs again, doubling the encoding
+# every reload — the runaway `/?/&/~and~/~and~/...` pattern.
+/*  /index.html  200

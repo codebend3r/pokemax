@@ -53,7 +53,7 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 
 ### Do
 - Keep the CRT phosphor aesthetic: `--primary` (phosphor green), `--accent` (magenta), `--tertiary` (cyan), `--dim`, all defined at the top of `src/styles/crt.css`. Pull from these variables, don't hardcode hex.
-- Use the `Pixelify Sans` retro font already loaded in `index.html`. Fallback chain in `crt.css` is `'Pixelify Sans', 'VT323', 'Courier New', monospace`.
+- Two fonts are loaded in `index.html`: `Pixelify Sans` (the global retro display font — logo, names, headers; fallback chain `'Pixelify Sans', 'VT323', 'Courier New', monospace`) and `Space Mono` (the `--font-body` used for small body text and stat numbers where pixel-art legibility suffers). `VT323` is only a fallback name, not a loaded import.
 - Persist user preferences in `localStorage` under the `pokemax.*` namespace (`pokemax.theme`, `pokemax.view`, `pokemax.pageSize`, etc.).
 - Light theme overrides live near the bottom of `crt.css` under `:root[data-theme="light"] ...`. Add matching overrides when introducing new tinted elements.
 

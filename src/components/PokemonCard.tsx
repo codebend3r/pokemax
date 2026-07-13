@@ -76,11 +76,7 @@ function isGmaxVariety(name: string): boolean {
  * - Gmax without override (fallback only): route through
  *   `playGmaxCryWithEffects` for the Web Audio pitch/reverb/bass chain.
  */
-function playCryWithIntro(
-  cryAudio: HTMLAudioElement,
-  pokemonName: string,
-  volume: number,
-): void {
+function playCryWithIntro(cryAudio: HTMLAudioElement, pokemonName: string, volume: number): void {
   const playDirect = () => {
     cryAudio.currentTime = 0;
     cryAudio.volume = volume * CRY_VOLUME_SCALE;

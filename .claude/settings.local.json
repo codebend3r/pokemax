@@ -5,7 +5,10 @@
       "Bash(git commit -m ' *)",
       "Bash(npm run *)",
       "Bash(bun run *)",
-      "Bash(bun install*)"
+      "Bash(bun install*)",
+      "Bash(git branch *)",
+      "Bash(echo \"PUSH=$?\")",
+      "Bash(git commit *)"
     ]
   }
 }

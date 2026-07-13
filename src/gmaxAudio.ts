@@ -13,9 +13,7 @@ let cachedIR: AudioBuffer | null = null;
 
 function getCtx(): AudioContext | null {
   if (ctx) return ctx;
-  const Ctor =
-    window.AudioContext ??
-    (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const Ctor = window.AudioContext ?? window.webkitAudioContext;
   if (!Ctor) return null;
   ctx = new Ctor();
   return ctx;

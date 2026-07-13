@@ -178,13 +178,8 @@ class ChiptunePlayer {
   private ensureContext(): boolean {
     if (this.ctx) return true;
     const Ctor =
-      (
-        window as unknown as {
-          AudioContext?: typeof AudioContext;
-          webkitAudioContext?: typeof AudioContext;
-        }
-      ).AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      window.AudioContext ??
+      (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return false;
     const ctx = new Ctor();
     const master = ctx.createGain();

@@ -32,9 +32,10 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ### Do
 - Keep `strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, and `noUncheckedSideEffectImports` on. Fix the cause, not the lint.
 - Run `npx tsc -b --pretty false` before committing if you've touched types — silent green is the bar.
+- Reach for **type narrowing or type guards** to satisfy the checker. For platform-typed globals (e.g. `webkitAudioContext`), declare the real shape via an ambient declaration in `src/vite-env.d.ts` instead of asserting it at the call site.
 
 ### Don't
-- Don't add `// @ts-ignore` or `as any` to make errors go away. Type the data properly or narrow.
+- Don't use TypeScript type assertions of **any** kind — no `as SomeType`, no `as unknown as`, no `as any`, no `// @ts-ignore`. Narrow the type, write a type guard, or declare the correct type. Assertions are banned outright; `as const` (a const assertion, not a cast) is fine.
 - Don't disable strict flags.
 
 ## Tests

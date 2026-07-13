@@ -1248,9 +1248,9 @@ button.crt-type:hover,
     0 0 16px #ffeb70;
 }
 .crt-card-particle.sparkle {
-  color: #00ff9f;
+  color: var(--primary);
   text-shadow:
-    0 0 8px #00ff9f,
+    0 0 8px var(--primary),
     0 0 14px #66ffc4;
   font-size: 26px;
 }

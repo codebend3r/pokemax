@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "verify": "run-p --continue-on-error --aggregate-output prettier:check lint test",
+    "system-check": "run-s prettier:check build:types lint test build:vite",
     "prepare": "husky"
   },
   "dependencies": {

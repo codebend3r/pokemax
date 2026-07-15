@@ -1,1 +1,1 @@
-bun run verify
+bun run prettier:quick

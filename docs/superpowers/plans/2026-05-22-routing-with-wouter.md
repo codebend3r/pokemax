@@ -1071,7 +1071,6 @@ If grep/smoke surfaced no fixes, no commit needed — Tasks 1–6 already produc
 
 ## Acceptance Criteria
 
-- [ ] `npm run verify` (format + lint + tests) passes cleanly
 - [ ] `npx tsc -b --pretty false` produces no output
 - [ ] `npm test` count = old count + 14 (new `routes.test.ts`)
 - [ ] `npm run build` succeeds

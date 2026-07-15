@@ -21,8 +21,10 @@ import ComparePanel from '@/components/ComparePanel';
 import CompetitiveBuild from '@/components/CompetitiveBuild';
 import Detail from '@/components/Detail';
 import ObtainMethods from '@/components/ObtainMethods';
+import TcgCards from '@/components/TcgCards';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { useObtainData } from '@/hooks/useObtainData';
+import { useTcgCards } from '@/hooks/useTcgCards';
 import { GAME_GENS, GAME_ORDER, type GameId } from '@/trainers';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
@@ -447,6 +449,7 @@ export default function PokemonCard({
     }
   }, [pokemon.name, initialBuildGame]);
   const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAME_GENS[buildGame] : null);
+  const tcg = useTcgCards(species.name);
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
 
@@ -647,6 +650,10 @@ export default function PokemonCard({
           />
         </Section>
       </div>
+
+      <Section label="TCG CARDS" count={tcg.cards.length || undefined} defaultOpen={false}>
+        <TcgCards cards={tcg.cards} loading={tcg.loading} error={tcg.error} />
+      </Section>
     </div>
   );
 }

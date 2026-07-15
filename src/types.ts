@@ -100,3 +100,34 @@ export interface GroupedMove {
   level: number;
   method: LearnMethod;
 }
+
+export interface TcgCardPrices {
+  market?: number | null;
+  low?: number | null;
+  mid?: number | null;
+  high?: number | null;
+}
+
+export interface TcgCard {
+  id: string;
+  name: string;
+  number: string;
+  rarity: string | null;
+  images: {
+    small: string;
+    large: string;
+  };
+  set: {
+    id: string;
+    name: string;
+    releaseDate: string;
+  };
+  tcgplayer?: {
+    url: string;
+    prices?: Record<string, TcgCardPrices>;
+  };
+}
+
+export interface TcgCardsResponse {
+  data: TcgCard[];
+}

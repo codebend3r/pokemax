@@ -89,7 +89,7 @@ The whole layout is responsive. Card top stacks, stat bars compress, type chips 
 - **Web Audio API** — chiptune synthesis, no audio files in the bundle
 - **Vitest** + **@testing-library/react** + **jsdom** for tests
 - **Pixelify Sans** Google Font
-- **ESLint + Husky pre-commit** keep the tree lint-clean
+- **oxlint + oxfmt + Husky pre-commit** keep the tree lint-clean
 - **Data sources:**
   - [PokeAPI](https://pokeapi.co) — species, stats, abilities, evolutions, moves, sprites, cries
   - [Smogon sets via pkmn.github.io](https://pkmn.github.io) — competitive builds per generation

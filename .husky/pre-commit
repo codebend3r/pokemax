@@ -1,1 +1,10 @@
-bun run prettier:quick
+# oxfmt has no `--staged` mode, so do what pretty-quick did: format only the
+# staged files it would actually rewrite, then re-stage those.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -n "$staged" ] || exit 0
+
+unformatted=$(printf '%s\n' "$staged" | tr '\n' '\0' | xargs -0 bunx oxfmt --list-different)
+[ -n "$unformatted" ] || exit 0
+
+printf '%s\n' "$unformatted" | tr '\n' '\0' | xargs -0 bunx oxfmt
+printf '%s\n' "$unformatted" | tr '\n' '\0' | xargs -0 git add --

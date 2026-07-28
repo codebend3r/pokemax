@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "coverage",
+    "package-lock.json",
+    "docs/screenshots",
+    "*.md"
+  ]
+}

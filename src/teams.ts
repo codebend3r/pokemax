@@ -10,7 +10,7 @@ export interface TeamPick {
 }
 
 export interface TeamBuild {
-  /** Display title — usually `Recommended in-game team`. */
+  /** Short descriptor — the game label + region heading already give context. */
   title: string;
   /** Subtitle / context note. */
   note?: string;
@@ -28,7 +28,7 @@ export interface TeamBuild {
  */
 export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
   'red-blue': {
-    title: 'Kanto playthrough — balanced coverage',
+    title: 'Balanced coverage',
     note: 'Catchable early, covers most Gym Leaders, anime-coded.',
     team: [
       {
@@ -64,7 +64,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'gold-silver': {
-    title: 'Johto playthrough — type variety',
+    title: 'Type variety',
     note: 'Heavy on Gen 2 newcomers so the regional dex actually matters.',
     team: [
       {
@@ -100,7 +100,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   emerald: {
-    title: 'Hoenn playthrough — strong coverage',
+    title: 'Strong coverage',
     note: 'Picks revolve around the Hoenn Pokédex with broad type spread.',
     team: [
       {
@@ -136,7 +136,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'diamond-pearl': {
-    title: 'Sinnoh playthrough — pre-Platinum',
+    title: 'Base-dex gaps patched',
     note: 'Sinnoh’s base dex is thin on Fire and Fighting — this team patches that.',
     team: [
       {
@@ -172,7 +172,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'black-white': {
-    title: 'Unova playthrough — Gen V only',
+    title: 'Gen V only',
     note: 'BW only allows Gen 5 Pokémon until post-game — picks reflect that.',
     team: [
       {
@@ -208,7 +208,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'sword-shield': {
-    title: 'Galar playthrough — Dynamax-ready',
+    title: 'Dynamax-ready',
     note: 'Picks all hit hard under Dynamax / Max Moves.',
     team: [
       {
@@ -244,7 +244,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'scarlet-violet': {
-    title: 'Paldea playthrough — open-world',
+    title: 'Open-world route',
     note: 'Catchable in the first half of the open world. Hard hits, fast clear.',
     team: [
       {
@@ -280,7 +280,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   yellow: {
-    title: 'Kanto playthrough — Pikachu locked',
+    title: 'Pikachu locked',
     note: 'Pikachu is forced; fill the roster with early Kanto workhorses.',
     team: [
       {
@@ -316,7 +316,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   crystal: {
-    title: 'Johto playthrough — Crystal edition',
+    title: 'Suicune story run',
     note: 'Suicune is woven into the story; the rest mirrors a GS-style balanced run.',
     team: [
       {
@@ -352,7 +352,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'ruby-sapphire': {
-    title: 'Hoenn playthrough — RS pre-Emerald',
+    title: 'Version-exclusive coverage',
     note: 'No guaranteed Bagon early; Sableye/Mawile version exclusives shape coverage.',
     team: [
       {
@@ -388,7 +388,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'firered-leafgreen': {
-    title: 'Kanto playthrough — FRLG remake',
+    title: 'Sevii-rematch ready',
     note: 'National Dex post-game unlocks Sevii Islands — team is built to also handle the Sevii rematches.',
     team: [
       {
@@ -424,7 +424,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   platinum: {
-    title: 'Sinnoh playthrough — Platinum enhanced',
+    title: 'Expanded-dex picks',
     note: 'Expanded dex adds Magnemite early; altered gym order changes optimal picks vs DP.',
     team: [
       {
@@ -460,7 +460,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'heartgold-soulsilver': {
-    title: 'Johto playthrough — handles Lance AND Red',
+    title: 'Handles Lance AND Red',
     note: 'Red’s team peaks at Lv 88 — this roster is built to scale through post-game Kanto.',
     team: [
       {
@@ -496,7 +496,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'black-2-white-2': {
-    title: 'Unova playthrough — expanded dex',
+    title: 'Cross-gen expanded dex',
     note: 'B2W2 allows non-Gen-5 Pokémon — mix in cross-gen picks unavailable in BW.',
     team: [
       {
@@ -532,7 +532,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'omega-ruby-alpha-sapphire': {
-    title: 'Hoenn remake — Mega Evolution run',
+    title: 'Mega Evolution run',
     note: 'Mega Stones available mid-game; build around the Mega starter of choice.',
     team: [
       {
@@ -568,7 +568,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'sun-moon': {
-    title: 'Alola playthrough — Island Trials',
+    title: 'Island Trials',
     note: 'No Gyms — Z-Moves and Island Kahunas shape the run. Different picks than USUM.',
     team: [
       {
@@ -604,7 +604,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'ultra-sun-ultra-moon': {
-    title: 'Alola playthrough — Ultra enhanced',
+    title: 'Ultra Wormhole ready',
     note: 'Ultra Wormholes add cross-gen legends; Ultra Necrozma is the real final boss.',
     team: [
       {
@@ -640,7 +640,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'lets-go': {
-    title: 'Kanto playthrough — Pikachu / Eevee edition',
+    title: 'Partner-bonus picks',
     note: 'Dex capped at 151 + Meltan; anime-style picks with partner bonuses.',
     team: [
       {
@@ -676,7 +676,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'brilliant-diamond-shining-pearl': {
-    title: 'Sinnoh playthrough — BDSP remake',
+    title: 'Grand Underground boost',
     note: 'Grand Underground exclusives available mid-game; largely mirrors DP but with earlier access.',
     team: [
       {
@@ -712,7 +712,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'legends-arceus': {
-    title: 'Hisui open-world — strong styles',
+    title: 'Strong styles',
     note: 'Action RPG mechanics reward high-damage styles over bulk. Prioritize Hisuian forms.',
     team: [
       {

@@ -68,6 +68,15 @@ const DEFAULT_FORM_SLUGS: Record<string, string> = {
   'basculegion-male': 'basculegion',
   'indeedee-male': 'indeedee',
   'oinkologne-male': 'oinkologne',
+  // Ride/travel poses of the box legendaries — cosmetic; use the base sprite.
+  'koraidon-limited-build': 'koraidon',
+  'koraidon-sprinting-build': 'koraidon',
+  'koraidon-swimming-build': 'koraidon',
+  'koraidon-gliding-build': 'koraidon',
+  'miraidon-low-power-mode': 'miraidon',
+  'miraidon-drive-mode': 'miraidon',
+  'miraidon-aquatic-mode': 'miraidon',
+  'miraidon-glide-mode': 'miraidon',
 };
 
 /**
@@ -124,4 +133,57 @@ export function showdownSpriteUrl(pokeapiSlug: string): string {
  */
 export function showdownAnimSpriteUrl(pokeapiSlug: string, set: 'gen5ani' | 'ani' = 'gen5ani') {
   return `https://play.pokemonshowdown.com/sprites/${set}/${pokeapiToShowdownSlug(pokeapiSlug)}.gif`;
+}
+
+/**
+ * Species with a locally-built 2D pixel GIF in `public/sprites/anim/` —
+ * assembled from PokeRogue / GBA fan spritesheets, plus RetroNC's animated
+ * gen-5-style sprites for gen 9 DLC legendaries and Legends Z-A megas.
+ * Values are the GIF basename; forms that share art alias the same file.
+ */
+const LOCAL_ANIM_FILES: Record<string, string> = {
+  'arcanine-hisui': 'arcanine-hisui',
+  cinderace: 'cinderace',
+  decidueye: 'decidueye',
+  'decidueye-hisui': 'decidueye-hisui',
+  garganacl: 'garganacl',
+  'iron-bundle': 'iron-bundle',
+  'iron-jugulis': 'iron-jugulis',
+  'iron-treads': 'iron-treads',
+  'maushold-family-of-three': 'maushold-family-of-three',
+  meowscarada: 'meowscarada',
+  salazzle: 'salazzle',
+  sneasler: 'sneasler',
+  tinkaton: 'tinkaton',
+  'typhlosion-hisui': 'typhlosion-hisui',
+  // Gen 9 DLC legendaries (RetroNC)
+  ogerpon: 'ogerpon',
+  'ogerpon-wellspring-mask': 'ogerpon',
+  'ogerpon-hearthflame-mask': 'ogerpon',
+  'ogerpon-cornerstone-mask': 'ogerpon',
+  okidogi: 'okidogi',
+  munkidori: 'munkidori',
+  fezandipiti: 'fezandipiti',
+  pecharunt: 'pecharunt',
+  'iron-leaves': 'iron-leaves',
+  'iron-boulder': 'iron-boulder',
+  'iron-crown': 'iron-crown',
+  // Legends Z-A megas (RetroNC)
+  'zygarde-mega': 'zygarde-mega',
+  'heatran-mega': 'heatran-mega',
+  'darkrai-mega': 'darkrai-mega',
+  'zeraora-mega': 'zeraora-mega',
+  'baxcalibur-mega': 'baxcalibur-mega',
+  'golisopod-mega': 'golisopod-mega',
+  'meowstic-male-mega': 'meowstic-male-mega',
+  'meowstic-female-mega': 'meowstic-male-mega',
+  'magearna-mega': 'magearna-mega',
+  'magearna-original-mega': 'magearna-mega',
+};
+
+/** URL of the local animated GIF for a slug, or null when we don't ship one. */
+export function localAnimUrl(pokeapiSlug: string): string | null {
+  const file = LOCAL_ANIM_FILES[pokeapiSlug];
+  if (!file) return null;
+  return `${import.meta.env.BASE_URL}sprites/anim/${file}.gif`;
 }

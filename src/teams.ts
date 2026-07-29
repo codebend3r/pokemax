@@ -64,8 +64,8 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'gold-silver': {
-    title: 'Type variety',
-    note: 'Heavy on Gen 2 newcomers so the regional dex actually matters.',
+    title: 'Best available lineup',
+    note: 'Johto’s dex is half Kanto — the best team uses both, plus the free Red Gyarados.',
     team: [
       {
         species: 'typhlosion',
@@ -73,29 +73,29 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Cyndaquil line is the most reliable Johto starter for in-game runs.',
       },
       {
+        species: 'gyarados',
+        role: 'Physical Attacker',
+        why: 'The Red Gyarados at the Lake of Rage is free, Lv 30, and story-mandatory to meet.',
+      },
+      {
         species: 'ampharos',
         role: 'Special Tank',
         why: 'Mareep on Route 32 — early Electric, evolves into a bulky sweeper.',
       },
       {
-        species: 'crobat',
-        role: 'Speed Pivot',
-        why: 'Zubat is free; Crobat is one of the fastest, most evasive sweepers in Johto.',
+        species: 'nidoking',
+        role: 'Coverage Wallbreaker',
+        why: 'Nidoran on Route 35, Moon Stone in town — Earthquake + Thunderbolt off one slot.',
       },
       {
-        species: 'feraligatr',
-        role: 'Physical Attacker',
-        why: 'Optional Totodile trade or restart slot — Crunch + Surf coverage.',
+        species: 'espeon',
+        role: 'Special Sweeper',
+        why: 'Eevee gifted in Goldenrod — daytime friendship evolution; Psychic deletes Bruno and Koga.',
       },
       {
         species: 'heracross',
         role: 'Wallbreaker',
         why: 'Found in headbuttable trees in Azalea — Megahorn is busted in Gen 2.',
-      },
-      {
-        species: 'umbreon',
-        role: 'Wall',
-        why: 'Eevee is gifted in Goldenrod; Umbreon trivializes the Kanto rematch run.',
       },
     ],
   },
@@ -208,8 +208,8 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
     ],
   },
   'sword-shield': {
-    title: 'Dynamax-ready',
-    note: 'Picks all hit hard under Dynamax / Max Moves.',
+    title: 'Best available lineup',
+    note: 'Galar’s dex is full of returning Pokémon — the best run uses them, not just gen 8 debuts.',
     team: [
       {
         species: 'cinderace',
@@ -217,35 +217,35 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Pyro Ball + Libero hidden ability post-game. Best Galar starter, period.',
       },
       {
+        species: 'gyarados',
+        role: 'Physical Attacker',
+        why: 'Magikarp on Route 2 from the very start — evolved by the second gym, carries to Leon.',
+      },
+      {
+        species: 'excadrill',
+        role: 'Wallbreaker',
+        why: 'Drilbur in Galar Mine — Earthquake + Iron Head shreds Nessa, Bea, Melony, and Raihan.',
+      },
+      {
         species: 'corviknight',
         role: 'Tank / Flyer',
         why: 'Rookidee on Route 1 — Pressure + Bulk Up walks through Bea / Allister.',
       },
       {
-        species: 'toxapex',
-        role: 'Wall',
-        why: 'Mareanie at Outer Spikemuth. Regenerator + Toxic stalls Leon’s Charizard.',
+        species: 'lucario',
+        role: 'Special Attacker',
+        why: 'Riolu at Giant’s Cap — Steel/Fighting coverage under Dynamax handles Piers and Gordie.',
       },
       {
         species: 'dragapult',
         role: 'Speed Sweeper',
         why: 'Dreepy in the Lake of Outrage — fastest Dragon in the game, Dragon Darts is insane.',
       },
-      {
-        species: 'mr-rime',
-        role: 'Special Attacker',
-        why: 'Galarian Mr. Mime evolves — Screens setter + Ice Beam coverage.',
-      },
-      {
-        species: 'grimmsnarl',
-        role: 'Disruptor',
-        why: 'Impidimp in Glimwood Tangle. Prankster + Spirit Break + Thunder Wave under Dynamax.',
-      },
     ],
   },
   'scarlet-violet': {
-    title: 'Open-world route',
-    note: 'Catchable in the first half of the open world. Hard hits, fast clear.',
+    title: 'Best available lineup',
+    note: 'Paldea’s open world is full of returning Pokémon — mixed old/new beats an all-gen-9 squad.',
     team: [
       {
         species: 'meowscarada',
@@ -253,65 +253,65 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Flower Trick is a guaranteed crit + can’t miss. Single-handed sweep button.',
       },
       {
+        species: 'annihilape',
+        role: 'Setup Wallbreaker',
+        why: 'Primeape learns Rage Fist at 35 — use it 20 times and Annihilape breaks the whole game.',
+      },
+      {
+        species: 'arcanine',
+        role: 'Physical Attacker',
+        why: 'Growlithe in the first hour, Fire Stone from raids/shops — Intimidate + Flare Blitz all game.',
+      },
+      {
+        species: 'gyarados',
+        role: 'Physical Attacker',
+        why: 'Magikarp in every river — Moxie Gyarados snowballs gym after gym.',
+      },
+      {
         species: 'garganacl',
         role: 'Tank',
         why: 'Nacli in the South Province — Salt Cure stalls the Elite Four’s top end.',
-      },
-      {
-        species: 'gholdengo',
-        role: 'Wallbreaker',
-        why: 'Make Believe puzzle in the open world. Make It Rain + Shadow Ball is unfair.',
-      },
-      {
-        species: 'iron-bundle',
-        role: 'Speed Sweeper',
-        why: 'Area Zero — paradox Pokémon, fastest in the game with insane Ice/Water STAB.',
       },
       {
         species: 'tinkaton',
         role: 'Coverage',
         why: 'Tinkatink on West Province. Gigaton Hammer one-shots most Dragons / Fairies.',
       },
-      {
-        species: 'koraidon',
-        role: 'Box Legendary',
-        why: 'Story-mandatory in Scarlet. Collision Course turns the postgame Academy Ace tournament trivial.',
-      },
     ],
   },
   yellow: {
-    title: 'Pikachu locked',
-    note: 'Pikachu is forced; fill the roster with early Kanto workhorses.',
+    title: 'All three starters',
+    note: 'Yellow gifts every Kanto starter during the story — the only game where this team is free.',
     team: [
       {
         species: 'pikachu',
         role: 'Starter / Electric',
-        why: 'Story-mandatory and gifted at the start — can’t deposit it, so lean into Thunder.',
+        why: 'Story-mandatory and gifted at the start — can’t deposit it, so lean into Thunderbolt.',
       },
       {
-        species: 'vaporeon',
+        species: 'venusaur',
+        role: 'Special Tank',
+        why: 'Bulbasaur gifted in Cerulean — Sleep Powder + Razor Leaf carries the early gyms.',
+      },
+      {
+        species: 'charizard',
+        role: 'Special Attacker',
+        why: 'Charmander gifted on Route 24 — Flamethrower coverage the forced Pikachu can’t offer.',
+      },
+      {
+        species: 'blastoise',
         role: 'Bulky Water',
-        why: 'Eevee gifted in Celadon — Vaporeon patches the Water gap left by the forced Pikachu start.',
+        why: 'Squirtle gifted in Vermilion — Surf mule with real stats, walls Blaine and Lance’s Gyarados.',
       },
       {
-        species: 'pidgeot',
-        role: 'Physical Attacker / Flyer',
-        why: 'Pidgey is free on Route 1; Pidgeot is the strongest fully evolved Normal flier in Kanto.',
+        species: 'snorlax',
+        role: 'Tank',
+        why: 'Body Slam + Rest + huge HP pool. Only one in the wild — don’t skip Route 12.',
       },
       {
-        species: 'alakazam',
-        role: 'Special Wallbreaker',
-        why: 'Abra in Cerulean; highest Special in Gen 1 — covers everything Pikachu can’t.',
-      },
-      {
-        species: 'machamp',
-        role: 'Physical Tank',
-        why: 'Machop in Rock Tunnel — Fighting coverage smashes Brock, Koga, and the E4 Dark gap.',
-      },
-      {
-        species: 'lapras',
-        role: 'Coverage / Pivot',
-        why: 'Free at Silph Co.; Ice Beam + Surf handles Lance and acts as the team’s HM mule.',
+        species: 'dragonite',
+        role: 'Late-game Sweeper',
+        why: 'Dratini from the Safari Zone or Game Corner — outclasses everything by the Elite Four.',
       },
     ],
   },
@@ -330,9 +330,9 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Mareep on Route 32; evolves into a bulky Electric sweeper that handles Karen’s Umbreon.',
       },
       {
-        species: 'crobat',
-        role: 'Speed Pivot',
-        why: 'Zubat is everywhere; Crobat’s speed and Cross Poison overwhelm most Kanto Gym Leaders.',
+        species: 'nidoking',
+        role: 'Coverage Wallbreaker',
+        why: 'Nidoran on Route 35, Moon Stone in town — Earthquake + Thunderbolt off one slot.',
       },
       {
         species: 'suicune',
@@ -531,6 +531,42 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
       },
     ],
   },
+  'x-y': {
+    title: 'Best available lineup',
+    note: 'Kalos hands out gift Pokémon constantly — the best team is mostly free.',
+    team: [
+      {
+        species: 'greninja',
+        role: 'Starter / Speed Sweeper',
+        why: 'Protean Froakie is the best starter of its generation — every move gets STAB.',
+      },
+      {
+        species: 'talonflame',
+        role: 'Physical Attacker',
+        why: 'Fletchling on Route 2 — Gale Wings priority Flying moves carry the whole midgame.',
+      },
+      {
+        species: 'lucario',
+        role: 'Special Attacker',
+        why: 'Gifted by Korrina with a Lucarionite — free Mega Evolution the moment you get it.',
+      },
+      {
+        species: 'aegislash',
+        role: 'Setup Sweeper',
+        why: 'Honedge on Route 6, Dusk Stone in Laverre — King’s Shield stance dancing breaks the AI.',
+      },
+      {
+        species: 'gardevoir',
+        role: 'Special Attacker',
+        why: 'Ralts on Route 4 — Fairy typing added in XY makes it the Dragon answer all game.',
+      },
+      {
+        species: 'snorlax',
+        role: 'Tank',
+        why: 'Story encounter on Route 7 — same wall it has always been, free before the second gym.',
+      },
+    ],
+  },
   'omega-ruby-alpha-sapphire': {
     title: 'Mega Evolution run',
     note: 'Mega Stones available mid-game; build around the Mega starter of choice.',
@@ -577,9 +613,9 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Litten’s Darkest Lariat ignores stat boosts — perfect for Totem Pokémon that set up.',
       },
       {
-        species: 'vikavolt',
-        role: 'Special Attacker',
-        why: 'Grubbin on Route 1; Vikavolt’s Thunderbolt + Bug Buzz handles Hala, Olivia, and Nanu.',
+        species: 'raichu-alola',
+        role: 'Special Sweeper',
+        why: 'Pichu on Route 1 — Alolan Raichu’s Psychic/Electric STAB carries trial after trial.',
       },
       {
         species: 'mudsdale',
@@ -597,9 +633,9 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Salandit in Wela Volcano Park — Corrosion ignores type immunities to Toxic, warping Totem fights.',
       },
       {
-        species: 'kommo-o',
-        role: 'Pseudo-Legend',
-        why: 'Jangmo-o in Vast Poni Canyon — Dragon / Fighting STAB sweeps Hapu and the Elite Four late.',
+        species: 'magnezone',
+        role: 'Special Tank',
+        why: 'Magnemite at the Trainers’ School — Steel/Electric typing walls half of Alola’s threats.',
       },
     ],
   },
@@ -618,14 +654,14 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Rockruff from a gift or early route — Accelerock priority + Stone Edge covers Totem Vikavolt.',
       },
       {
-        species: 'toxapex',
-        role: 'Wall',
-        why: 'Mareanie from SOS chaining early; Regenerator + Toxic stalls Ultra Necrozma’s boosted hits.',
+        species: 'mimikyu',
+        role: 'Setup Sweeper',
+        why: 'Thrifty Megamart — Disguise gives a free Swords Dance; sweeps Totems and Ultra Necrozma.',
       },
       {
-        species: 'kommo-o',
-        role: 'Pseudo-Legend',
-        why: 'Jangmo-o in Vast Poni Canyon — Clangorous Soulblaze Z-Move deletes Ultra Recon Squad.',
+        species: 'mudsdale',
+        role: 'Physical Tank',
+        why: 'Mudbray in Paniola Ranch — Stamina snowballs under physical hits; Earthquake stacks.',
       },
       {
         species: 'magnezone',
@@ -633,9 +669,9 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
         why: 'Magnemite on Blush Mountain; evolves at Vast Poni Canyon — Flash Cannon handles Fairy trials.',
       },
       {
-        species: 'tapu-koko',
-        role: 'Electric Terrain Setter',
-        why: 'Mandatory encounter at Ruins of Conflict post-game; Electric Surge + Dazzling Gleam covers Lusamine.',
+        species: 'naganadel',
+        role: 'Special Sweeper',
+        why: 'Poipole is a story gift from the Ultra Recon Squad — teach Dragon Pulse and it evolves.',
       },
     ],
   },

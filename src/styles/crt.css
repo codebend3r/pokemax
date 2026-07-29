@@ -1170,16 +1170,26 @@ button.crt-type:hover,
   transform-origin: center bottom;
 }
 .crt-card-top img.crt-sprite-3d.is-anim {
-  /* 3D mode is always a Showdown GIF. Smooth-scale the upscale so the result
-   * reads as a soft 3D-ish render rather than chunky pixels. */
+  /* Showdown's 3D GIFs are small natives. Full-stretch to 220px blurred and
+   * pixelated chunked (both rejected) — a modest 1.5× zoom of the natural
+   * size keeps them big without visible smearing. */
   image-rendering: auto;
+  width: auto;
+  height: auto;
+  max-width: 150px;
+  max-height: 150px;
+  zoom: 1.5;
+  /* Lift above the `body::after` scanline overlay so the render stays clean. */
+  position: relative;
+  z-index: 10000;
   transform-origin: center bottom;
 }
 /* 3D and 2D sprite sizes are driven by the responsive `.crt-card-top img`
  * rules at each breakpoint, so 3D no longer needs a separate override. */
 .crt-card-top img.crt-sprite-3d.is-static {
   /* Last-resort static fallback — user rejected the prior "PNG bouncing
-   * around" CSS animation, so this stays truly still. */
+   * around" CSS animation, so this stays truly still. Official artwork is
+   * high-res, so smooth scaling is correct here (pixelated would jaggy it). */
   image-rendering: auto;
   transform-origin: center 70%;
 }
@@ -2730,8 +2740,8 @@ button.crt-type:hover,
   flex: 1;
 }
 .crt-trainer-detail-portrait {
-  width: 96px;
-  height: 96px;
+  width: 160px;
+  height: 160px;
   image-rendering: pixelated;
   object-fit: contain;
   flex-shrink: 0;
@@ -2744,6 +2754,8 @@ button.crt-type:hover,
   }
   .crt-trainer-detail-portrait {
     align-self: center;
+    width: 128px;
+    height: 128px;
   }
 }
 .crt-trainer-detail-name {
@@ -3345,6 +3357,17 @@ button.crt-type:hover,
 .crt-trainer-filter-label,
 .crt-trainer-list-card-game,
 .crt-trainer-detail-game,
+/* Digit-heavy text — Pixelify's 5 reads like an S */
+.crt-compare-stat-num,
+.crt-compare-vitals-row,
+.crt-grid-dex,
+.crt-card-dex,
+.crt-pagination-status,
+.crt-section-count,
+.crt-trainer-member-level,
+.crt-move-prefix,
+.crt-build-value,
+.crt-footer,
 .crt-trainer-counter-why,
 .crt-trainer-counter-vs,
 .crt-trainer-counter-type,
@@ -3360,8 +3383,8 @@ button.crt-type:hover,
 
 /* Trainer list-card portrait — small Showdown VS sprite above the name */
 .crt-trainer-list-card-portrait {
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   image-rendering: pixelated;
   object-fit: contain;
   margin-bottom: 4px;

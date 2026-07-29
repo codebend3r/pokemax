@@ -24,7 +24,7 @@ import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { GAME_GENS, GAME_ORDER, type GameId } from '@/trainers';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
-import { pokeapiToShowdownSlug } from '@/showdownSprite';
+import { localAnimUrl, pokeapiToShowdownSlug } from '@/showdownSprite';
 import { cryOverrideFor } from '@/cryOverrides';
 import { playGmaxCryWithEffects } from '@/gmaxAudio';
 
@@ -104,61 +104,58 @@ interface SpritePick {
   animated: boolean;
 }
 
-function pickSprite(
-  p: PokemonResponse,
-  shiny: boolean,
-  view: SpriteView,
-  fallbackLevel: number,
-): SpritePick {
+function spriteCandidates(p: PokemonResponse, shiny: boolean, view: SpriteView): SpritePick[] {
   const sdSlug = pokeapiToShowdownSlug(p.name);
+  // Locally-shipped 2D GIF (no shiny variants — only offer for regular).
+  const local = shiny ? null : localAnimUrl(p.name);
+  const list: SpritePick[] = [];
   if (view === '2d') {
-    // 2D shows ONLY frame-animated pixel art. All three tiers below are
-    // animated GIFs; the parent probes them before rendering and hides the 2D
-    // toggle entirely if none resolves, so there's no static fallback here.
-    if (fallbackLevel === 0) {
+    // 2D shows ONLY frame-animated pixel art; the parent probes and hides the
+    // 2D toggle entirely if none resolves, so there's no static fallback here.
+    if (local) list.push({ url: local, animated: true });
+    if (p.id <= MAX_BW_ID) {
       // Gen 1-5 base species: BW animated pixel art — iconic 2D experience.
-      if (p.id <= MAX_BW_ID) {
-        const url = shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`;
-        return { url, animated: true };
-      }
+      list.push({
+        url: shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`,
+        animated: true,
+      });
+    } else {
       // Gen 6+ official: PokeAPI's Showdown mirror, indexed by id.
-      const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-      return { url, animated: true };
+      list.push({
+        url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
+        animated: true,
+      });
     }
-    if (fallbackLevel === 1) {
-      // Smogon Sprite Project fan animation — covers most Gen 6-9 forms
-      // including Gmax / Eternamax that the PokeAPI mirror is missing.
-      const dir = shiny ? SD_ANI_SHINY : SD_ANI;
-      return { url: `${dir}/${sdSlug}.gif`, animated: true };
-    }
+    // Smogon Sprite Project fan animation — covers most Gen 6-9 forms
+    // including Gmax / Eternamax that the PokeAPI mirror is missing.
+    list.push({ url: `${shiny ? SD_ANI_SHINY : SD_ANI}/${sdSlug}.gif`, animated: true });
     // Showdown's older `gen5ani/` set — has fan animations for newer DLC
-    // additions (Terapagos, Miraidon, Terapagos-Terastal) that the main
-    // `ani/` directory hasn't picked up yet.
-    const dir = shiny ? SD_GEN5_ANI_SHINY : SD_GEN5_ANI;
-    return { url: `${dir}/${sdSlug}.gif`, animated: true };
+    // additions that the main `ani/` directory hasn't picked up yet.
+    list.push({
+      url: `${shiny ? SD_GEN5_ANI_SHINY : SD_GEN5_ANI}/${sdSlug}.gif`,
+      animated: true,
+    });
+    return list;
   }
-  // 3D mode: always a frame-animated Showdown GIF. For Gmax / Eternamax it's
-  // a true 3D-render animation; for everything else it's pixel art that
-  // animates. CSS scales the GIF smoothly (no `image-rendering: pixelated`)
-  // so the upscale reads as a soft 3D-ish render rather than chunky pixels.
-  if (fallbackLevel === 0) {
-    const url = shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`;
-    return { url, animated: true };
-  }
-  if (fallbackLevel === 1) {
-    // PokeAPI mirror missing — try Showdown's direct ani as another animated source.
-    const dir = shiny ? SD_ANI_SHINY : SD_ANI;
-    return { url: `${dir}/${sdSlug}.gif`, animated: true };
-  }
+  // 3D mode: a frame-animated Showdown GIF whenever one exists.
+  list.push({
+    url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
+    animated: true,
+  });
+  // PokeAPI mirror missing — try Showdown's direct ani as another animated source.
+  list.push({ url: `${shiny ? SD_ANI_SHINY : SD_ANI}/${sdSlug}.gif`, animated: true });
+  // Locally-shipped GIF beats a static image even in 3D mode.
+  if (local) list.push({ url: local, animated: true });
   // Last resort — official artwork. Stays truly static (no CSS bob); should
   // only ever appear for the handful of forms with no animated source at all.
   const art = p.sprites.other['official-artwork'];
-  return {
+  list.push({
     url: shiny
       ? (art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? '')
       : (art.front_default ?? p.sprites.front_default ?? ''),
     animated: false,
-  };
+  });
+  return list;
 }
 
 interface Particle {
@@ -193,15 +190,19 @@ function CardSprite({
   const [reacting, setReacting] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
   const fallback = fallbacks[view];
+  const candidates = spriteCandidates(pokemon, shiny, view);
   const bumpFallback = () =>
-    setFallbacks((prev) => ({ ...prev, [view]: Math.min(2, prev[view] + 1) }));
-  const sprite = pickSprite(pokemon, shiny, view, fallback);
+    setFallbacks((prev) => ({
+      ...prev,
+      [view]: Math.min(candidates.length - 1, prev[view] + 1),
+    }));
+  const sprite = candidates[Math.min(fallback, candidates.length - 1)];
 
-  // Reset the per-view fallback ladder whenever the Pokemon changes — the new species
-  // might have sprites in places the previous one didn't.
+  // Reset the per-view fallback ladder whenever the Pokemon or shiny state
+  // changes — the candidate list differs (local GIFs have no shiny variant).
   useEffect(() => {
     setFallbacks({ '2d': 0, '3d': 0 });
-  }, [pokemon.id]);
+  }, [pokemon.id, shiny]);
   const cryUrl =
     cryOverrideFor(pokemon.name) ?? pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
 
@@ -390,6 +391,11 @@ export default function PokemonCard({
   const [has2D, setHas2D] = useState(true);
   useEffect(() => {
     if (pokemon.id <= MAX_BW_ID) {
+      setHas2D(true);
+      return;
+    }
+    // A locally-shipped GIF is a known-good 2D animation — no probing needed.
+    if (localAnimUrl(pokemon.name)) {
       setHas2D(true);
       return;
     }

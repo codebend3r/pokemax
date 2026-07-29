@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { GAME_LABELS, type Trainer } from '@/trainers';
+import { GAME_LABELS, trainerPortraitUrl, type Trainer } from '@/trainers';
 import { GAME_MAX_GEN, pickCounterTeam } from '@/counters';
 import Detail from '@/components/Detail';
 import { useTypeIndex } from '@/hooks/useTypeIndex';
@@ -101,8 +101,12 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
       </button>
 
       <div className="crt-trainer-detail-header">
-        {trainer.spriteUrl && (
-          <img className="crt-trainer-detail-portrait" src={trainer.spriteUrl} alt={trainer.name} />
+        {trainerPortraitUrl(trainer) && (
+          <img
+            className="crt-trainer-detail-portrait"
+            src={trainerPortraitUrl(trainer)}
+            alt={trainer.name}
+          />
         )}
         <div className="crt-trainer-detail-header-text">
           <div className="crt-trainer-detail-name">{trainer.name.toUpperCase()}</div>

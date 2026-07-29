@@ -30,6 +30,80 @@ export const GAME_MAX_GEN: Record<GameId, number> = {
   'scarlet-violet': 9,
 };
 
+interface PSDexEntry {
+  num: number;
+  prevo?: string;
+  evoLevel?: number;
+  evoType?: string;
+  forme?: string;
+  baseSpecies?: string;
+}
+
+function isPSDexEntry(v: unknown): v is PSDexEntry {
+  return typeof v === 'object' && v !== null && 'num' in v;
+}
+
+function toPSId(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Trade / stone / friendship evolutions have no evo level; mid-game is the
+ * earliest they're realistically accessible in most games.
+ */
+const SPECIAL_EVO_MIN_LEVEL = 25;
+
+/**
+ * Earliest level a species can realistically exist at: 0 for base species,
+ * the evo level (chained through prevos) for level evolutions, and a
+ * mid-game floor for trade/stone/friendship evolutions.
+ */
+export function buildMinLevelMap(dex: Record<string, unknown>): Map<number, number> {
+  const memo = new Map<string, number>();
+  const minLevel = (key: string): number => {
+    const hit = memo.get(key);
+    if (hit !== undefined) return hit;
+    memo.set(key, 0); // cycle guard
+    const e = dex[key];
+    let level = 0;
+    if (isPSDexEntry(e) && e.prevo) {
+      const parent = minLevel(toPSId(e.prevo));
+      level = Math.max(e.evoLevel ?? SPECIAL_EVO_MIN_LEVEL, parent);
+    }
+    memo.set(key, level);
+    return level;
+  };
+
+  const byNum = new Map<number, number>();
+  for (const [key, e] of Object.entries(dex)) {
+    if (!isPSDexEntry(e) || e.num <= 0) continue;
+    // Base species only — forms carry `forme`/`baseSpecies` and share the num.
+    if (e.forme || e.baseSpecies) continue;
+    byNum.set(e.num, minLevel(key));
+  }
+  return byNum;
+}
+
+let minLevelsCache: Map<number, number> | null = null;
+let minLevelsInflight: Promise<Map<number, number>> | null = null;
+
+export async function fetchMinLevels(): Promise<Map<number, number>> {
+  if (minLevelsCache) return minLevelsCache;
+  if (!minLevelsInflight) {
+    minLevelsInflight = fetch('https://play.pokemonshowdown.com/data/pokedex.json')
+      .then((r) => {
+        if (!r.ok) throw new Error('pokedex data unavailable');
+        return r.json() as Promise<Record<string, unknown>>;
+      })
+      .then((dex) => {
+        minLevelsCache = buildMinLevelMap(dex);
+        minLevelsInflight = null;
+        return minLevelsCache;
+      });
+  }
+  return minLevelsInflight;
+}
+
 export interface CounterPick {
   /** PokeAPI numeric id. */
   id: number;

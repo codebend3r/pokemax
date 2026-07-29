@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickCounterTeam, GAME_MAX_GEN } from '@/counters';
+import { buildMinLevelMap, pickCounterTeam, GAME_MAX_GEN } from '@/counters';
 import type { PokeType } from '@/typeChart';
 
 describe('pickCounterTeam', () => {
@@ -109,5 +109,43 @@ describe('pickCounterTeam', () => {
     expect(Object.keys(GAME_MAX_GEN).length).toBeGreaterThanOrEqual(20);
     expect(GAME_MAX_GEN['scarlet-violet']).toBe(9);
     expect(GAME_MAX_GEN['red-blue']).toBe(1);
+  });
+});
+
+describe('buildMinLevelMap', () => {
+  const dex = {
+    magikarp: { num: 129 },
+    gyarados: { num: 130, prevo: 'Magikarp', evoLevel: 20 },
+    tangela: { num: 114 },
+    abra: { num: 63 },
+    kadabra: { num: 64, prevo: 'Abra', evoLevel: 16 },
+    alakazam: { num: 65, prevo: 'Kadabra', evoType: 'trade' },
+    golbat: { num: 42, prevo: 'Zubat', evoLevel: 22 },
+    zubat: { num: 41 },
+    crobat: { num: 169, prevo: 'Golbat', evoType: 'levelFriendship' },
+    charizardmegax: { num: 6, baseSpecies: 'Charizard', forme: 'Mega-X' },
+  };
+
+  it('base species can exist at any level', () => {
+    const m = buildMinLevelMap(dex);
+    expect(m.get(129)).toBe(0);
+    expect(m.get(114)).toBe(0);
+  });
+
+  it('level evolutions chain through prevos', () => {
+    const m = buildMinLevelMap(dex);
+    expect(m.get(130)).toBe(20); // Gyarados can't exist at Brock's Lv 14
+    expect(m.get(64)).toBe(16);
+  });
+
+  it('trade/friendship evolutions get the mid-game floor', () => {
+    const m = buildMinLevelMap(dex);
+    expect(m.get(65)).toBe(25);
+    expect(m.get(169)).toBe(25);
+  });
+
+  it('skips form entries so the base species wins', () => {
+    const m = buildMinLevelMap(dex);
+    expect(m.has(6)).toBe(false); // only the Mega form is present in this fixture
   });
 });

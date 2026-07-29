@@ -3,6 +3,7 @@ import { GAME_LABELS, type Trainer } from '@/trainers';
 import { GAME_MAX_GEN, pickCounterTeam } from '@/counters';
 import Detail from '@/components/Detail';
 import { useTypeIndex } from '@/hooks/useTypeIndex';
+import { useMinLevels } from '@/hooks/useMinLevels';
 import { TYPE_COLORS } from '@/typeChart';
 import type { Gen8Species } from '@/types';
 import { showdownSpriteUrl } from '@/showdownSprite';
@@ -47,17 +48,35 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
   const [openLoc, setOpenLoc] = useState(false);
   const [openCounters, setOpenCounters] = useState(false);
   const typeIndex = useTypeIndex(openCounters);
+  const minLevels = useMinLevels(openCounters);
 
   const counterTeam = useMemo(() => {
-    if (!openCounters || !typeIndex.index) return null;
+    if (!openCounters || !typeIndex.index || !minLevels) return null;
     const nameToId = new Map<string, number>();
     const idToName = new Map<number, string>();
     const allowed = new Set<number>();
     const maxGen = GAME_MAX_GEN[trainer.game];
+    // A counter must be able to EXIST at this fight: at or below the
+    // trainer's strongest level, given how its evolution line works.
+    const maxLevel = Math.max(...trainer.team.map((m) => m.level));
     for (const s of speciesIndex) {
       nameToId.set(s.name, s.id);
       idToName.set(s.id, s.name);
-      if (s.gen <= maxGen) allowed.add(s.id);
+      if (s.gen <= maxGen && (minLevels.get(s.id) ?? 0) <= maxLevel) allowed.add(s.id);
+    }
+    // Early-game trainers additionally pin the pool to what's catchable so far.
+    if (trainer.availableBefore) {
+      const pool = new Set<number>();
+      for (const slug of trainer.availableBefore) {
+        const id = nameToId.get(slug);
+        if (id != null && allowed.has(id)) pool.add(id);
+      }
+      return pickCounterTeam(trainer.team, {
+        typeIndex: typeIndex.index,
+        nameToId,
+        idToName,
+        candidateFilter: (id) => pool.has(id),
+      });
     }
     return pickCounterTeam(trainer.team, {
       typeIndex: typeIndex.index,
@@ -65,7 +84,15 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
       idToName,
       candidateFilter: (id) => allowed.has(id),
     });
-  }, [openCounters, typeIndex.index, speciesIndex, trainer.team, trainer.game]);
+  }, [
+    openCounters,
+    typeIndex.index,
+    minLevels,
+    speciesIndex,
+    trainer.team,
+    trainer.game,
+    trainer.availableBefore,
+  ]);
 
   return (
     <div className="crt-trainer-detail">
@@ -171,7 +198,11 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
       )}
 
       <Section
-        title={`BEST COUNTER TEAM (Gen ≤ ${GAME_MAX_GEN[trainer.game]})`}
+        title={
+          trainer.availableBefore
+            ? 'BEST COUNTER TEAM (OBTAINABLE BY THIS FIGHT)'
+            : `BEST COUNTER TEAM (Gen ≤ ${GAME_MAX_GEN[trainer.game]})`
+        }
         open={openCounters}
         onToggle={() => setOpenCounters((v) => !v)}
       >

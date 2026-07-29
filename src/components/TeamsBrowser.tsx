@@ -98,11 +98,18 @@ function GameTeamCard({
 }
 
 function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: string) => void }) {
-  const [animOk, setAnimOk] = useState(true);
+  // GIF fallback chain: gen5ani → ani → none (CSS bounce takes over).
+  const [animLevel, setAnimLevel] = useState(0);
+  const animSrc =
+    animLevel === 0
+      ? showdownAnimSpriteUrl(pick.species)
+      : animLevel === 1
+        ? showdownAnimSpriteUrl(pick.species, 'ani')
+        : null;
   return (
     <button
       type="button"
-      className={'crt-team-pick' + (animOk ? ' has-anim' : '')}
+      className={'crt-team-pick' + (animSrc ? ' has-anim' : ' no-anim')}
       onClick={() => onSelect(pick.species)}
       title={`View ${pick.species}`}
     >
@@ -114,15 +121,15 @@ function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: s
           loading="lazy"
           decoding="async"
         />
-        {animOk && (
+        {animSrc && (
           <img
             className="team-pick-anim"
-            src={showdownAnimSpriteUrl(pick.species)}
+            src={animSrc}
             alt=""
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            onError={() => setAnimOk(false)}
+            onError={() => setAnimLevel((l) => l + 1)}
           />
         )}
       </span>

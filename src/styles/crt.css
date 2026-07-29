@@ -3159,6 +3159,11 @@ button.crt-type:hover,
 .crt-team-pick.has-anim:focus-visible .team-pick-still {
   opacity: 0;
 }
+/* No GIF in any set (e.g. `iron-bundle`) — CSS bounce keeps hover animated. */
+.crt-team-pick.no-anim:hover .team-pick-still,
+.crt-team-pick.no-anim:focus-visible .team-pick-still {
+  animation: crt-grid-bounce 0.5s ease-in-out infinite;
+}
 .crt-team-pick-name {
   font-size: 13px;
   letter-spacing: 1px;

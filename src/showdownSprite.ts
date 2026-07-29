@@ -118,9 +118,10 @@ export function showdownSpriteUrl(pokeapiSlug: string): string {
 }
 
 /**
- * Build the animated variant (gen-5 BW-style GIF). Not every species has one —
- * pair with an `onError` fallback to the static sprite.
+ * Build the animated variant (BW-style GIF). Neither set is complete —
+ * `gen5ani` covers gens 1-5 + some DLC, `ani` covers most gen 6-9 — so chain
+ * them via `onError` (gen5ani → ani → CSS motion) rather than trusting one.
  */
-export function showdownAnimSpriteUrl(pokeapiSlug: string): string {
-  return `https://play.pokemonshowdown.com/sprites/gen5ani/${pokeapiToShowdownSlug(pokeapiSlug)}.gif`;
+export function showdownAnimSpriteUrl(pokeapiSlug: string, set: 'gen5ani' | 'ani' = 'gen5ani') {
+  return `https://play.pokemonshowdown.com/sprites/${set}/${pokeapiToShowdownSlug(pokeapiSlug)}.gif`;
 }

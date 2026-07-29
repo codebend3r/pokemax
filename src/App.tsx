@@ -480,7 +480,8 @@ export default function App() {
               trainer={selectedTrainer}
               onBack={() => navigate(trainersPath())}
               onSelectPokemon={(name) => {
-                handleSelect(name);
+                // Roster AND counter picks preselect this trainer's game.
+                handleSelect(name, selectedTrainer.game);
               }}
               speciesIndex={fullSpeciesIndex}
             />

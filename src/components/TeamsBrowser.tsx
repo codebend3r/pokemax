@@ -97,15 +97,39 @@ function GameTeamCard({
   );
 }
 
+/**
+ * Species with a locally-built 2D pixel GIF in `public/sprites/anim/` —
+ * built from PokeRogue / GBA fan spritesheets for Pokémon that Showdown only
+ * covers with 3D-model-style `ani` GIFs (or, like `iron-bundle`, not at all).
+ */
+const LOCAL_ANIM_SLUGS = new Set([
+  'arcanine-hisui',
+  'cinderace',
+  'decidueye',
+  'decidueye-hisui',
+  'garganacl',
+  'iron-bundle',
+  'meowscarada',
+  'salazzle',
+  'sneasler',
+  'tinkaton',
+  'typhlosion-hisui',
+]);
+
+/** Animated-GIF sources in preference order: local 2D → gen5ani → ani (3D-style). */
+function animSources(species: string): string[] {
+  const sources: string[] = [];
+  if (LOCAL_ANIM_SLUGS.has(species)) {
+    sources.push(`${import.meta.env.BASE_URL}sprites/anim/${species}.gif`);
+  }
+  sources.push(showdownAnimSpriteUrl(species), showdownAnimSpriteUrl(species, 'ani'));
+  return sources;
+}
+
 function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: string) => void }) {
-  // GIF fallback chain: gen5ani → ani → none (CSS bounce takes over).
+  // Walk the source chain on load errors; past the end, CSS bounce takes over.
   const [animLevel, setAnimLevel] = useState(0);
-  const animSrc =
-    animLevel === 0
-      ? showdownAnimSpriteUrl(pick.species)
-      : animLevel === 1
-        ? showdownAnimSpriteUrl(pick.species, 'ani')
-        : null;
+  const animSrc = animSources(pick.species)[animLevel] ?? null;
   return (
     <button
       type="button"

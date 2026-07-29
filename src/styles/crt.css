@@ -1170,14 +1170,18 @@ button.crt-type:hover,
   transform-origin: center bottom;
 }
 .crt-card-top img.crt-sprite-3d.is-anim {
-  /* Showdown's 3D GIFs are small natives. Upscaling them either blurs (auto)
-   * or chunks (pixelated) — both rejected — so render at natural size inside
-   * the 220px box instead. */
+  /* Showdown's 3D GIFs are small natives. Full-stretch to 220px blurred and
+   * pixelated chunked (both rejected) — a modest 1.5× zoom of the natural
+   * size keeps them big without visible smearing. */
   image-rendering: auto;
   width: auto;
   height: auto;
-  max-width: 220px;
-  max-height: 220px;
+  max-width: 150px;
+  max-height: 150px;
+  zoom: 1.5;
+  /* Lift above the `body::after` scanline overlay so the render stays clean. */
+  position: relative;
+  z-index: 10000;
   transform-origin: center bottom;
 }
 /* 3D and 2D sprite sizes are driven by the responsive `.crt-card-top img`

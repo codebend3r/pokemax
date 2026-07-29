@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
 import { GAME_LABELS, type GameId } from '@/trainers';
-import { showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
+import { localAnimUrl, showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
 interface Props {
@@ -132,31 +132,11 @@ function GameTeamCard({
   );
 }
 
-/**
- * Species with a locally-built 2D pixel GIF in `public/sprites/anim/` —
- * built from PokeRogue / GBA fan spritesheets for Pokémon that Showdown only
- * covers with 3D-model-style `ani` GIFs (or, like `iron-bundle`, not at all).
- */
-const LOCAL_ANIM_SLUGS = new Set([
-  'arcanine-hisui',
-  'cinderace',
-  'decidueye',
-  'decidueye-hisui',
-  'garganacl',
-  'iron-bundle',
-  'meowscarada',
-  'salazzle',
-  'sneasler',
-  'tinkaton',
-  'typhlosion-hisui',
-]);
-
 /** Animated-GIF sources in preference order: local 2D → gen5ani → ani (3D-style). */
 function animSources(species: string): string[] {
   const sources: string[] = [];
-  if (LOCAL_ANIM_SLUGS.has(species)) {
-    sources.push(`${import.meta.env.BASE_URL}sprites/anim/${species}.gif`);
-  }
+  const local = localAnimUrl(species);
+  if (local) sources.push(local);
   sources.push(showdownAnimSpriteUrl(species), showdownAnimSpriteUrl(species, 'ani'));
   return sources;
 }

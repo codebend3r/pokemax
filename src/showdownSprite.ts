@@ -125,3 +125,31 @@ export function showdownSpriteUrl(pokeapiSlug: string): string {
 export function showdownAnimSpriteUrl(pokeapiSlug: string, set: 'gen5ani' | 'ani' = 'gen5ani') {
   return `https://play.pokemonshowdown.com/sprites/${set}/${pokeapiToShowdownSlug(pokeapiSlug)}.gif`;
 }
+
+/**
+ * Species with a locally-built 2D pixel GIF in `public/sprites/anim/` —
+ * assembled from PokeRogue / GBA fan spritesheets for Pokémon that Showdown
+ * either only covers with 3D-model-style `ani` GIFs or not at all.
+ */
+const LOCAL_ANIM_SLUGS = new Set([
+  'arcanine-hisui',
+  'cinderace',
+  'decidueye',
+  'decidueye-hisui',
+  'garganacl',
+  'iron-bundle',
+  'iron-jugulis',
+  'iron-treads',
+  'maushold-family-of-three',
+  'meowscarada',
+  'salazzle',
+  'sneasler',
+  'tinkaton',
+  'typhlosion-hisui',
+]);
+
+/** URL of the local animated GIF for a slug, or null when we don't ship one. */
+export function localAnimUrl(pokeapiSlug: string): string | null {
+  if (!LOCAL_ANIM_SLUGS.has(pokeapiSlug)) return null;
+  return `${import.meta.env.BASE_URL}sprites/anim/${pokeapiSlug}.gif`;
+}

@@ -35,6 +35,13 @@ describe('pokeapiToShowdownSlug', () => {
     expect(pokeapiToShowdownSlug('avalugg-hisui')).toBe('avalugg-hisui');
   });
 
+  it('drops default-form suffixes Showdown treats as the base species', () => {
+    expect(pokeapiToShowdownSlug('lycanroc-midday')).toBe('lycanroc');
+    expect(pokeapiToShowdownSlug('mimikyu-disguised')).toBe('mimikyu');
+    expect(pokeapiToShowdownSlug('toxtricity-amped')).toBe('toxtricity');
+    expect(pokeapiToShowdownSlug('minior-red-meteor')).toBe('minior');
+  });
+
   it('drops the `-cap` suffix from Pikachu cap forms', () => {
     expect(pokeapiToShowdownSlug('pikachu-original-cap')).toBe('pikachu-original');
     expect(pokeapiToShowdownSlug('pikachu-hoenn-cap')).toBe('pikachu-hoenn');

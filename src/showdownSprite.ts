@@ -56,11 +56,29 @@ const COMPOUND_BASE_SPECIES = new Set<string>([
 ]);
 
 /**
+ * PokeAPI slugs where the form suffix names the species' DEFAULT form —
+ * Showdown drops the suffix entirely (`lycanroc-midday` → `lycanroc`).
+ */
+const DEFAULT_FORM_SLUGS: Record<string, string> = {
+  'lycanroc-midday': 'lycanroc',
+  'oricorio-baile': 'oricorio',
+  'minior-red-meteor': 'minior',
+  'mimikyu-disguised': 'mimikyu',
+  'toxtricity-amped': 'toxtricity',
+  'basculegion-male': 'basculegion',
+  'indeedee-male': 'indeedee',
+  'oinkologne-male': 'oinkologne',
+};
+
+/**
  * Convert a PokeAPI slug (e.g. `mr-mime`, `charizard-mega-x`) into the slug
  * Showdown's sprite mirror expects.
  */
 export function pokeapiToShowdownSlug(pokeapiSlug: string): string {
   let s = pokeapiSlug.toLowerCase();
+
+  const defaultForm = DEFAULT_FORM_SLUGS[s];
+  if (defaultForm) return defaultForm;
 
   // Pikachu cap-forms drop the `-cap` suffix on Showdown
   // (`pikachu-original-cap` → `pikachu-original`).
@@ -97,4 +115,12 @@ export function pokeapiToShowdownSlug(pokeapiSlug: string): string {
  */
 export function showdownSpriteUrl(pokeapiSlug: string): string {
   return `https://play.pokemonshowdown.com/sprites/gen5/${pokeapiToShowdownSlug(pokeapiSlug)}.png`;
+}
+
+/**
+ * Build the animated variant (gen-5 BW-style GIF). Not every species has one —
+ * pair with an `onError` fallback to the static sprite.
+ */
+export function showdownAnimSpriteUrl(pokeapiSlug: string): string {
+  return `https://play.pokemonshowdown.com/sprites/gen5ani/${pokeapiToShowdownSlug(pokeapiSlug)}.gif`;
 }

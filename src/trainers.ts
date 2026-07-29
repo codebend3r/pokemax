@@ -245,6 +245,7 @@ export const TRAINERS: Trainer[] = [
     game: 'red-blue',
     location: 'Fuchsia City Gym',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/koga.png',
+    animSprite: 'koga.png',
     team: [
       { species: 'koffing', level: 37, moves: ['smog', 'smokescreen', 'tackle'] },
       { species: 'muk', level: 39, moves: ['minimize', 'sludge', 'smokescreen'] },
@@ -320,6 +321,7 @@ export const TRAINERS: Trainer[] = [
     game: 'red-blue',
     location: 'Indigo Plateau',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bruno.png',
+    animSprite: 'bruno.png',
     team: [
       { species: 'onix', level: 53, moves: ['bide', 'slam', 'tackle'] },
       {
@@ -590,6 +592,7 @@ export const TRAINERS: Trainer[] = [
     game: 'gold-silver',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/will.png',
+    animSprite: 'will.png',
     team: [
       {
         species: 'xatu',
@@ -613,6 +616,7 @@ export const TRAINERS: Trainer[] = [
     game: 'gold-silver',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/koga.png',
+    animSprite: 'koga.png',
     team: [
       {
         species: 'ariados',
@@ -640,6 +644,7 @@ export const TRAINERS: Trainer[] = [
     game: 'gold-silver',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bruno.png',
+    animSprite: 'bruno.png',
     team: [
       {
         species: 'hitmontop',
@@ -667,6 +672,7 @@ export const TRAINERS: Trainer[] = [
     game: 'gold-silver',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/karen.png',
+    animSprite: 'karen.png',
     team: [
       {
         species: 'umbreon',
@@ -731,6 +737,7 @@ export const TRAINERS: Trainer[] = [
     game: 'gold-silver',
     location: 'Mt. Silver',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/silver.png',
+    animSprite: 'silver.png',
     team: [
       {
         species: 'sneasel',
@@ -992,6 +999,7 @@ export const TRAINERS: Trainer[] = [
     game: 'ruby-sapphire',
     location: 'Mossdeep City Gym',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/tateandliza-gen3.png',
+    animSprite: 'tateliza.gif',
     team: [
       {
         species: 'lunatone',
@@ -1553,6 +1561,7 @@ export const TRAINERS: Trainer[] = [
     game: 'diamond-pearl',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/aaron.png',
+    animSprite: 'aaron.png',
     team: [
       {
         species: 'dustox',
@@ -1593,6 +1602,7 @@ export const TRAINERS: Trainer[] = [
     game: 'diamond-pearl',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/bertha.png',
+    animSprite: 'bertha.png',
     team: [
       {
         species: 'whiscash',
@@ -1633,6 +1643,7 @@ export const TRAINERS: Trainer[] = [
     game: 'diamond-pearl',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/flint.png',
+    animSprite: 'flint.png',
     team: [
       {
         species: 'rapidash',
@@ -1673,6 +1684,7 @@ export const TRAINERS: Trainer[] = [
     game: 'diamond-pearl',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/lucian.png',
+    animSprite: 'lucian.png',
     team: [
       {
         species: 'mr-mime',
@@ -1761,6 +1773,7 @@ export const TRAINERS: Trainer[] = [
     game: 'diamond-pearl',
     location: 'Pokémon League',
     spriteUrl: 'https://play.pokemonshowdown.com/sprites/trainers/barry.png',
+    animSprite: 'barry.png',
     team: [
       {
         species: 'staraptor',

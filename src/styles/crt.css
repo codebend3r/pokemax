@@ -1170,16 +1170,17 @@ button.crt-type:hover,
   transform-origin: center bottom;
 }
 .crt-card-top img.crt-sprite-3d.is-anim {
-  /* 3D mode is always a Showdown GIF. Smooth-scale the upscale so the result
-   * reads as a soft 3D-ish render rather than chunky pixels. */
-  image-rendering: auto;
+  /* Showdown's 3D GIFs are small natives — smooth upscaling reads as blur,
+   * so scale them crisp like the 2D pixel art. */
+  image-rendering: pixelated;
   transform-origin: center bottom;
 }
 /* 3D and 2D sprite sizes are driven by the responsive `.crt-card-top img`
  * rules at each breakpoint, so 3D no longer needs a separate override. */
 .crt-card-top img.crt-sprite-3d.is-static {
   /* Last-resort static fallback — user rejected the prior "PNG bouncing
-   * around" CSS animation, so this stays truly still. */
+   * around" CSS animation, so this stays truly still. Official artwork is
+   * high-res, so smooth scaling is correct here (pixelated would jaggy it). */
   image-rendering: auto;
   transform-origin: center 70%;
 }

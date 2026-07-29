@@ -8,38 +8,38 @@ describe('TeamsBrowser', () => {
     window.localStorage.clear();
   });
 
-  it('renders every region expanded by default', () => {
+  it('renders every region collapsed by default', () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     expect(screen.getByRole('button', { name: /^[▼▶]KANTO$/ })).toHaveAttribute(
       'aria-expanded',
-      'true',
+      'false',
     );
-    expect(screen.getByText('Red / Blue')).toBeInTheDocument();
+    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
   });
 
-  it('collapses and re-expands a region via its heading', async () => {
+  it('expands and re-collapses a region via its heading', async () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     const user = userEvent.setup();
     const kanto = screen.getByRole('button', { name: /^[▼▶]KANTO$/ });
     await user.click(kanto);
-    expect(kanto).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
-    await user.click(kanto);
+    expect(kanto).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText('Red / Blue')).toBeInTheDocument();
+    await user.click(kanto);
+    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
   });
 
-  it('collapse all hides every roster; expand all restores them', async () => {
+  it('expand all shows every roster; collapse all hides them again', async () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: /collapse all/i }));
-    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
-    expect(screen.queryByText('Scarlet / Violet')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /expand all/i }));
     expect(screen.getByText('Red / Blue')).toBeInTheDocument();
     expect(screen.getByText('Scarlet / Violet')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /collapse all/i }));
+    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
+    expect(screen.queryByText('Scarlet / Violet')).not.toBeInTheDocument();
   });
 
-  it('remembers collapsed regions across remounts via localStorage', async () => {
+  it('remembers expanded regions across remounts via localStorage', async () => {
     const { unmount } = render(<TeamsBrowser onSelectPokemon={() => {}} />);
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /^[▼▶]KANTO$/ }));
@@ -47,16 +47,15 @@ describe('TeamsBrowser', () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     expect(screen.getByRole('button', { name: /^[▼▶]KANTO$/ })).toHaveAttribute(
       'aria-expanded',
-      'false',
+      'true',
     );
-    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
-    expect(screen.getByText('Gold / Silver')).toBeInTheDocument();
+    expect(screen.getByText('Red / Blue')).toBeInTheDocument();
+    expect(screen.queryByText('Gold / Silver')).not.toBeInTheDocument();
   });
 
   it('an active search shows matches inside collapsed regions', async () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: /collapse all/i }));
     await user.type(screen.getByLabelText(/search game or species/i), 'charizard');
     expect(screen.getByText('Red / Blue')).toBeInTheDocument();
   });

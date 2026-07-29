@@ -9,18 +9,23 @@ interface Props {
 
 const COLLAPSED_KEY = 'pokemax.teamsCollapsed';
 
+/** Everything starts collapsed; a stored value (even `[]`) is the user's own state. */
+const ALL_COLLAPSED: readonly string[] = TEAM_REGIONS.map((r) => r.region);
+
 function initialCollapsed(): Set<string> {
-  if (typeof window === 'undefined') return new Set();
+  if (typeof window === 'undefined') return new Set(ALL_COLLAPSED);
   try {
     const raw = window.localStorage.getItem(COLLAPSED_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    if (Array.isArray(parsed)) {
-      return new Set(parsed.filter((r): r is string => typeof r === 'string'));
+    if (raw !== null) {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return new Set(parsed.filter((r): r is string => typeof r === 'string'));
+      }
     }
   } catch {
-    // Corrupted value — fall through to all-expanded.
+    // Corrupted value — fall through to the all-collapsed default.
   }
-  return new Set();
+  return new Set(ALL_COLLAPSED);
 }
 
 export default function TeamsBrowser({ onSelectPokemon }: Props) {

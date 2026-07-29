@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
 import { GAME_LABELS, type GameId } from '@/trainers';
 import { showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
@@ -7,10 +7,30 @@ interface Props {
   onSelectPokemon: (speciesSlug: string) => void;
 }
 
+const COLLAPSED_KEY = 'pokemax.teamsCollapsed';
+
+function initialCollapsed(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(COLLAPSED_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) {
+      return new Set(parsed.filter((r): r is string => typeof r === 'string'));
+    }
+  } catch {
+    // Corrupted value — fall through to all-expanded.
+  }
+  return new Set();
+}
+
 export default function TeamsBrowser({ onSelectPokemon }: Props) {
   const [filter, setFilter] = useState('');
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [collapsed, setCollapsed] = useState<Set<string>>(initialCollapsed);
   const q = filter.trim().toLowerCase();
+
+  useEffect(() => {
+    window.localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]));
+  }, [collapsed]);
 
   const toggleRegion = (region: string) => {
     setCollapsed((prev) => {

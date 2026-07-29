@@ -1,9 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TeamsBrowser from '@/components/TeamsBrowser';
 
 describe('TeamsBrowser', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it('renders every region expanded by default', () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     expect(screen.getByRole('button', { name: /^[▼▶]KANTO$/ })).toHaveAttribute(
@@ -33,6 +37,20 @@ describe('TeamsBrowser', () => {
     await user.click(screen.getByRole('button', { name: /expand all/i }));
     expect(screen.getByText('Red / Blue')).toBeInTheDocument();
     expect(screen.getByText('Scarlet / Violet')).toBeInTheDocument();
+  });
+
+  it('remembers collapsed regions across remounts via localStorage', async () => {
+    const { unmount } = render(<TeamsBrowser onSelectPokemon={() => {}} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /^[▼▶]KANTO$/ }));
+    unmount();
+    render(<TeamsBrowser onSelectPokemon={() => {}} />);
+    expect(screen.getByRole('button', { name: /^[▼▶]KANTO$/ })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(screen.queryByText('Red / Blue')).not.toBeInTheDocument();
+    expect(screen.getByText('Gold / Silver')).toBeInTheDocument();
   });
 
   it('an active search shows matches inside collapsed regions', async () => {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
-import { GAME_LABELS, GAMES_BY_REGION, type GameId, type Trainer } from '@/trainers';
+import { GAME_LABELS, GAME_ORDER, GAMES_BY_REGION, type GameId, type Trainer } from '@/trainers';
 import { showdownSpriteUrl } from '@/showdownSprite';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
@@ -9,8 +9,13 @@ interface Props {
   onSelect: (trainer: Trainer) => void;
 }
 
-// Region-grouped chronological order — same organization as the TEAMS page.
-const GAME_ORDER: GameId[] = GAMES_BY_REGION.flatMap((r) => r.games);
+const ALL_REGIONS: readonly string[] = GAMES_BY_REGION.map((r) => r.region);
+
+// Stale key from the brief collapsed-by-default version — its mount write
+// froze `[]` into storage, which would override the expanded default below.
+if (typeof window !== 'undefined') {
+  window.localStorage.removeItem('pokemax.trainersExpanded');
+}
 
 function normalize(s: string): string {
   return s.toLowerCase().replace(/[-_]/g, ' ');
@@ -21,8 +26,10 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
   const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
   const [nameQuery, setNameQuery] = useState('');
   const [pokemonQuery, setPokemonQuery] = useState('');
+  // Trainers default to everything expanded (unlike TEAMS, which starts collapsed).
   const { expanded, toggle, expandAll, collapseAll } = useExpandedRegions(
-    'pokemax.trainersExpanded',
+    'pokemax.trainerRegions',
+    ALL_REGIONS,
   );
 
   const allGames = useMemo(() => {
@@ -96,11 +103,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
       />
 
       <div className="crt-teams-fold-controls crt-trainers-fold">
-        <button
-          type="button"
-          className="crt-trainer-chip"
-          onClick={() => expandAll(GAMES_BY_REGION.map((r) => r.region))}
-        >
+        <button type="button" className="crt-trainer-chip" onClick={() => expandAll(ALL_REGIONS)}>
           ▼ EXPAND ALL
         </button>
         <button type="button" className="crt-trainer-chip" onClick={collapseAll}>

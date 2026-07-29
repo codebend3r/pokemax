@@ -33,7 +33,7 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
 import type { PokeType } from '@/typeChart';
 import { CRY_VOLUME_SCALE } from '@/textUtil';
 import { cryOverrideFor } from '@/cryOverrides';
-import { TRAINERS, type Trainer } from '@/trainers';
+import { TRAINERS, type GameId, type Trainer } from '@/trainers';
 
 // Lazy-loaded — only fetched when first needed
 const PokemonCard = lazy(() => import('@/components/PokemonCard'));
@@ -97,6 +97,8 @@ export default function App() {
   const dimension = pokedexSearch.dimension;
   const formKey = pokedexSearch.form;
   const [attempt, setAttempt] = useState(0);
+  // Game a TEAMS pick was clicked from — preselects the competitive build.
+  const [pendingBuildGame, setPendingBuildGame] = useState<GameId | null>(null);
   const fullSpeciesIndex = useMemo(
     () => [...list.species, ...extraForms.forms],
     [list.species, extraForms.forms],
@@ -166,10 +168,11 @@ export default function App() {
   else if (result.error?.kind === 'transmission') status = 'err-api';
 
   useEffect(() => {
-    if (result.data && cardRef.current) {
+    // A TEAMS pick scrolls to the competitive-build section instead (PokemonCard).
+    if (result.data && cardRef.current && !pendingBuildGame) {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [result.data]);
+  }, [result.data, pendingBuildGame]);
 
   // Keep document.title in sync with the selected Pokemon. URL is owned by the router.
   useEffect(() => {
@@ -199,9 +202,10 @@ export default function App() {
     }
   }, [result.data, selected, pokedexSearch, navigate]);
 
-  const handleSelect = (name: string) => {
+  const handleSelect = (name: string, buildGame: GameId | null = null) => {
     setAttempt((n) => n + 1);
     setQuery('');
+    setPendingBuildGame(buildGame);
 
     // Pre-warm the cry audio while the pokemon data is still being fetched.
     // The cry URL is predictable from the species ID, so we don't need to wait.
@@ -372,6 +376,7 @@ export default function App() {
                   cryVolume={cryVolume}
                   onCryVolumeChange={setCryVolume}
                   speciesPool={fullSpeciesIndex}
+                  initialBuildGame={pendingBuildGame}
                 />
               </Suspense>
             </div>
@@ -496,8 +501,8 @@ export default function App() {
           }
         >
           <TeamsBrowser
-            onSelectPokemon={(name) => {
-              handleSelect(name);
+            onSelectPokemon={(name, game) => {
+              handleSelect(name, game);
             }}
           />
         </Suspense>

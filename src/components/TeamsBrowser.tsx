@@ -5,7 +5,8 @@ import { showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
 interface Props {
-  onSelectPokemon: (speciesSlug: string) => void;
+  /** `game` is the team card the pick came from — used to preselect the competitive build. */
+  onSelectPokemon: (speciesSlug: string, game: GameId) => void;
 }
 
 // Stale key from the short-lived collapsed-list format — remove so the
@@ -93,7 +94,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
                       key={gameId}
                       gameId={gameId}
                       build={build}
-                      onSelect={onSelectPokemon}
+                      onSelect={(slug) => onSelectPokemon(slug, gameId)}
                     />
                   );
                 })}

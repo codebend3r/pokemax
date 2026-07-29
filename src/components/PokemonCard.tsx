@@ -48,6 +48,8 @@ interface Props {
   onCryVolumeChange?: (v: number) => void;
   /** Pool of species the compare picker can choose from */
   speciesPool?: Gen8Species[];
+  /** Preselects the competitive-build game and scrolls to the section (TEAMS picks). */
+  initialBuildGame?: GameId | null;
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
@@ -340,6 +342,7 @@ export default function PokemonCard({
   cryVolume = 0.25,
   onCryVolumeChange,
   speciesPool,
+  initialBuildGame,
 }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
   const [activeVariety, setActiveVariety] = useState<string>(() =>
@@ -424,8 +427,15 @@ export default function PokemonCard({
   );
   // Games this Pokémon can appear in — everything from its home gen onward.
   const buildGames = GAME_ORDER.filter((g) => GAME_GENS[g] >= gen);
-  const [buildGame, setBuildGame] = useState<GameId | null>(null);
-  useEffect(() => setBuildGame(null), [pokemon.name]);
+  const [buildGame, setBuildGame] = useState<GameId | null>(initialBuildGame ?? null);
+  const buildSectionRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    setBuildGame(initialBuildGame ?? null);
+    // Arriving from a TEAMS pick — jump straight to the build for that game.
+    if (initialBuildGame) {
+      buildSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [pokemon.name, initialBuildGame]);
   const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAME_GENS[buildGame] : null);
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
@@ -591,24 +601,26 @@ export default function PokemonCard({
         <MoveList moves={movesPokemon.moves} versionGroup={meta.primaryVersionGroup} />
       </Section>
 
-      <Section
-        label="COMPETITIVE BUILD"
-        count={
-          competitive.build
-            ? `GEN ${competitive.build.sourceGen ?? '?'} · ${competitive.build.tier.toUpperCase()}`
-            : undefined
-        }
-      >
-        <CompetitiveBuild
-          build={competitive.build}
-          loading={competitive.loading}
-          error={competitive.error}
-          pokemon={pokemon}
-          games={buildGames}
-          selectedGame={buildGame}
-          onSelectGame={setBuildGame}
-        />
-      </Section>
+      <div ref={buildSectionRef}>
+        <Section
+          label="COMPETITIVE BUILD"
+          count={
+            competitive.build
+              ? `GEN ${competitive.build.sourceGen ?? '?'} · ${competitive.build.tier.toUpperCase()}`
+              : undefined
+          }
+        >
+          <CompetitiveBuild
+            build={competitive.build}
+            loading={competitive.loading}
+            error={competitive.error}
+            pokemon={pokemon}
+            games={buildGames}
+            selectedGame={buildGame}
+            onSelectGame={setBuildGame}
+          />
+        </Section>
+      </div>
     </div>
   );
 }

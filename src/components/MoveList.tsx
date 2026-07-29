@@ -44,7 +44,7 @@ export default function MoveList({ moves, versionGroup }: Props) {
                     : '· ';
                 return (
                   <li key={m.name}>
-                    {prefix}
+                    <span className="crt-move-prefix">{prefix}</span>
                     <Detail kind="move" name={m.name} label={pretty(m.name)} />
                   </li>
                 );

@@ -1170,9 +1170,14 @@ button.crt-type:hover,
   transform-origin: center bottom;
 }
 .crt-card-top img.crt-sprite-3d.is-anim {
-  /* Showdown's 3D GIFs are small natives — smooth upscaling reads as blur,
-   * so scale them crisp like the 2D pixel art. */
-  image-rendering: pixelated;
+  /* Showdown's 3D GIFs are small natives. Upscaling them either blurs (auto)
+   * or chunks (pixelated) — both rejected — so render at natural size inside
+   * the 220px box instead. */
+  image-rendering: auto;
+  width: auto;
+  height: auto;
+  max-width: 220px;
+  max-height: 220px;
   transform-origin: center bottom;
 }
 /* 3D and 2D sprite sizes are driven by the responsive `.crt-card-top img`
@@ -3348,6 +3353,17 @@ button.crt-type:hover,
 .crt-trainer-filter-label,
 .crt-trainer-list-card-game,
 .crt-trainer-detail-game,
+/* Digit-heavy text — Pixelify's 5 reads like an S */
+.crt-compare-stat-num,
+.crt-compare-vitals-row,
+.crt-grid-dex,
+.crt-card-dex,
+.crt-pagination-status,
+.crt-section-count,
+.crt-trainer-member-level,
+.crt-move-prefix,
+.crt-build-value,
+.crt-footer,
 .crt-trainer-counter-why,
 .crt-trainer-counter-vs,
 .crt-trainer-counter-type,

@@ -51,6 +51,26 @@ export const GAME_LABELS: Record<GameId, string> = {
   'scarlet-violet': 'Scarlet / Violet',
 };
 
+/**
+ * Games grouped by the region they take place in — regions in first-appearance
+ * order, games within a region in release order. `Legends: Arceus` sits under
+ * Sinnoh because Hisui is Sinnoh's past.
+ */
+export const GAMES_BY_REGION: { region: string; games: GameId[] }[] = [
+  { region: 'Kanto', games: ['red-blue', 'yellow', 'firered-leafgreen', 'lets-go'] },
+  { region: 'Johto', games: ['gold-silver', 'crystal', 'heartgold-soulsilver'] },
+  { region: 'Hoenn', games: ['ruby-sapphire', 'emerald', 'omega-ruby-alpha-sapphire'] },
+  {
+    region: 'Sinnoh',
+    games: ['diamond-pearl', 'platinum', 'brilliant-diamond-shining-pearl', 'legends-arceus'],
+  },
+  { region: 'Unova', games: ['black-white', 'black-2-white-2'] },
+  { region: 'Kalos', games: ['x-y'] },
+  { region: 'Alola', games: ['sun-moon', 'ultra-sun-ultra-moon'] },
+  { region: 'Galar', games: ['sword-shield'] },
+  { region: 'Paldea', games: ['scarlet-violet'] },
+];
+
 export interface TrainerPokemon {
   /** PokeAPI species slug, e.g. `pikachu`. */
   species: string;

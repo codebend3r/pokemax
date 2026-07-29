@@ -3037,6 +3037,33 @@ button.crt-type:hover,
 .crt-teams-search .crt-trainer-search-input {
   flex: 1;
 }
+.crt-team-region {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.crt-team-region-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(255, 0, 200, 0.35);
+}
+.crt-team-region-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--accent), transparent);
+  opacity: 0.5;
+}
+.crt-team-region-games {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
 .crt-team-card {
   border: 1px solid var(--border);
   border-radius: 6px;

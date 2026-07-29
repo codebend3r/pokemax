@@ -1,4 +1,4 @@
-import type { GameId } from '@/trainers';
+import { GAMES_BY_REGION, type GameId } from '@/trainers';
 
 export interface TeamPick {
   /** PokeAPI species slug. */
@@ -749,5 +749,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
   },
 };
 
-/** Ordered list of games that actually have a curated team. */
-export const TEAM_GAMES: GameId[] = Object.keys(TEAM_BUILDS) as GameId[];
+/** Games that have a curated team, grouped by region and ordered by release date. */
+export const TEAM_REGIONS: { region: string; games: GameId[] }[] = GAMES_BY_REGION.map(
+  ({ region, games }) => ({ region, games: games.filter((g) => TEAM_BUILDS[g]) }),
+).filter(({ games }) => games.length > 0);

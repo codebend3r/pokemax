@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TEAM_BUILDS, TEAM_GAMES } from '@/teams';
+import { TEAM_BUILDS, TEAM_REGIONS } from '@/teams';
 import { GAME_LABELS, type GameId } from '@/trainers';
 import { showdownSpriteUrl } from '@/showdownSprite';
 
@@ -11,14 +11,20 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
   const [filter, setFilter] = useState('');
   const q = filter.trim().toLowerCase();
 
-  const visible = TEAM_GAMES.filter((g) => {
+  const matches = (region: string, g: GameId) => {
     if (!q) return true;
     const build = TEAM_BUILDS[g];
     if (!build) return false;
+    if (region.toLowerCase().includes(q)) return true;
     if (GAME_LABELS[g].toLowerCase().includes(q)) return true;
     if (build.title.toLowerCase().includes(q)) return true;
     return build.team.some((p) => p.species.includes(q) || p.role.toLowerCase().includes(q));
-  });
+  };
+
+  const visible = TEAM_REGIONS.map(({ region, games }) => ({
+    region,
+    games: games.filter((g) => matches(region, g)),
+  })).filter(({ games }) => games.length > 0);
 
   return (
     <div className="crt-teams-page">
@@ -39,13 +45,25 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
 
       {visible.length === 0 && <div className="crt-trainer-empty">▶ NO TEAMS MATCH FILTER</div>}
 
-      {visible.map((gameId) => {
-        const build = TEAM_BUILDS[gameId];
-        if (!build) return null;
-        return (
-          <GameTeamCard key={gameId} gameId={gameId} build={build} onSelect={onSelectPokemon} />
-        );
-      })}
+      {visible.map(({ region, games }) => (
+        <section key={region} className="crt-team-region">
+          <h2 className="crt-team-region-heading">{region.toUpperCase()}</h2>
+          <div className="crt-team-region-games">
+            {games.map((gameId) => {
+              const build = TEAM_BUILDS[gameId];
+              if (!build) return null;
+              return (
+                <GameTeamCard
+                  key={gameId}
+                  gameId={gameId}
+                  build={build}
+                  onSelect={onSelectPokemon}
+                />
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

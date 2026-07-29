@@ -1,6 +1,13 @@
 import { useMemo, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
-import { GAME_LABELS, GAME_ORDER, GAMES_BY_REGION, type GameId, type Trainer } from '@/trainers';
+import {
+  GAME_LABELS,
+  GAME_ORDER,
+  GAMES_BY_REGION,
+  trainerPortraitUrl,
+  type GameId,
+  type Trainer,
+} from '@/trainers';
 import { showdownSpriteUrl } from '@/showdownSprite';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
@@ -140,10 +147,10 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                     type="button"
                     onClick={() => onSelect(t)}
                   >
-                    {t.spriteUrl && (
+                    {trainerPortraitUrl(t) && (
                       <img
                         className="crt-trainer-list-card-portrait"
-                        src={t.spriteUrl}
+                        src={trainerPortraitUrl(t)}
                         alt={t.name}
                         loading="lazy"
                       />

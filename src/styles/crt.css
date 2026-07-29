@@ -2730,8 +2730,8 @@ button.crt-type:hover,
   flex: 1;
 }
 .crt-trainer-detail-portrait {
-  width: 96px;
-  height: 96px;
+  width: 160px;
+  height: 160px;
   image-rendering: pixelated;
   object-fit: contain;
   flex-shrink: 0;
@@ -2744,6 +2744,8 @@ button.crt-type:hover,
   }
   .crt-trainer-detail-portrait {
     align-self: center;
+    width: 128px;
+    height: 128px;
   }
 }
 .crt-trainer-detail-name {
@@ -3360,8 +3362,8 @@ button.crt-type:hover,
 
 /* Trainer list-card portrait — small Showdown VS sprite above the name */
 .crt-trainer-list-card-portrait {
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   image-rendering: pixelated;
   object-fit: contain;
   margin-bottom: 4px;

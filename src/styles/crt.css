@@ -3052,6 +3052,12 @@ button.crt-type:hover,
   color: var(--accent);
   text-shadow: 0 0 6px rgba(255, 0, 200, 0.35);
 }
+.crt-team-region-note {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  text-shadow: none;
+}
 .crt-team-region-heading::after {
   content: '';
   flex: 1;

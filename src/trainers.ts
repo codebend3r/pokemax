@@ -53,17 +53,18 @@ export const GAME_LABELS: Record<GameId, string> = {
 
 /**
  * Games grouped by the region they take place in — regions in first-appearance
- * order, games within a region in release order. `Legends: Arceus` sits under
- * Sinnoh because Hisui is Sinnoh's past.
+ * order, games within a region in release order. Hisui gets its own group
+ * (with a note) placed right after Sinnoh, since it's Sinnoh's ancient past.
  */
-export const GAMES_BY_REGION: { region: string; games: GameId[] }[] = [
+export const GAMES_BY_REGION: { region: string; note?: string; games: GameId[] }[] = [
   { region: 'Kanto', games: ['red-blue', 'yellow', 'firered-leafgreen', 'lets-go'] },
   { region: 'Johto', games: ['gold-silver', 'crystal', 'heartgold-soulsilver'] },
   { region: 'Hoenn', games: ['ruby-sapphire', 'emerald', 'omega-ruby-alpha-sapphire'] },
   {
     region: 'Sinnoh',
-    games: ['diamond-pearl', 'platinum', 'brilliant-diamond-shining-pearl', 'legends-arceus'],
+    games: ['diamond-pearl', 'platinum', 'brilliant-diamond-shining-pearl'],
   },
+  { region: 'Hisui', note: 'Ancient Sinnoh', games: ['legends-arceus'] },
   { region: 'Unova', games: ['black-white', 'black-2-white-2'] },
   { region: 'Kalos', games: ['x-y'] },
   { region: 'Alola', games: ['sun-moon', 'ultra-sun-ultra-moon'] },

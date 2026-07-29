@@ -750,6 +750,9 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
 };
 
 /** Games that have a curated team, grouped by region and ordered by release date. */
-export const TEAM_REGIONS: { region: string; games: GameId[] }[] = GAMES_BY_REGION.map(
-  ({ region, games }) => ({ region, games: games.filter((g) => TEAM_BUILDS[g]) }),
-).filter(({ games }) => games.length > 0);
+export const TEAM_REGIONS: { region: string; note?: string; games: GameId[] }[] =
+  GAMES_BY_REGION.map(({ region, note, games }) => ({
+    region,
+    note,
+    games: games.filter((g) => TEAM_BUILDS[g]),
+  })).filter(({ games }) => games.length > 0);

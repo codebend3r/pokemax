@@ -21,8 +21,9 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
     return build.team.some((p) => p.species.includes(q) || p.role.toLowerCase().includes(q));
   };
 
-  const visible = TEAM_REGIONS.map(({ region, games }) => ({
+  const visible = TEAM_REGIONS.map(({ region, note, games }) => ({
     region,
+    note,
     games: games.filter((g) => matches(region, g)),
   })).filter(({ games }) => games.length > 0);
 
@@ -45,9 +46,12 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
 
       {visible.length === 0 && <div className="crt-trainer-empty">▶ NO TEAMS MATCH FILTER</div>}
 
-      {visible.map(({ region, games }) => (
+      {visible.map(({ region, note, games }) => (
         <section key={region} className="crt-team-region">
-          <h2 className="crt-team-region-heading">{region.toUpperCase()}</h2>
+          <h2 className="crt-team-region-heading">
+            {region.toUpperCase()}
+            {note && <span className="crt-team-region-note">◂ {note.toUpperCase()}</span>}
+          </h2>
           <div className="crt-team-region-games">
             {games.map((gameId) => {
               const build = TEAM_BUILDS[gameId];

@@ -72,6 +72,34 @@ export const GAMES_BY_REGION: { region: string; note?: string; games: GameId[] }
   { region: 'Paldea', games: ['scarlet-violet'] },
 ];
 
+/** Region-grouped chronological game order (regions first-appearance, releases within). */
+export const GAME_ORDER: GameId[] = GAMES_BY_REGION.flatMap((r) => r.games);
+
+/** Core-series generation each game belongs to — used for Smogon set lookups. */
+export const GAME_GENS: Record<GameId, number> = {
+  'red-blue': 1,
+  yellow: 1,
+  'gold-silver': 2,
+  crystal: 2,
+  'ruby-sapphire': 3,
+  emerald: 3,
+  'firered-leafgreen': 3,
+  'diamond-pearl': 4,
+  platinum: 4,
+  'heartgold-soulsilver': 4,
+  'black-white': 5,
+  'black-2-white-2': 5,
+  'x-y': 6,
+  'omega-ruby-alpha-sapphire': 6,
+  'sun-moon': 7,
+  'ultra-sun-ultra-moon': 7,
+  'lets-go': 7,
+  'sword-shield': 8,
+  'brilliant-diamond-shining-pearl': 8,
+  'legends-arceus': 8,
+  'scarlet-violet': 9,
+};
+
 export interface TrainerPokemon {
   /** PokeAPI species slug, e.g. `pikachu`. */
   species: string;

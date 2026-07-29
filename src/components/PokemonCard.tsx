@@ -21,6 +21,7 @@ import ComparePanel from '@/components/ComparePanel';
 import CompetitiveBuild from '@/components/CompetitiveBuild';
 import Detail from '@/components/Detail';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
+import { GAME_GENS, GAME_ORDER, type GameId } from '@/trainers';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
 import { pokeapiToShowdownSlug } from '@/showdownSprite';
@@ -421,7 +422,11 @@ export default function PokemonCard({
     (n, g) => n + g.length,
     0,
   );
-  const competitive = useCompetitiveSet(pokemon.name, gen);
+  // Games this Pokémon can appear in — everything from its home gen onward.
+  const buildGames = GAME_ORDER.filter((g) => GAME_GENS[g] >= gen);
+  const [buildGame, setBuildGame] = useState<GameId | null>(null);
+  useEffect(() => setBuildGame(null), [pokemon.name]);
+  const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAME_GENS[buildGame] : null);
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
 
@@ -599,6 +604,9 @@ export default function PokemonCard({
           loading={competitive.loading}
           error={competitive.error}
           pokemon={pokemon}
+          games={buildGames}
+          selectedGame={buildGame}
+          onSelectGame={setBuildGame}
         />
       </Section>
     </div>

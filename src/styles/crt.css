@@ -596,6 +596,16 @@ button.crt-type:hover,
   gap: 6px 12px;
   align-items: baseline;
 }
+.crt-build-game-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.crt-build-game-row .crt-pagesize-select {
+  font-size: 14px;
+}
 .crt-build-tier {
   grid-column: 1 / -1;
   display: flex;

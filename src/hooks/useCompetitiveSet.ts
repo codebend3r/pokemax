@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { findBestBuild, type ResolvedBuild } from '@/competitive';
+import { findBestBuild, findBuildForGen, type ResolvedBuild } from '@/competitive';
 
 export interface CompetitiveState {
   build: ResolvedBuild | null;
@@ -7,7 +7,13 @@ export interface CompetitiveState {
   error: string | null;
 }
 
-export function useCompetitiveSet(name: string | null, _homeGen: number): CompetitiveState {
+/**
+ * `gen` pins the lookup to one Smogon gen (the game the user is playing);
+ * `null` walks latest → oldest for the richest modern build. Older gens for
+ * old Pokémon (e.g. Gen 1 Mewtwo) lack abilities/items/natures/EVs because
+ * those mechanics didn't exist yet, so the walk is the better default.
+ */
+export function useCompetitiveSet(name: string | null, gen: number | null): CompetitiveState {
   const [state, setState] = useState<CompetitiveState>({
     build: null,
     loading: !!name,
@@ -21,11 +27,7 @@ export function useCompetitiveSet(name: string | null, _homeGen: number): Compet
     }
     let active = true;
     setState((s) => ({ ...s, loading: true, error: null }));
-    // Always walk Smogon gens from latest → oldest. Older gens for old Pokémon
-    // (e.g. Gen 1 Mewtwo) lack abilities/items/natures/EVs because those mechanics
-    // didn't exist yet. The latest gen with the Pokémon listed gives the modern
-    // competitive build the user expects.
-    findBestBuild(name)
+    (gen === null ? findBestBuild(name) : findBuildForGen(name, gen))
       .then((build) => {
         if (active) setState({ build, loading: false, error: null });
       })
@@ -35,7 +37,7 @@ export function useCompetitiveSet(name: string | null, _homeGen: number): Compet
     return () => {
       active = false;
     };
-  }, [name]);
+  }, [name, gen]);
 
   return state;
 }

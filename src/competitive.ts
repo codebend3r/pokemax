@@ -78,6 +78,34 @@ export async function findBestBuild(name: string): Promise<ResolvedBuild | null>
   return null;
 }
 
+/**
+ * Look up a set in ONE specific gen — for "show me the build for the game I'm
+ * playing". Returns null (no cross-gen walking) when that gen has no set.
+ */
+export async function findBuildForGen(name: string, gen: number): Promise<ResolvedBuild | null> {
+  try {
+    const data = await fetchSmogonData(gen);
+    const build = pickBuild(data, name);
+    if (build) build.sourceGen = gen;
+    return build;
+  } catch {
+    return null;
+  }
+}
+
+/** Smogon strategy-dex slug for a gen (`smogon.com/dex/<slug>`). */
+export const SMOGON_DEX_SLUGS: Record<number, string> = {
+  1: 'rb',
+  2: 'gs',
+  3: 'rs',
+  4: 'dp',
+  5: 'bw',
+  6: 'xy',
+  7: 'sm',
+  8: 'ss',
+  9: 'sv',
+};
+
 export interface ResolvedBuild {
   pokemonKey: string;
   tier: string;

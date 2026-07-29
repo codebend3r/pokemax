@@ -1,6 +1,7 @@
 import type { ResolvedBuild, SmogonSet } from '@/competitive';
-import { formatEVs } from '@/competitive';
+import { formatEVs, SMOGON_DEX_SLUGS } from '@/competitive';
 import type { PokemonResponse } from '@/types';
+import { GAME_LABELS, type GameId } from '@/trainers';
 import Detail from '@/components/Detail';
 
 interface Props {
@@ -9,6 +10,15 @@ interface Props {
   error: string | null;
   /** Default ability fallback when the Smogon set omits it (single-ability species). */
   pokemon?: PokemonResponse;
+  /** Games this Pokémon can appear in — the per-game build options. */
+  games: GameId[];
+  /** null = latest gen with a published set (the richest modern build). */
+  selectedGame: GameId | null;
+  onSelectGame: (game: GameId | null) => void;
+}
+
+function isGameId(v: string): v is GameId {
+  return v in GAME_LABELS;
 }
 
 function smogonToApi(name: string): string {
@@ -65,23 +75,65 @@ function defaultAbility(p: PokemonResponse | undefined): string | undefined {
     .join(' ');
 }
 
-export default function CompetitiveBuild({ build, loading, error, pokemon }: Props) {
+export default function CompetitiveBuild({
+  build,
+  loading,
+  error,
+  pokemon,
+  games,
+  selectedGame,
+  onSelectGame,
+}: Props) {
+  const gameSelect = (
+    <div className="crt-build-game-row">
+      <span className="crt-build-label">FOR GAME</span>
+      <select
+        className="crt-pagesize-select"
+        aria-label="game for competitive build"
+        value={selectedGame ?? ''}
+        onChange={(e) => onSelectGame(isGameId(e.target.value) ? e.target.value : null)}
+      >
+        <option value="">LATEST (BEST AVAILABLE)</option>
+        {games.map((g) => (
+          <option key={g} value={g}>
+            {GAME_LABELS[g].toUpperCase()}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="crt-build-empty">
-        ▶ FETCHING COMPETITIVE DATA<span className="crt-cursor">&nbsp;</span>
+      <div>
+        {gameSelect}
+        <div className="crt-build-empty">
+          ▶ FETCHING COMPETITIVE DATA<span className="crt-cursor">&nbsp;</span>
+        </div>
       </div>
     );
   }
   if (error) {
-    return <div className="crt-build-empty">ERR: {error}</div>;
+    return (
+      <div>
+        {gameSelect}
+        <div className="crt-build-empty">ERR: {error}</div>
+      </div>
+    );
   }
   if (!build) {
     return (
-      <div className="crt-build-empty">
-        · no competitive data on Smogon for this entry
-        <div style={{ fontSize: 14, marginTop: 4, color: 'var(--dim)' }}>
-          (not every Gen 8 Pokémon has a published analysis)
+      <div>
+        {gameSelect}
+        <div className="crt-build-empty">
+          {selectedGame
+            ? `· no Smogon set for this entry in ${GAME_LABELS[selectedGame]}`
+            : '· no competitive data on Smogon for this entry'}
+          <div style={{ fontSize: 14, marginTop: 4, color: 'var(--dim)' }}>
+            {selectedGame
+              ? '(try LATEST, or a game from a different generation)'
+              : '(not every Pokémon has a published analysis)'}
+          </div>
         </div>
       </div>
     );
@@ -94,6 +146,7 @@ export default function CompetitiveBuild({ build, loading, error, pokemon }: Pro
 
   return (
     <div className="crt-build">
+      {gameSelect}
       <div className="crt-build-tier">
         <span className="crt-build-tier-label">[{tier.toUpperCase()}]</span>
         <span className="crt-build-tier-name">{buildName}</span>
@@ -132,7 +185,9 @@ export default function CompetitiveBuild({ build, loading, error, pokemon }: Pro
           ))}
         </ul>
       </div>
-      <div className="crt-build-source">data: smogon.com/dex/ss</div>
+      <div className="crt-build-source">
+        data: smogon.com/dex/{SMOGON_DEX_SLUGS[build.sourceGen ?? 9] ?? 'sv'}
+      </div>
     </div>
   );
 }

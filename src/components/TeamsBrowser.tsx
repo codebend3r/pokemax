@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { TEAM_BUILDS, TEAM_REGIONS } from '@/teams';
+import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
 import { GAME_LABELS, type GameId } from '@/trainers';
-import { showdownSpriteUrl } from '@/showdownSprite';
+import { showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
 
 interface Props {
   onSelectPokemon: (speciesSlug: string) => void;
@@ -90,26 +90,45 @@ function GameTeamCard({
       </header>
       <div className="crt-team-card-roster">
         {build.team.map((pick) => (
-          <button
-            key={pick.species}
-            type="button"
-            className="crt-team-pick"
-            onClick={() => onSelect(pick.species)}
-            title={`View ${pick.species}`}
-          >
-            <img
-              className="crt-team-pick-sprite"
-              src={showdownSpriteUrl(pick.species)}
-              alt={pick.species}
-            />
-            <div className="crt-team-pick-name">
-              {pick.species.replace(/-/g, ' ').toUpperCase()}
-            </div>
-            <div className="crt-team-pick-role">{pick.role.toUpperCase()}</div>
-            <div className="crt-team-pick-why">{pick.why}</div>
-          </button>
+          <TeamPickButton key={pick.species} pick={pick} onSelect={onSelect} />
         ))}
       </div>
     </section>
+  );
+}
+
+function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: string) => void }) {
+  const [animOk, setAnimOk] = useState(true);
+  return (
+    <button
+      type="button"
+      className={'crt-team-pick' + (animOk ? ' has-anim' : '')}
+      onClick={() => onSelect(pick.species)}
+      title={`View ${pick.species}`}
+    >
+      <span className="crt-team-pick-sprite">
+        <img
+          className="team-pick-still"
+          src={showdownSpriteUrl(pick.species)}
+          alt={pick.species}
+          loading="lazy"
+          decoding="async"
+        />
+        {animOk && (
+          <img
+            className="team-pick-anim"
+            src={showdownAnimSpriteUrl(pick.species)}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            onError={() => setAnimOk(false)}
+          />
+        )}
+      </span>
+      <div className="crt-team-pick-name">{pick.species.replace(/-/g, ' ').toUpperCase()}</div>
+      <div className="crt-team-pick-role">{pick.role.toUpperCase()}</div>
+      <div className="crt-team-pick-why">{pick.why}</div>
+    </button>
   );
 }

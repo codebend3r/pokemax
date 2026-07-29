@@ -3122,16 +3122,42 @@ button.crt-type:hover,
     box-shadow 0.12s ease,
     border-color 0.12s ease;
 }
-.crt-team-pick:hover {
+.crt-team-pick:hover,
+.crt-team-pick:focus-visible {
   transform: scale(1.03);
   border-color: var(--primary);
+  background: rgba(0, 255, 159, 0.13);
   box-shadow: 0 0 12px rgba(0, 255, 159, 0.35);
 }
 .crt-team-pick-sprite {
+  position: relative;
+  display: block;
   width: 72px;
   height: 72px;
-  image-rendering: pixelated;
+}
+.crt-team-pick-sprite img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  pointer-events: none;
+  image-rendering: pixelated;
+  transition: opacity 80ms;
+}
+.crt-team-pick-sprite .team-pick-anim {
+  opacity: 0;
+}
+/* Hover: crossfade still → animated GIF, same trick as the Pokédex grid.
+ * `has-anim` gates the still's fade-out so a missing GIF never leaves a
+ * blank sprite box. */
+.crt-team-pick:hover .team-pick-anim,
+.crt-team-pick:focus-visible .team-pick-anim {
+  opacity: 1;
+}
+.crt-team-pick.has-anim:hover .team-pick-still,
+.crt-team-pick.has-anim:focus-visible .team-pick-still {
+  opacity: 0;
 }
 .crt-team-pick-name {
   font-size: 13px;

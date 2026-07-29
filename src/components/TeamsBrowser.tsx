@@ -7,15 +7,16 @@ interface Props {
   onSelectPokemon: (speciesSlug: string) => void;
 }
 
-const COLLAPSED_KEY = 'pokemax.teamsCollapsed';
+// Tracks EXPANDED regions (empty set = the all-collapsed default) so that a
+// fresh visitor, a corrupted value, and a stale entry from the short-lived
+// collapsed-list format all land on everything-collapsed.
+const EXPANDED_KEY = 'pokemax.teamsExpanded';
 
-/** Everything starts collapsed; a stored value (even `[]`) is the user's own state. */
-const ALL_COLLAPSED: readonly string[] = TEAM_REGIONS.map((r) => r.region);
-
-function initialCollapsed(): Set<string> {
-  if (typeof window === 'undefined') return new Set(ALL_COLLAPSED);
+function initialExpanded(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  window.localStorage.removeItem('pokemax.teamsCollapsed');
   try {
-    const raw = window.localStorage.getItem(COLLAPSED_KEY);
+    const raw = window.localStorage.getItem(EXPANDED_KEY);
     if (raw !== null) {
       const parsed: unknown = JSON.parse(raw);
       if (Array.isArray(parsed)) {
@@ -25,20 +26,20 @@ function initialCollapsed(): Set<string> {
   } catch {
     // Corrupted value — fall through to the all-collapsed default.
   }
-  return new Set(ALL_COLLAPSED);
+  return new Set();
 }
 
 export default function TeamsBrowser({ onSelectPokemon }: Props) {
   const [filter, setFilter] = useState('');
-  const [collapsed, setCollapsed] = useState<Set<string>>(initialCollapsed);
+  const [expanded, setExpanded] = useState<Set<string>>(initialExpanded);
   const q = filter.trim().toLowerCase();
 
   useEffect(() => {
-    window.localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]));
-  }, [collapsed]);
+    window.localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expanded]));
+  }, [expanded]);
 
   const toggleRegion = (region: string) => {
-    setCollapsed((prev) => {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(region)) {
         next.delete(region);
@@ -84,15 +85,11 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
           <button
             type="button"
             className="crt-trainer-chip"
-            onClick={() => setCollapsed(new Set())}
+            onClick={() => setExpanded(new Set(TEAM_REGIONS.map((r) => r.region)))}
           >
             ▼ EXPAND ALL
           </button>
-          <button
-            type="button"
-            className="crt-trainer-chip"
-            onClick={() => setCollapsed(new Set(TEAM_REGIONS.map((r) => r.region)))}
-          >
+          <button type="button" className="crt-trainer-chip" onClick={() => setExpanded(new Set())}>
             ▶ COLLAPSE ALL
           </button>
         </div>
@@ -102,7 +99,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
 
       {visible.map(({ region, note, games }) => {
         // An active search auto-expands so matches are never hidden.
-        const isCollapsed = !q && collapsed.has(region);
+        const isCollapsed = !q && !expanded.has(region);
         return (
           <section key={region} className="crt-team-region">
             <h2 className="crt-team-region-heading">

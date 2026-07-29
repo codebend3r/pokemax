@@ -3052,11 +3052,36 @@ button.crt-type:hover,
   color: var(--accent);
   text-shadow: 0 0 6px rgba(255, 0, 200, 0.35);
 }
+.crt-team-region-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+.crt-team-region-toggle:hover {
+  color: var(--primary);
+}
+.crt-team-region-caret {
+  font-size: 11px;
+  color: var(--tertiary);
+}
 .crt-team-region-note {
   font-size: 11px;
   letter-spacing: 2px;
   color: var(--dim);
   text-shadow: none;
+}
+.crt-teams-fold-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
 }
 .crt-team-region-heading::after {
   content: '';

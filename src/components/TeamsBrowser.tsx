@@ -9,7 +9,20 @@ interface Props {
 
 export default function TeamsBrowser({ onSelectPokemon }: Props) {
   const [filter, setFilter] = useState('');
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const q = filter.trim().toLowerCase();
+
+  const toggleRegion = (region: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(region)) {
+        next.delete(region);
+      } else {
+        next.add(region);
+      }
+      return next;
+    });
+  };
 
   const matches = (region: string, g: GameId) => {
     if (!q) return true;
@@ -42,32 +55,62 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
           placeholder="Search game, species, or role (ESC to clear)"
           className="crt-trainer-search-input"
         />
+        <div className="crt-teams-fold-controls">
+          <button
+            type="button"
+            className="crt-trainer-chip"
+            onClick={() => setCollapsed(new Set())}
+          >
+            ▼ EXPAND ALL
+          </button>
+          <button
+            type="button"
+            className="crt-trainer-chip"
+            onClick={() => setCollapsed(new Set(TEAM_REGIONS.map((r) => r.region)))}
+          >
+            ▶ COLLAPSE ALL
+          </button>
+        </div>
       </div>
 
       {visible.length === 0 && <div className="crt-trainer-empty">▶ NO TEAMS MATCH FILTER</div>}
 
-      {visible.map(({ region, note, games }) => (
-        <section key={region} className="crt-team-region">
-          <h2 className="crt-team-region-heading">
-            {region.toUpperCase()}
-            {note && <span className="crt-team-region-note">◂ {note.toUpperCase()}</span>}
-          </h2>
-          <div className="crt-team-region-games">
-            {games.map((gameId) => {
-              const build = TEAM_BUILDS[gameId];
-              if (!build) return null;
-              return (
-                <GameTeamCard
-                  key={gameId}
-                  gameId={gameId}
-                  build={build}
-                  onSelect={onSelectPokemon}
-                />
-              );
-            })}
-          </div>
-        </section>
-      ))}
+      {visible.map(({ region, note, games }) => {
+        // An active search auto-expands so matches are never hidden.
+        const isCollapsed = !q && collapsed.has(region);
+        return (
+          <section key={region} className="crt-team-region">
+            <h2 className="crt-team-region-heading">
+              <button
+                type="button"
+                className="crt-team-region-toggle"
+                aria-expanded={!isCollapsed}
+                onClick={() => toggleRegion(region)}
+              >
+                <span className="crt-team-region-caret">{isCollapsed ? '▶' : '▼'}</span>
+                {region.toUpperCase()}
+                {note && <span className="crt-team-region-note">◂ {note.toUpperCase()}</span>}
+              </button>
+            </h2>
+            {!isCollapsed && (
+              <div className="crt-team-region-games">
+                {games.map((gameId) => {
+                  const build = TEAM_BUILDS[gameId];
+                  if (!build) return null;
+                  return (
+                    <GameTeamCard
+                      key={gameId}
+                      gameId={gameId}
+                      build={build}
+                      onSelect={onSelectPokemon}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }

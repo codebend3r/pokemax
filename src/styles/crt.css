@@ -3083,6 +3083,15 @@ button.crt-type:hover,
   gap: 6px;
   flex-shrink: 0;
 }
+.crt-trainers-fold {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+/* Trainers page has no flex-gap parent like `.crt-teams-page` — space the
+ * region sections themselves. */
+.crt-trainer-region {
+  margin-top: 18px;
+}
 .crt-team-region-heading::after {
   content: '';
   flex: 1;

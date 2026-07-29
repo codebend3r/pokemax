@@ -1,54 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
 import { GAME_LABELS, type GameId } from '@/trainers';
 import { showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
+import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
 interface Props {
   onSelectPokemon: (speciesSlug: string) => void;
 }
 
-// Tracks EXPANDED regions (empty set = the all-collapsed default) so that a
-// fresh visitor, a corrupted value, and a stale entry from the short-lived
-// collapsed-list format all land on everything-collapsed.
-const EXPANDED_KEY = 'pokemax.teamsExpanded';
-
-function initialExpanded(): Set<string> {
-  if (typeof window === 'undefined') return new Set();
+// Stale key from the short-lived collapsed-list format — remove so the
+// all-collapsed default holds for visitors who saw that version.
+if (typeof window !== 'undefined') {
   window.localStorage.removeItem('pokemax.teamsCollapsed');
-  try {
-    const raw = window.localStorage.getItem(EXPANDED_KEY);
-    if (raw !== null) {
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return new Set(parsed.filter((r): r is string => typeof r === 'string'));
-      }
-    }
-  } catch {
-    // Corrupted value — fall through to the all-collapsed default.
-  }
-  return new Set();
 }
 
 export default function TeamsBrowser({ onSelectPokemon }: Props) {
   const [filter, setFilter] = useState('');
-  const [expanded, setExpanded] = useState<Set<string>>(initialExpanded);
+  const { expanded, toggle, expandAll, collapseAll } = useExpandedRegions('pokemax.teamsExpanded');
   const q = filter.trim().toLowerCase();
-
-  useEffect(() => {
-    window.localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expanded]));
-  }, [expanded]);
-
-  const toggleRegion = (region: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(region)) {
-        next.delete(region);
-      } else {
-        next.add(region);
-      }
-      return next;
-    });
-  };
 
   const matches = (region: string, g: GameId) => {
     if (!q) return true;
@@ -85,11 +54,11 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
           <button
             type="button"
             className="crt-trainer-chip"
-            onClick={() => setExpanded(new Set(TEAM_REGIONS.map((r) => r.region)))}
+            onClick={() => expandAll(TEAM_REGIONS.map((r) => r.region))}
           >
             ▼ EXPAND ALL
           </button>
-          <button type="button" className="crt-trainer-chip" onClick={() => setExpanded(new Set())}>
+          <button type="button" className="crt-trainer-chip" onClick={collapseAll}>
             ▶ COLLAPSE ALL
           </button>
         </div>
@@ -107,7 +76,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
                 type="button"
                 className="crt-team-region-toggle"
                 aria-expanded={!isCollapsed}
-                onClick={() => toggleRegion(region)}
+                onClick={() => toggle(region)}
               >
                 <span className="crt-team-region-caret">{isCollapsed ? '▶' : '▼'}</span>
                 {region.toUpperCase()}

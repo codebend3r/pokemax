@@ -55,5 +55,10 @@ export function useObtainData(pokemonId: number, enabled: boolean): ObtainState 
     };
   }, [pokemonId, enabled]);
 
-  return state;
+  // `state.data` can lag a `pokemonId` change by a frame (or forever, when
+  // `enabled` is false and the fetch effect never ran) — never surface a
+  // stale Pokémon's data under the current id.
+  const data =
+    state.data && state.data.pokemonId === pokemonId ? state.data : (cache.get(pokemonId) ?? null);
+  return { ...state, data };
 }

@@ -52,7 +52,7 @@ const FILE: ObtainFile = {
 
 describe('ObtainMethods', () => {
   it('shows breeding info and the current gen expanded', () => {
-    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} />);
+    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
     expect(screen.getByText(/FIELD\/FAIRY/)).toBeInTheDocument();
     expect(screen.getByText(/2,560 STEPS/)).toBeInTheDocument();
     // Gen 1 expanded: entries visible
@@ -67,7 +67,7 @@ describe('ObtainMethods', () => {
   });
 
   it('collapses other gens until toggled', async () => {
-    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} />);
+    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
     expect(screen.queryByText(/Trade\/migrate/)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /GEN V/ }));
     expect(screen.getByText(/Trade\/migrate/)).toBeInTheDocument();
@@ -75,13 +75,52 @@ describe('ObtainMethods', () => {
 
   it('renders the unavailable state on error', () => {
     render(
-      <ObtainMethods data={null} loading={false} error="No obtain data (404)" currentGen={1} />,
+      <ObtainMethods
+        data={null}
+        loading={false}
+        error="No obtain data (404)"
+        currentGen={1}
+        enabled
+      />,
     );
     expect(screen.getByText('OBTAIN DATA UNAVAILABLE')).toBeInTheDocument();
   });
 
   it('renders a loading line', () => {
-    render(<ObtainMethods data={null} loading error={null} currentGen={1} />);
+    render(<ObtainMethods data={null} loading error={null} currentGen={1} enabled />);
     expect(screen.getByText(/LOADING/)).toBeInTheDocument();
+  });
+
+  it('shows loading, not unavailable, the instant it is enabled but data has not arrived', () => {
+    render(<ObtainMethods data={null} loading={false} error={null} currentGen={1} enabled />);
+    expect(screen.getByText(/LOADING/)).toBeInTheDocument();
+    expect(screen.queryByText('OBTAIN DATA UNAVAILABLE')).not.toBeInTheDocument();
+  });
+
+  it('stays unavailable (not loading) when disabled with no data', () => {
+    render(
+      <ObtainMethods data={null} loading={false} error={null} currentGen={1} enabled={false} />,
+    );
+    expect(screen.getByText('OBTAIN DATA UNAVAILABLE')).toBeInTheDocument();
+  });
+
+  it('default-expands the first gen present when currentGen is not in the file', () => {
+    const gen7Only: ObtainFile = {
+      pokemonId: 37,
+      name: 'vulpix',
+      breeding: null,
+      games: [
+        {
+          gen: 7,
+          versionGroup: 'sun-moon',
+          versions: ['sun', 'moon'],
+          entries: [{ method: 'wild', location: 'Mount Lanakila' }],
+        },
+      ],
+    };
+    // Alolan Vulpix: currentGen is 1 (its national dex gen) but the file
+    // only has gen-7-and-later games.
+    render(<ObtainMethods data={gen7Only} loading={false} error={null} currentGen={1} enabled />);
+    expect(screen.getByText('Mount Lanakila')).toBeInTheDocument();
   });
 });

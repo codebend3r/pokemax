@@ -614,10 +614,12 @@ export default function PokemonCard({
         onToggle={setObtainOpen}
       >
         <ObtainMethods
+          key={pokemon.id}
           data={obtain.data}
           loading={obtain.loading}
           error={obtain.error}
           currentGen={gen}
+          enabled={obtainOpen}
         />
       </Section>
 

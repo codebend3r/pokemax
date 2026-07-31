@@ -7,6 +7,8 @@ interface Props {
   loading: boolean;
   error: string | null;
   currentGen: number;
+  /** Whether the HOW TO OBTAIN section is open (data fetch is gated on this). */
+  enabled: boolean;
 }
 
 const METHOD_LABEL: Record<ObtainEntry['method'], string> = {
@@ -136,15 +138,25 @@ function GameRow({ game }: { game: ObtainGame }) {
   );
 }
 
-export default function ObtainMethods({ data, loading, error, currentGen }: Props) {
-  const [expanded, setExpanded] = useState<Set<number>>(() => new Set([currentGen]));
-  if (loading) return <div className="crt-obtain-status">LOADING OBTAIN DATA…</div>;
+export default function ObtainMethods({ data, loading, error, currentGen, enabled }: Props) {
+  const [userExpanded, setUserExpanded] = useState<Set<number> | null>(null);
+  // Between `enabled` flipping true and the fetch effect's first state update,
+  // `loading` is still false — treat that gap as loading too so there's no
+  // one-frame "UNAVAILABLE" flash before the request even starts.
+  if (loading || (enabled && !data && !error)) {
+    return <div className="crt-obtain-status">LOADING OBTAIN DATA…</div>;
+  }
   if (error || !data) return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
 
   const gens = [...new Set(data.games.map((g) => g.gen))];
+  // Regional forms can carry a `currentGen` the file's games never reach
+  // (e.g. Alolan Vulpix is gen 1, but its file starts at gen 7) — default to
+  // the first gen actually present instead of expanding nothing.
+  const defaultGen = gens.includes(currentGen) ? currentGen : gens[0];
+  const expanded = userExpanded ?? new Set(defaultGen === undefined ? [] : [defaultGen]);
   const toggle = (gen: number) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
+    setUserExpanded((prev) => {
+      const next = new Set(prev ?? expanded);
       if (next.has(gen)) next.delete(gen);
       else next.add(gen);
       return next;

@@ -1,0 +1,1 @@
+{"pokemonId":10108,"name":"persian-alola","breeding":{"eggGroups":["ground"],"hatchCycles":20,"steps":5120,"breedable":true},"games":[{"gen":7,"versionGroup":"ultra-sun-ultra-moon","versions":["ultra-sun","ultra-moon"],"entries":[{"method":"special","location":"Malie Garden","minLevel":25,"maxLevel":28,"chance":15,"conditions":["sos"]}]}]}

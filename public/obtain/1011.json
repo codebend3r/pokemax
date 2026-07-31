@@ -1,0 +1,1 @@
+{"pokemonId":1011,"name":"dipplin","breeding":{"eggGroups":["plant","dragon"],"hatchCycles":20,"steps":5120,"breedable":true},"games":[{"gen":9,"versionGroup":"scarlet-violet","versions":["scarlet","violet"],"entries":[{"method":"evolve","detail":"Evolve applin (use syrupy apple)"},{"method":"special","detail":"Location data not yet available"}]}]}

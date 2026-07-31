@@ -20,7 +20,9 @@ import Section from '@/components/Section';
 import ComparePanel from '@/components/ComparePanel';
 import CompetitiveBuild from '@/components/CompetitiveBuild';
 import Detail from '@/components/Detail';
+import ObtainMethods from '@/components/ObtainMethods';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
+import { useObtainData } from '@/hooks/useObtainData';
 import { GAME_GENS, GAME_ORDER, type GameId } from '@/trainers';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
@@ -434,6 +436,8 @@ export default function PokemonCard({
   // Games this Pokémon can appear in — everything from its home gen onward.
   const buildGames = GAME_ORDER.filter((g) => GAME_GENS[g] >= gen);
   const [buildGame, setBuildGame] = useState<GameId | null>(initialBuildGame ?? null);
+  const [obtainOpen, setObtainOpen] = useState(false);
+  const obtain = useObtainData(pokemon.id, obtainOpen);
   const buildSectionRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     setBuildGame(initialBuildGame ?? null);
@@ -601,6 +605,22 @@ export default function PokemonCard({
 
       <Section label="EVOLUTION">
         <EvolutionChain chain={chain.chain} active={pokemon.name} onSelect={onSelectEvolution} />
+      </Section>
+
+      <Section
+        label="HOW TO OBTAIN"
+        count={obtain.data ? obtain.data.games.length : undefined}
+        defaultOpen={false}
+        onToggle={setObtainOpen}
+      >
+        <ObtainMethods
+          key={pokemon.id}
+          data={obtain.data}
+          loading={obtain.loading}
+          error={obtain.error}
+          currentGen={gen}
+          enabled={obtainOpen}
+        />
       </Section>
 
       <Section label={`MOVES (${movesLabel})`} count={moveCount}>

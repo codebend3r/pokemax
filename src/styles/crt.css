@@ -1697,6 +1697,117 @@ button.crt-type:hover,
   font-size: 13px;
 }
 
+/* HOW TO OBTAIN */
+.crt-obtain-status {
+  color: var(--dim);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 4px 0;
+}
+.crt-obtain-breeding {
+  color: var(--tertiary);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+.crt-obtain-gen-toggle {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 6px 0 2px;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+.crt-obtain-game {
+  margin: 4px 0 8px 14px;
+}
+.crt-obtain-game-name {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+.crt-obtain-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 10px;
+}
+.crt-obtain-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 0;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+}
+/* Method-tag and condition-chip color is set inline per method/category
+   (see `METHOD_COLOR`/`conditionMeta` in `ObtainMethods.tsx`) — these rules
+   are just the shared box/type styling. */
+.crt-obtain-tag {
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+}
+.crt-obtain-loc {
+  color: var(--primary);
+}
+.crt-obtain-meta {
+  color: var(--tertiary);
+}
+.crt-obtain-cond {
+  color: var(--dim);
+  border: 1px solid var(--dim);
+  padding: 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+}
+.crt-obtain-detail {
+  color: var(--primary);
+  opacity: 0.9;
+}
+.crt-obtain-legend {
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--dim);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--dim);
+  line-height: 1.3;
+}
+.crt-obtain-legend summary {
+  cursor: pointer;
+  color: var(--dim);
+  letter-spacing: 0.5px;
+  list-style: none;
+}
+.crt-obtain-legend summary::-webkit-details-marker {
+  display: none;
+}
+.crt-obtain-legend-section {
+  margin: 6px 0 0 14px;
+}
+.crt-obtain-legend-title {
+  color: var(--primary);
+  opacity: 0.8;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.crt-obtain-legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 /* ────────────────────────────────────────────
    Light theme — vintage warm-amber CRT
    Same retro structure, swapped palette.

@@ -1,0 +1,1 @@
+{"pokemonId":10164,"name":"slowpoke-galar","breeding":{"eggGroups":["monster","water1"],"hatchCycles":20,"steps":5120,"breedable":true},"games":[{"gen":8,"versionGroup":"sword-shield","versions":["sword","shield"],"entries":[{"method":"special","location":"Wedgehurst","minLevel":12,"maxLevel":12,"chance":100,"conditions":["static"]}]}]}

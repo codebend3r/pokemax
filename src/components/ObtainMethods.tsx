@@ -46,6 +46,57 @@ function prettyVersions(versions: string[]): string {
   return versions.map((v) => v.toUpperCase().replace(/-/g, ' ')).join(' / ');
 }
 
+// Raw PokéAPI condition slugs read badly on chips ("weather-intense-sun",
+// "story-progress-hall-of-fame"); shorten the noisy families before the
+// generic uppercase fallback.
+const CONDITION_LABELS: Record<string, string> = {
+  'weather-normal': 'CLEAR WEATHER',
+  'slot2-none': 'NO GBA CART',
+  'swarm-yes': 'SWARM',
+  'swarm-no': 'NO SWARM',
+  'radar-on': 'POKéRADAR',
+  'radar-off': 'NO POKéRADAR',
+  'radio-off': 'NO RADIO',
+  'bug-catching-contest-yes': 'BUG CONTEST',
+  'bug-catching-contest-no': 'NO BUG CONTEST',
+  'max-den-rarity-common': 'COMMON DEN',
+  'max-den-rarity-rare': 'RARE DEN',
+  'max-den-rarity-special': 'SPECIAL DEN',
+  'story-progress-before-hall-of-fame': 'BEFORE HALL OF FAME',
+  'story-progress-hall-of-fame': 'AFTER HALL OF FAME',
+};
+
+const CONDITION_PREFIXES: [RegExp, string][] = [
+  [/^time-/, ''],
+  [/^season-/, ''],
+  [/^weather-/, ''],
+  [/^weekday-/, ''],
+  [/^story-progress-/, ''],
+  [/^other-/, ''],
+  [/^item-/, ''],
+  [/^slot2-/, 'GBA: '],
+  [/^radio-/, 'RADIO: '],
+  [/^trade-/, 'GIVE '],
+  [/^starter-/, 'STARTER: '],
+];
+
+function prettyCondition(slug: string): string {
+  const mapped = CONDITION_LABELS[slug];
+  if (mapped) return mapped;
+  const star = slug.match(/^max-den-rating-(\d)-star$/);
+  if (star) return `${star[1]}★ DEN`;
+  const coins = slug.match(/^coins-(\d+)$/);
+  if (coins) return `${parseInt(coins[1], 10).toLocaleString('en-US')} COINS`;
+  let s = slug;
+  for (const [re, repl] of CONDITION_PREFIXES) {
+    if (re.test(s)) {
+      s = s.replace(re, repl);
+      break;
+    }
+  }
+  return s.toUpperCase().replace(/-/g, ' ');
+}
+
 function levelRate(e: ObtainEntry): string {
   const bits: string[] = [];
   if (e.minLevel !== undefined && e.maxLevel !== undefined) {
@@ -64,7 +115,7 @@ function EntryRow({ entry }: { entry: ObtainEntry }) {
       {meta && <span className="crt-obtain-meta">{meta}</span>}
       {entry.conditions?.map((c) => (
         <span key={c} className="crt-obtain-cond">
-          {c.toUpperCase().replace(/-/g, ' ')}
+          {prettyCondition(c)}
         </span>
       ))}
       {entry.detail && <span className="crt-obtain-detail">{entry.detail}</span>}

@@ -1772,9 +1772,10 @@ button.crt-type:hover,
 }
 .crt-obtain-cond {
   color: var(--dim);
-  border: 1px dashed var(--dim);
-  padding: 0 3px;
-  font-size: 0.65rem;
+  border: 1px solid var(--dim);
+  padding: 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
 }
 .crt-obtain-detail {
   color: var(--primary);

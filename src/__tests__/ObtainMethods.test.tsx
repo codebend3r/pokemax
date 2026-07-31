@@ -25,7 +25,7 @@ const FILE: ObtainFile = {
           minLevel: 3,
           maxLevel: 5,
           chance: 45,
-          conditions: ['night'],
+          conditions: ['time-night', 'weather-intense-sun', 'slot2-firered'],
         },
       ],
     },
@@ -59,7 +59,11 @@ describe('ObtainMethods', () => {
     expect(screen.getByText('Viridian Forest')).toBeInTheDocument();
     expect(screen.getByText('GIFT')).toBeInTheDocument();
     expect(screen.getByText(/L3–5 · 45%/)).toBeInTheDocument();
+    // Condition slugs render prettified, not as raw dataset text
     expect(screen.getByText('NIGHT')).toBeInTheDocument();
+    expect(screen.getByText('INTENSE SUN')).toBeInTheDocument();
+    expect(screen.getByText('GBA: FIRERED')).toBeInTheDocument();
+    expect(screen.queryByText('WEATHER INTENSE SUN')).not.toBeInTheDocument();
   });
 
   it('collapses other gens until toggled', async () => {

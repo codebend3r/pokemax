@@ -50,7 +50,7 @@ export function bulbaNameToSlug(name: string): string {
   return lower
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .replace(/[.:']/g, '')
+    .replace(/[.:'’]/g, '')
     .replace(/\s+/g, '-');
 }
 

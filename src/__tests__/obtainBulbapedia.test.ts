@@ -46,5 +46,7 @@ describe('bulbaNameToSlug', () => {
     expect(bulbaNameToSlug('Flabébé')).toBe('flabebe');
     expect(bulbaNameToSlug('Type: Null')).toBe('type-null');
     expect(bulbaNameToSlug('Mime Jr.')).toBe('mime-jr');
+    expect(bulbaNameToSlug("Farfetch'd")).toBe('farfetchd');
+    expect(bulbaNameToSlug("Sirfetch'd")).toBe('sirfetchd');
   });
 });

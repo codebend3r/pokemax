@@ -113,7 +113,7 @@ describe('ObtainMethods', () => {
     expect(screen.getByText(/time of day/)).toBeVisible();
   });
 
-  it('omits the region suffix when a gen mixes home and remake/spin-off games', () => {
+  it('lists every region in the header when a gen mixes home and remake/spin-off games', () => {
     const mixed: ObtainFile = {
       pokemonId: 1,
       name: 'testmon',
@@ -140,10 +140,12 @@ describe('ObtainMethods', () => {
       ],
     };
     render(<ObtainMethods data={mixed} loading={false} error={null} currentGen={8} enabled />);
-    expect(screen.getByRole('button', { name: /^▼ GEN VIII$/ })).toBeInTheDocument();
-    expect(screen.queryByText(/GALAR/)).not.toBeInTheDocument();
-    expect(screen.getByText(/SINNOH/)).toBeInTheDocument();
-    expect(screen.getByText(/HISUI/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /GEN VIII · GALAR \/ SINNOH \/ HISUI/ }),
+    ).toBeInTheDocument();
+    // Per-game rows still carry their own region labels
+    expect(screen.getAllByText(/SINNOH/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(/HISUI/).length).toBeGreaterThanOrEqual(2);
   });
 
   it('keeps the region suffix when a gen is only its home-region games', () => {

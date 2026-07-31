@@ -367,12 +367,11 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
         const meta = getGen(gen);
         const open = expanded.has(gen);
         const gamesInGen = data.games.filter((g) => g.gen === gen);
-        // Only label the header with a region when every game shown under it
-        // actually belongs to the gen's home region — some gens (VIII, e.g.)
-        // mix in remakes/spin-offs from other regions.
-        const allHome = gamesInGen.every(
-          (g) => (VG_REGION[g.versionGroup] ?? meta.region) === meta.region,
-        );
+        // Header lists every region the gen's games actually cover — some
+        // gens (VIII, e.g.) mix in remakes/spin-offs from other regions.
+        const regions = [
+          ...new Set(gamesInGen.map((g) => VG_REGION[g.versionGroup] ?? meta.region)),
+        ];
         return (
           <div key={gen} className="crt-obtain-gen">
             <button
@@ -381,8 +380,8 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
               aria-expanded={open}
               onClick={() => toggle(gen)}
             >
-              {open ? '▼' : '▶'} GEN {meta.roman}
-              {allHome ? ` · ${meta.region.toUpperCase()}` : ''}
+              {open ? '▼' : '▶'} GEN {meta.roman} ·{' '}
+              {regions.map((r) => r.toUpperCase()).join(' / ')}
             </button>
             {open && gamesInGen.map((g, i) => <GameRow key={i} game={g} />)}
           </div>

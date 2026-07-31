@@ -55,23 +55,32 @@ const VG_REGION: Record<string, string> = {
   'omega-ruby-alpha-sapphire': 'Hoenn',
   'lets-go-pikachu-lets-go-eevee': 'Kanto',
   'brilliant-diamond-shining-pearl': 'Sinnoh',
-  // Hisui is ancient Sinnoh — grouped under the Sinnoh tab, labeled on the row.
-  'legends-arceus': 'Sinnoh',
+  'legends-arceus': 'Hisui',
 };
 
 // Groups are by REGION, not generation — BDSP belongs with the other Sinnoh
 // games regardless of when it was released.
+// Hisui sits directly under Sinnoh (it's the same land, ancient era).
 const REGION_ORDER = [
   'Kanto',
   'Johto',
   'Hoenn',
   'Sinnoh',
+  'Hisui',
   'Unova',
   'Kalos',
   'Alola',
   'Galar',
   'Paldea',
 ];
+
+const REGION_LABELS: Record<string, string> = {
+  Hisui: 'HISUI · ANCIENT SINNOH',
+};
+
+function regionLabel(region: string): string {
+  return REGION_LABELS[region] ?? region.toUpperCase();
+}
 
 function regionOf(game: ObtainGame): string {
   return VG_REGION[game.versionGroup] ?? getGen(game.gen).region;
@@ -262,12 +271,7 @@ function EntryRow({ entry }: { entry: ObtainEntry }) {
 function GameRow({ game }: { game: ObtainGame }) {
   return (
     <div className="crt-obtain-game">
-      <div className="crt-obtain-game-name">
-        {prettyVersions(game.versions)}
-        {game.versionGroup === 'legends-arceus' && (
-          <span className="crt-obtain-game-region"> · ANCIENT SINNOH</span>
-        )}
-      </div>
+      <div className="crt-obtain-game-name">{prettyVersions(game.versions)}</div>
       <ul className="crt-obtain-entries">
         {game.entries.map((e, i) => (
           <EntryRow key={i} entry={e} />
@@ -395,7 +399,7 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
               aria-expanded={open}
               onClick={() => toggle(region)}
             >
-              {open ? '▼' : '▶'} {region.toUpperCase()}
+              {open ? '▼' : '▶'} {regionLabel(region)}
             </button>
             {open && gamesInRegion.map((g, i) => <GameRow key={i} game={g} />)}
           </div>

@@ -140,18 +140,20 @@ describe('ObtainMethods', () => {
       ],
     };
     render(<ObtainMethods data={mixed} loading={false} error={null} currentGen={8} enabled />);
-    // Region tabs, no generation numbers; Legends Arceus lives under Sinnoh
+    // Region tabs, no generation numbers; Hisui is its own tab right after
+    // Sinnoh, labeled as ancient Sinnoh
     expect(screen.getByRole('button', { name: /GALAR/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /SINNOH/ })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /HISUI/ })).not.toBeInTheDocument();
     expect(screen.queryByText(/GEN VIII/)).not.toBeInTheDocument();
+    const sinnoh = screen.getByRole('button', { name: /^▶ SINNOH$/ });
+    const hisui = screen.getByRole('button', { name: /HISUI · ANCIENT SINNOH/ });
+    expect(sinnoh.compareDocumentPosition(hisui) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     // currentGen 8 → home region Galar expanded; the others start collapsed
     expect(screen.getByText('Wild Area')).toBeInTheDocument();
     expect(screen.queryByText('Route 201')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /SINNOH/ }));
+    await userEvent.click(sinnoh);
     expect(screen.getByText('Route 201')).toBeInTheDocument();
+    await userEvent.click(hisui);
     expect(screen.getByText('Obsidian Fieldlands')).toBeInTheDocument();
-    expect(screen.getByText(/ANCIENT SINNOH/)).toBeInTheDocument();
   });
 
   it('collapses other gens until toggled', async () => {

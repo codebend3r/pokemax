@@ -52,18 +52,116 @@ const FILE: ObtainFile = {
 
 describe('ObtainMethods', () => {
   it('shows breeding info and the current gen expanded', () => {
-    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
+    const { container } = render(
+      <ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />,
+    );
     expect(screen.getByText(/FIELD\/FAIRY/)).toBeInTheDocument();
     expect(screen.getByText(/2,560 STEPS/)).toBeInTheDocument();
     // Gen 1 expanded: entries visible
     expect(screen.getByText('Viridian Forest')).toBeInTheDocument();
-    expect(screen.getByText('GIFT')).toBeInTheDocument();
+    // Scope to game entries — the legend also glosses each method tag.
+    const gameTags = [...container.querySelectorAll('.crt-obtain-game .crt-obtain-tag')];
+    expect(gameTags.some((el) => el.textContent === 'GIFT')).toBe(true);
     expect(screen.getByText(/L3–5 · 45%/)).toBeInTheDocument();
-    // Condition slugs render prettified, not as raw dataset text
-    expect(screen.getByText('NIGHT')).toBeInTheDocument();
-    expect(screen.getByText('INTENSE SUN')).toBeInTheDocument();
-    expect(screen.getByText('GBA: FIRERED')).toBeInTheDocument();
-    expect(screen.queryByText('WEATHER INTENSE SUN')).not.toBeInTheDocument();
+    // Condition slugs render prettified (with a leading icon glyph), not as
+    // raw dataset text
+    expect(screen.getByText(/NIGHT/)).toBeInTheDocument();
+    expect(screen.getByText(/INTENSE SUN/)).toBeInTheDocument();
+    expect(screen.getByText(/GBA: FIRERED/)).toBeInTheDocument();
+    expect(screen.queryByText(/WEATHER INTENSE SUN/)).not.toBeInTheDocument();
+  });
+
+  it('gives a weather condition chip its icon', () => {
+    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
+    // weather-intense-sun renders with the sun-specific weather glyph
+    // (U+2600 + U+FE0E text-presentation selector)
+    const sunIcon = '☀︎';
+    expect(screen.getByText(`${sunIcon} INTENSE SUN`)).toBeInTheDocument();
+  });
+
+  it('labels the special method OTHER, not SPECIAL', () => {
+    const file: ObtainFile = {
+      ...FILE,
+      games: [
+        {
+          gen: 1,
+          versionGroup: 'red-blue',
+          versions: ['red', 'blue'],
+          entries: [{ method: 'special', detail: 'Headbutt a tree' }],
+        },
+      ],
+    };
+    const { container } = render(
+      <ObtainMethods data={file} loading={false} error={null} currentGen={1} enabled />,
+    );
+    // The legend also glosses OTHER for `special`, so scope to the entry chip.
+    const entryTag = container.querySelector('.crt-obtain-entries .crt-obtain-tag');
+    expect(entryTag).toHaveTextContent('OTHER');
+    expect(screen.queryByText('SPECIAL')).not.toBeInTheDocument();
+  });
+
+  it('renders a collapsible legend that expands to show glosses', async () => {
+    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
+    const summary = screen.getByText(/LEGEND/);
+    expect(summary).not.toHaveTextContent('?');
+    const details = summary.closest('details');
+    expect(details).not.toBeNull();
+    expect(screen.getByText(/breed & hatch/)).not.toBeVisible();
+    await userEvent.click(summary);
+    expect(details?.open).toBe(true);
+    expect(screen.getByText(/breed & hatch/)).toBeVisible();
+    expect(screen.getByText(/time of day/)).toBeVisible();
+  });
+
+  it('omits the region suffix when a gen mixes home and remake/spin-off games', () => {
+    const mixed: ObtainFile = {
+      pokemonId: 1,
+      name: 'testmon',
+      breeding: null,
+      games: [
+        {
+          gen: 8,
+          versionGroup: 'sword-shield',
+          versions: ['sword', 'shield'],
+          entries: [{ method: 'wild', location: 'Wild Area' }],
+        },
+        {
+          gen: 8,
+          versionGroup: 'brilliant-diamond-shining-pearl',
+          versions: ['brilliant-diamond', 'shining-pearl'],
+          entries: [{ method: 'wild', location: 'Route 201' }],
+        },
+        {
+          gen: 8,
+          versionGroup: 'legends-arceus',
+          versions: ['legends-arceus'],
+          entries: [{ method: 'wild', location: 'Obsidian Fieldlands' }],
+        },
+      ],
+    };
+    render(<ObtainMethods data={mixed} loading={false} error={null} currentGen={8} enabled />);
+    expect(screen.getByRole('button', { name: /^▼ GEN VIII$/ })).toBeInTheDocument();
+    expect(screen.queryByText(/GALAR/)).not.toBeInTheDocument();
+    expect(screen.getByText(/SINNOH/)).toBeInTheDocument();
+    expect(screen.getByText(/HISUI/)).toBeInTheDocument();
+  });
+
+  it('keeps the region suffix when a gen is only its home-region games', () => {
+    const galarOnly: ObtainFile = {
+      pokemonId: 1,
+      name: 'testmon',
+      breeding: null,
+      games: [
+        {
+          gen: 8,
+          versionGroup: 'sword-shield',
+          versions: ['sword', 'shield'],
+          entries: [{ method: 'wild', location: 'Wild Area' }],
+        },
+      ],
+    };
+    render(<ObtainMethods data={galarOnly} loading={false} error={null} currentGen={8} enabled />);
+    expect(screen.getByRole('button', { name: /GEN VIII · GALAR/ })).toBeInTheDocument();
   });
 
   it('collapses other gens until toggled', async () => {

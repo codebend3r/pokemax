@@ -113,7 +113,7 @@ describe('ObtainMethods', () => {
     expect(screen.getByText(/time of day/)).toBeVisible();
   });
 
-  it('lists every region in the header when a gen mixes home and remake/spin-off games', () => {
+  it('groups games under region tabs, not generations', async () => {
     const mixed: ObtainFile = {
       pokemonId: 1,
       name: 'testmon',
@@ -140,36 +140,22 @@ describe('ObtainMethods', () => {
       ],
     };
     render(<ObtainMethods data={mixed} loading={false} error={null} currentGen={8} enabled />);
-    expect(
-      screen.getByRole('button', { name: /GEN VIII · GALAR \/ SINNOH \/ HISUI/ }),
-    ).toBeInTheDocument();
-    // Per-game rows still carry their own region labels
-    expect(screen.getAllByText(/SINNOH/).length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText(/HISUI/).length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('keeps the region suffix when a gen is only its home-region games', () => {
-    const galarOnly: ObtainFile = {
-      pokemonId: 1,
-      name: 'testmon',
-      breeding: null,
-      games: [
-        {
-          gen: 8,
-          versionGroup: 'sword-shield',
-          versions: ['sword', 'shield'],
-          entries: [{ method: 'wild', location: 'Wild Area' }],
-        },
-      ],
-    };
-    render(<ObtainMethods data={galarOnly} loading={false} error={null} currentGen={8} enabled />);
-    expect(screen.getByRole('button', { name: /GEN VIII · GALAR/ })).toBeInTheDocument();
+    // Three separate region tabs, no generation numbers anywhere
+    expect(screen.getByRole('button', { name: /GALAR/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /SINNOH/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /HISUI/ })).toBeInTheDocument();
+    expect(screen.queryByText(/GEN VIII/)).not.toBeInTheDocument();
+    // currentGen 8 → home region Galar expanded; the others start collapsed
+    expect(screen.getByText('Wild Area')).toBeInTheDocument();
+    expect(screen.queryByText('Route 201')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /SINNOH/ }));
+    expect(screen.getByText('Route 201')).toBeInTheDocument();
   });
 
   it('collapses other gens until toggled', async () => {
     render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
     expect(screen.queryByText(/Trade\/migrate/)).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /GEN V/ }));
+    await userEvent.click(screen.getByRole('button', { name: /UNOVA/ }));
     expect(screen.getByText(/Trade\/migrate/)).toBeInTheDocument();
   });
 

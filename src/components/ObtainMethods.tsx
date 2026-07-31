@@ -58,6 +58,25 @@ const VG_REGION: Record<string, string> = {
   'legends-arceus': 'Hisui',
 };
 
+// Groups are by REGION, not generation — BDSP belongs with the other Sinnoh
+// games regardless of when it was released.
+const REGION_ORDER = [
+  'Kanto',
+  'Johto',
+  'Hoenn',
+  'Sinnoh',
+  'Unova',
+  'Kalos',
+  'Alola',
+  'Galar',
+  'Hisui',
+  'Paldea',
+];
+
+function regionOf(game: ObtainGame): string {
+  return VG_REGION[game.versionGroup] ?? getGen(game.gen).region;
+}
+
 function prettyVersions(versions: string[]): string {
   return versions.map((v) => v.toUpperCase().replace(/-/g, ' ')).join(' / ');
 }
@@ -241,13 +260,9 @@ function EntryRow({ entry }: { entry: ObtainEntry }) {
 }
 
 function GameRow({ game }: { game: ObtainGame }) {
-  const region = VG_REGION[game.versionGroup];
   return (
     <div className="crt-obtain-game">
-      <div className="crt-obtain-game-name">
-        {prettyVersions(game.versions)}
-        {region && <span className="crt-obtain-game-region"> · {region.toUpperCase()}</span>}
-      </div>
+      <div className="crt-obtain-game-name">{prettyVersions(game.versions)}</div>
       <ul className="crt-obtain-entries">
         {game.entries.map((e, i) => (
           <EntryRow key={i} entry={e} />
@@ -329,7 +344,7 @@ function Legend() {
 }
 
 export default function ObtainMethods({ data, loading, error, currentGen, enabled }: Props) {
-  const [userExpanded, setUserExpanded] = useState<Set<number> | null>(null);
+  const [userExpanded, setUserExpanded] = useState<Set<string> | null>(null);
   // Between `enabled` flipping true and the fetch effect's first state update,
   // `loading` is still false — treat that gap as loading too so there's no
   // one-frame "UNAVAILABLE" flash before the request even starts.
@@ -338,17 +353,18 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
   }
   if (error || !data) return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
 
-  const gens = [...new Set(data.games.map((g) => g.gen))];
-  // Regional forms can carry a `currentGen` the file's games never reach
-  // (e.g. Alolan Vulpix is gen 1, but its file starts at gen 7) — default to
-  // the first gen actually present instead of expanding nothing.
-  const defaultGen = gens.includes(currentGen) ? currentGen : gens[0];
-  const expanded = userExpanded ?? new Set(defaultGen === undefined ? [] : [defaultGen]);
-  const toggle = (gen: number) =>
+  const regions = REGION_ORDER.filter((r) => data.games.some((g) => regionOf(g) === r));
+  // Regional forms can carry a `currentGen` whose home region the file's
+  // games never reach (e.g. Alolan Vulpix is gen 1, but its file starts in
+  // Alola) — default to the first region actually present.
+  const homeRegion = getGen(currentGen).region;
+  const defaultRegion = regions.includes(homeRegion) ? homeRegion : regions[0];
+  const expanded = userExpanded ?? new Set(defaultRegion === undefined ? [] : [defaultRegion]);
+  const toggle = (region: string) =>
     setUserExpanded((prev) => {
       const next = new Set(prev ?? expanded);
-      if (next.has(gen)) next.delete(gen);
-      else next.add(gen);
+      if (next.has(region)) next.delete(region);
+      else next.add(region);
       return next;
     });
 
@@ -363,27 +379,20 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
         </div>
       )}
       <Legend />
-      {gens.map((gen) => {
-        const meta = getGen(gen);
-        const open = expanded.has(gen);
-        const gamesInGen = data.games.filter((g) => g.gen === gen);
-        // Header lists every region the gen's games actually cover — some
-        // gens (VIII, e.g.) mix in remakes/spin-offs from other regions.
-        const regions = [
-          ...new Set(gamesInGen.map((g) => VG_REGION[g.versionGroup] ?? meta.region)),
-        ];
+      {regions.map((region) => {
+        const open = expanded.has(region);
+        const gamesInRegion = data.games.filter((g) => regionOf(g) === region);
         return (
-          <div key={gen} className="crt-obtain-gen">
+          <div key={region} className="crt-obtain-gen">
             <button
               type="button"
               className="crt-obtain-gen-toggle"
               aria-expanded={open}
-              onClick={() => toggle(gen)}
+              onClick={() => toggle(region)}
             >
-              {open ? '▼' : '▶'} GEN {meta.roman} ·{' '}
-              {regions.map((r) => r.toUpperCase()).join(' / ')}
+              {open ? '▼' : '▶'} {region.toUpperCase()}
             </button>
-            {open && gamesInGen.map((g, i) => <GameRow key={i} game={g} />)}
+            {open && gamesInRegion.map((g, i) => <GameRow key={i} game={g} />)}
           </div>
         );
       })}

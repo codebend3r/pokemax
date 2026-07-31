@@ -72,16 +72,53 @@ describe('assembleObtainFile', () => {
     const evRed = evFile.games.find((g) => g.versions.includes('red'));
     expect(evRed?.entries[0]).toEqual({ method: 'evolve', detail: 'Evolve premon (level 26)' });
 
+    // EGG fallback is forbidden in gen-1 groups — assert on a breeding-capable
+    // group instead, and confirm red-blue falls through to transfer for a
+    // non-evolving breedable species.
     const breeder = base();
     const eggFile = assembleObtainFile(breeder);
+    const eggGoldSilver = eggFile.games.find((g) => g.versionGroup === 'gold-silver');
+    expect(eggGoldSilver?.entries[0].method).toBe('egg');
     const eggRed = eggFile.games.find((g) => g.versions.includes('red'));
-    expect(eggRed?.entries[0].method).toBe('egg');
+    expect(eggRed?.entries[0].method).toBe('transfer');
 
     const loner = base();
     loner.breeding = { eggGroups: ['no-eggs'], hatchCycles: 120, steps: 30720, breedable: false };
     const trFile = assembleObtainFile(loner);
     const trRed = trFile.games.find((g) => g.versions.includes('red'));
     expect(trRed?.entries[0].method).toBe('transfer');
+  });
+
+  it('does not derive a fallback row when an unavailable entry is present', () => {
+    const input = base();
+    input.apiEntries.set('red', [{ method: 'unavailable', detail: 'Not obtainable in Red' }]);
+    const file = assembleObtainFile(input);
+    const red = file.games.find((g) => g.versions.includes('red'));
+    expect(red?.entries).toEqual([{ method: 'unavailable', detail: 'Not obtainable in Red' }]);
+  });
+
+  it('marks species absent from a limited-dex game as not in the Pokédex', () => {
+    const input = base();
+    // No API, pdb, or trade entries for Let's Go / Legends: Arceus versions.
+    const file = assembleObtainFile(input);
+    const lgpe = file.games.find((g) => g.versions.includes('lets-go-pikachu'));
+    expect(lgpe?.entries).toEqual([
+      { method: 'unavailable', detail: "Not in this game's Pokédex" },
+    ]);
+    const pla = file.games.find((g) => g.versions.includes('legends-arceus'));
+    expect(pla?.entries).toEqual([{ method: 'unavailable', detail: "Not in this game's Pokédex" }]);
+  });
+
+  it('skips the Bulbapedia trade when the API already has a trade entry', () => {
+    const input = base();
+    input.apiEntries.set('red', [{ method: 'trade', detail: 'Trade for a KADABRA' }]);
+    input.trades = [
+      { versions: ['red', 'blue'], give: 'abra', receive: 'testmon', location: 'Cerulean City' },
+    ];
+    const file = assembleObtainFile(input);
+    const red = file.games.find((g) => g.versions.includes('red'));
+    expect(red?.entries.filter((e) => e.method === 'trade')).toHaveLength(1);
+    expect(red?.entries[0].detail).toBe('Trade for a KADABRA');
   });
 
   it('starts at the debut gen and never before', () => {

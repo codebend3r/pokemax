@@ -1730,6 +1730,10 @@ button.crt-type:hover,
   font-size: 0.85rem;
   margin-bottom: 2px;
 }
+.crt-obtain-game-region {
+  color: var(--dim);
+  font-size: 0.75rem;
+}
 .crt-obtain-entries {
   list-style: none;
   margin: 0;

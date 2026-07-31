@@ -55,7 +55,8 @@ const VG_REGION: Record<string, string> = {
   'omega-ruby-alpha-sapphire': 'Hoenn',
   'lets-go-pikachu-lets-go-eevee': 'Kanto',
   'brilliant-diamond-shining-pearl': 'Sinnoh',
-  'legends-arceus': 'Hisui',
+  // Hisui is ancient Sinnoh — grouped under the Sinnoh tab, labeled on the row.
+  'legends-arceus': 'Sinnoh',
 };
 
 // Groups are by REGION, not generation — BDSP belongs with the other Sinnoh
@@ -69,7 +70,6 @@ const REGION_ORDER = [
   'Kalos',
   'Alola',
   'Galar',
-  'Hisui',
   'Paldea',
 ];
 
@@ -262,7 +262,12 @@ function EntryRow({ entry }: { entry: ObtainEntry }) {
 function GameRow({ game }: { game: ObtainGame }) {
   return (
     <div className="crt-obtain-game">
-      <div className="crt-obtain-game-name">{prettyVersions(game.versions)}</div>
+      <div className="crt-obtain-game-name">
+        {prettyVersions(game.versions)}
+        {game.versionGroup === 'legends-arceus' && (
+          <span className="crt-obtain-game-region"> · ANCIENT SINNOH</span>
+        )}
+      </div>
       <ul className="crt-obtain-entries">
         {game.entries.map((e, i) => (
           <EntryRow key={i} entry={e} />

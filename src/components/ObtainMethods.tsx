@@ -1,15 +1,12 @@
 import { useState, type SyntheticEvent } from 'react';
 import { getGen, REGIONS, REGION_OF_VERSION_GROUP } from '@/generations';
+import type { ObtainState } from '@/hooks/useObtainData';
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
 import { TYPE_COLORS } from '@/typeChart';
 
 interface Props {
-  data: ObtainFile | null;
-  loading: boolean;
-  error: string | null;
+  state: ObtainState;
   currentGen: number;
-  /** Whether the HOW TO OBTAIN section is open (data fetch is gated on this). */
-  enabled: boolean;
 }
 
 const METHOD_LABEL: Record<ObtainEntry['method'], string> = {
@@ -323,17 +320,10 @@ function Legend() {
   );
 }
 
-export default function ObtainMethods({ data, loading, error, currentGen, enabled }: Props) {
+function ObtainRegions({ file, currentGen }: { file: ObtainFile; currentGen: number }) {
   const [userExpanded, setUserExpanded] = useState<Set<string> | null>(null);
-  // Between `enabled` flipping true and the fetch effect's first state update,
-  // `loading` is still false — treat that gap as loading too so there's no
-  // one-frame "UNAVAILABLE" flash before the request even starts.
-  if (loading || (enabled && !data && !error)) {
-    return <div className="crt-obtain-status">LOADING OBTAIN DATA…</div>;
-  }
-  if (error || !data) return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
 
-  const regions = REGIONS.filter((r) => data.games.some((g) => regionOf(g) === r.name));
+  const regions = REGIONS.filter((r) => file.games.some((g) => regionOf(g) === r.name));
   // Regional forms can carry a `currentGen` whose home region the file's
   // games never reach (e.g. Alolan Vulpix is gen 1, but its file starts in
   // Alola) — default to the first region actually present.
@@ -350,18 +340,18 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
 
   return (
     <div className="crt-obtain">
-      {data.breeding && (
+      {file.breeding && (
         <div className="crt-obtain-breeding">
-          EGG GROUPS: {data.breeding.eggGroups.map((g) => g.toUpperCase()).join('/')}
-          {data.breeding.breedable
-            ? ` · HATCH: ${data.breeding.hatchCycles} CYCLES (${data.breeding.steps.toLocaleString('en-US')} STEPS)`
+          EGG GROUPS: {file.breeding.eggGroups.map((g) => g.toUpperCase()).join('/')}
+          {file.breeding.breedable
+            ? ` · HATCH: ${file.breeding.hatchCycles} CYCLES (${file.breeding.steps.toLocaleString('en-US')} STEPS)`
             : ' · CANNOT BREED'}
         </div>
       )}
       <Legend />
       {regions.map((region) => {
         const open = expanded.has(region.name);
-        const gamesInRegion = data.games.filter((g) => regionOf(g) === region.name);
+        const gamesInRegion = file.games.filter((g) => regionOf(g) === region.name);
         return (
           <div key={region.name} className="crt-obtain-region">
             <button
@@ -378,4 +368,14 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
       })}
     </div>
   );
+}
+
+export default function ObtainMethods({ state, currentGen }: Props) {
+  if (state.status === 'loading') {
+    return <div className="crt-obtain-status">LOADING OBTAIN DATA…</div>;
+  }
+  if (state.status !== 'ready') {
+    return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
+  }
+  return <ObtainRegions file={state.file} currentGen={currentGen} />;
 }

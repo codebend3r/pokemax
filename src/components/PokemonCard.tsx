@@ -609,18 +609,11 @@ export default function PokemonCard({
 
       <Section
         label="HOW TO OBTAIN"
-        count={obtain.data ? obtain.data.games.length : undefined}
+        count={obtain.status === 'ready' ? obtain.file.games.length : undefined}
         defaultOpen={false}
         onToggle={setObtainOpen}
       >
-        <ObtainMethods
-          key={pokemon.id}
-          data={obtain.data}
-          loading={obtain.loading}
-          error={obtain.error}
-          currentGen={gen}
-          enabled={obtainOpen}
-        />
+        <ObtainMethods key={pokemon.id} state={obtain} currentGen={gen} />
       </Section>
 
       <Section label={`MOVES (${movesLabel})`} count={moveCount}>

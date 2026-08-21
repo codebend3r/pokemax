@@ -320,19 +320,23 @@ function Legend() {
   );
 }
 
+// Mounted only once the file is loaded, so the default open region is known at
+// mount and expansion is plain, non-nullable state. Deliberately NOT persisted
+// via `useExpandedRegions` — that hook's stored value would carry one Pokémon's
+// open region onto the next, whose regions are a different set entirely.
 function ObtainRegions({ file, currentGen }: { file: ObtainFile; currentGen: number }) {
-  const [userExpanded, setUserExpanded] = useState<Set<string> | null>(null);
-
   const regions = REGIONS.filter((r) => file.games.some((g) => regionOf(g) === r.name));
   // Regional forms can carry a `currentGen` whose home region the file's
   // games never reach (e.g. Alolan Vulpix is gen 1, but its file starts in
   // Alola) — default to the first region actually present.
   const homeRegion = getGen(currentGen).region;
   const defaultRegion = regions.some((r) => r.name === homeRegion) ? homeRegion : regions[0]?.name;
-  const expanded = userExpanded ?? new Set(defaultRegion === undefined ? [] : [defaultRegion]);
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(defaultRegion === undefined ? [] : [defaultRegion]),
+  );
   const toggle = (region: string) =>
-    setUserExpanded((prev) => {
-      const next = new Set(prev ?? expanded);
+    setExpanded((prev) => {
+      const next = new Set(prev);
       if (next.has(region)) next.delete(region);
       else next.add(region);
       return next;

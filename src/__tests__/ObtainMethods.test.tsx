@@ -80,6 +80,56 @@ describe('ObtainMethods', () => {
     expect(screen.getByText(`${sunIcon} INTENSE SUN`)).toBeInTheDocument();
   });
 
+  it('renders each condition family with its own icon and label', () => {
+    const file: ObtainFile = {
+      pokemonId: 1,
+      name: 'testmon',
+      breeding: null,
+      games: [
+        {
+          gen: 1,
+          versionGroup: 'red-blue',
+          versions: ['red'],
+          entries: [
+            {
+              method: 'grass',
+              location: 'Route 1',
+              conditions: [
+                'time-night',
+                'season-winter',
+                'weather-snow',
+                'old-rod',
+                'story-progress-hall-of-fame',
+                'trade-machoke',
+                'slot2-emerald',
+                'radio-hoenn',
+                'starter-bulbasaur',
+                'weekday-tuesday',
+                'no-such-family-here',
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    render(<ObtainMethods state={ready(file)} currentGen={1} />);
+    // Prefix-stripping families
+    expect(screen.getByText('◔︎ NIGHT')).toBeInTheDocument();
+    expect(screen.getByText('✿︎ WINTER')).toBeInTheDocument();
+    expect(screen.getByText('❄︎ SNOW')).toBeInTheDocument();
+    expect(screen.getByText('⚑︎ AFTER HALL OF FAME')).toBeInTheDocument();
+    expect(screen.getByText('✧︎ TUESDAY')).toBeInTheDocument();
+    // Prefix-replacing families
+    expect(screen.getByText('⇄︎ GIVE MACHOKE')).toBeInTheDocument();
+    expect(screen.getByText('◎︎ GBA: EMERALD')).toBeInTheDocument();
+    expect(screen.getByText('✧︎ RADIO: HOENN')).toBeInTheDocument();
+    expect(screen.getByText('✧︎ STARTER: BULBASAUR')).toBeInTheDocument();
+    // Exact-slug family with no common prefix
+    expect(screen.getByText('≈︎ OLD ROD')).toBeInTheDocument();
+    // Unknown slug falls back to the generic chip, slug preserved
+    expect(screen.getByText('✧︎ NO SUCH FAMILY HERE')).toBeInTheDocument();
+  });
+
   it('labels the special method OTHER, not SPECIAL', () => {
     const file: ObtainFile = {
       ...FILE,

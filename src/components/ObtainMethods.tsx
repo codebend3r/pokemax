@@ -1,6 +1,7 @@
 import { useState, type SyntheticEvent } from 'react';
 import { getGen, REGIONS, REGION_OF_VERSION_GROUP } from '@/generations';
 import type { ObtainState } from '@/hooks/useObtainData';
+import { ROD_METHODS } from '@/obtain/pokeapi';
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
 import { TYPE_COLORS } from '@/typeChart';
 
@@ -56,6 +57,15 @@ function regionOf(game: ObtainGame): string {
 
 function prettyVersions(versions: string[]): string {
   return versions.map((v) => v.toUpperCase().replace(/-/g, ' ')).join(' / ');
+}
+
+// Text-presentation selector — keeps these glyphs flat/monochrome instead of
+// letting a platform render an emoji-colored version.
+const VS = '︎';
+
+interface ConditionMeta {
+  icon: string;
+  color: string;
 }
 
 // Raw PokéAPI condition slugs read badly on chips ("weather-intense-sun",
@@ -128,19 +138,87 @@ const CONDITION_LABELS: Record<string, string> = {
   'max-raid': 'MAX RAID DEN',
 };
 
-const CONDITION_PREFIXES: [RegExp, string][] = [
-  [/^time-/, ''],
-  [/^season-/, ''],
-  [/^weather-/, ''],
-  [/^weekday-/, ''],
-  [/^story-progress-/, ''],
-  [/^other-/, ''],
-  [/^item-/, ''],
-  [/^slot2-/, 'GBA: '],
-  [/^radio-/, 'RADIO: '],
-  [/^trade-/, 'GIVE '],
-  [/^starter-/, 'STARTER: '],
+interface ConditionFamily {
+  /** Slug prefixes this family owns. */
+  prefixes?: string[];
+  /** Exact slugs, for families with no common prefix. */
+  slugs?: ReadonlySet<string>;
+  icon?: string;
+  /** Swaps the icon when the slug contains one of these fragments. */
+  variants?: { when: string; icon: string }[];
+  color?: string;
+  /** Replaces the matched prefix in the display label; `''` strips it. */
+  strip?: string;
+  /** Legend gloss. Families without one get no legend row. */
+  legend?: string;
+}
+
+// One table per condition family — the display label, the chip icon/color, and
+// the legend row all read from here, so a new family is one entry, not three.
+// Order matters: the first matching family wins.
+const CONDITION_FAMILIES: ConditionFamily[] = [
+  {
+    prefixes: ['time-'],
+    icon: `◔${VS}`,
+    color: TYPE_COLORS.electric,
+    strip: '',
+    legend: 'time of day',
+  },
+  { prefixes: ['season-'], icon: `✿${VS}`, color: TYPE_COLORS.fairy, strip: '', legend: 'season' },
+  {
+    prefixes: ['weather-'],
+    icon: `☂${VS}`,
+    variants: [
+      { when: 'intense-sun', icon: `☀${VS}` },
+      { when: 'snow', icon: `❄${VS}` },
+      { when: 'thunderstorm', icon: `⚡${VS}` },
+    ],
+    color: TYPE_COLORS.water,
+    strip: '',
+    legend: 'weather',
+  },
+  { slugs: ROD_METHODS, icon: `≈${VS}`, color: TYPE_COLORS.ice, legend: 'fishing rod' },
+  {
+    prefixes: ['max-raid', 'max-den-'],
+    icon: `★${VS}`,
+    color: TYPE_COLORS.fire,
+    legend: 'raid den',
+  },
+  {
+    prefixes: ['story-progress-'],
+    icon: `⚑${VS}`,
+    color: TYPE_COLORS.psychic,
+    strip: '',
+    legend: 'story progress',
+  },
+  {
+    prefixes: ['trade-'],
+    icon: `⇄${VS}`,
+    color: TYPE_COLORS.psychic,
+    strip: 'GIVE ',
+    legend: 'required trade',
+  },
+  {
+    prefixes: ['slot2-'],
+    icon: `◎${VS}`,
+    color: TYPE_COLORS.steel,
+    strip: 'GBA: ',
+    legend: 'GBA cartridge',
+  },
+  { prefixes: ['weekday-'], strip: '' },
+  { prefixes: ['other-'], strip: '' },
+  { prefixes: ['item-'], strip: '' },
+  { prefixes: ['radio-'], strip: 'RADIO: ' },
+  { prefixes: ['starter-'], strip: 'STARTER: ' },
 ];
+
+const DEFAULT_CONDITION: ConditionMeta = { icon: `✧${VS}`, color: 'var(--dim)' };
+
+function familyOf(slug: string): ConditionFamily | undefined {
+  return CONDITION_FAMILIES.find(
+    (f) => f.slugs?.has(slug) ?? f.prefixes?.some((p) => slug.startsWith(p)),
+  );
+}
 
 function prettyCondition(slug: string): string {
   const mapped = CONDITION_LABELS[slug];
@@ -158,45 +236,21 @@ function prettyCondition(slug: string): string {
   if (slug.startsWith('great-marsh-daily-slot-')) return 'GREAT MARSH DAILY ROTATION';
   const johtoBlocks = slug.match(/^johto-safari-blocks-(\w+)-min-(\d+)$/);
   if (johtoBlocks) return `SAFARI ZONE: ${johtoBlocks[2]}+ ${johtoBlocks[1].toUpperCase()} BLOCKS`;
-  let s = slug;
-  for (const [re, repl] of CONDITION_PREFIXES) {
-    if (re.test(s)) {
-      s = s.replace(re, repl);
-      break;
+  const family = familyOf(slug);
+  if (family?.strip !== undefined) {
+    const prefix = family.prefixes?.find((p) => slug.startsWith(p));
+    if (prefix !== undefined) {
+      return (family.strip + slug.slice(prefix.length)).toUpperCase().replace(/-/g, ' ');
     }
   }
-  return s.toUpperCase().replace(/-/g, ' ');
-}
-
-const RODS = new Set(['old-rod', 'good-rod', 'super-rod', 'super-rod-spots']);
-
-// Text-presentation selector — keeps these glyphs flat/monochrome instead of
-// letting a platform render an emoji-colored version.
-const VS = '︎';
-
-interface ConditionMeta {
-  icon: string;
-  color: string;
+  return slug.toUpperCase().replace(/-/g, ' ');
 }
 
 function conditionMeta(slug: string): ConditionMeta {
-  if (slug.startsWith('time-')) return { icon: `◔${VS}`, color: TYPE_COLORS.electric };
-  if (slug.startsWith('season-')) return { icon: `✿${VS}`, color: TYPE_COLORS.fairy };
-  if (slug.startsWith('weather-')) {
-    let icon = `☂${VS}`;
-    if (slug.includes('intense-sun')) icon = `☀${VS}`;
-    else if (slug.includes('snow')) icon = `❄${VS}`;
-    else if (slug.includes('thunderstorm')) icon = `⚡${VS}`;
-    return { icon, color: TYPE_COLORS.water };
-  }
-  if (RODS.has(slug)) return { icon: `≈${VS}`, color: TYPE_COLORS.ice };
-  if (slug.startsWith('max-raid') || slug.startsWith('max-den-')) {
-    return { icon: `★${VS}`, color: TYPE_COLORS.fire };
-  }
-  if (slug.startsWith('story-progress-')) return { icon: `⚑${VS}`, color: TYPE_COLORS.psychic };
-  if (slug.startsWith('trade-')) return { icon: `⇄${VS}`, color: TYPE_COLORS.psychic };
-  if (slug.startsWith('slot2-')) return { icon: `◎${VS}`, color: TYPE_COLORS.steel };
-  return { icon: `✧${VS}`, color: 'var(--dim)' };
+  const family = familyOf(slug);
+  if (!family?.icon || !family.color) return DEFAULT_CONDITION;
+  const variant = family.variants?.find((v) => slug.includes(v.when));
+  return { icon: variant?.icon ?? family.icon, color: family.color };
 }
 
 function levelRate(e: ObtainEntry): string {
@@ -265,18 +319,16 @@ const LEGEND_METHODS: [ObtainEntry['method'], string][] = [
   ['special', 'special method (headbutt, island scan, honey tree…)'],
 ];
 
+// Derived from `CONDITION_FAMILIES` so a new family shows up in the legend for
+// free — the fallback row is appended last because it matches nothing directly.
 const LEGEND_CONDITIONS: { icon: string; color: string; label: string }[] = [
-  { icon: `◔${VS}`, color: TYPE_COLORS.electric, label: 'time of day' },
-  { icon: `✿${VS}`, color: TYPE_COLORS.fairy, label: 'season' },
-  { icon: `☂${VS}`, color: TYPE_COLORS.water, label: 'weather' },
-  { icon: `≈${VS}`, color: TYPE_COLORS.ice, label: 'fishing rod' },
-  { icon: `★${VS}`, color: TYPE_COLORS.fire, label: 'raid den' },
-  { icon: `⚑${VS}`, color: TYPE_COLORS.psychic, label: 'story progress' },
-  { icon: `⇄${VS}`, color: TYPE_COLORS.psychic, label: 'required trade' },
-  { icon: `◎${VS}`, color: TYPE_COLORS.steel, label: 'GBA cartridge' },
+  ...CONDITION_FAMILIES.filter((f) => f.legend && f.icon && f.color).map((f) => ({
+    icon: f.icon ?? '',
+    color: f.color ?? '',
+    label: f.legend ?? '',
+  })),
   {
-    icon: `✧${VS}`,
-    color: 'var(--dim)',
+    ...DEFAULT_CONDITION,
     label:
       'special requirement — the chip says which (swarms, honey trees, safari zones, SOS calls, hidden grottoes…)',
   },

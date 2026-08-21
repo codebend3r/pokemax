@@ -27,7 +27,13 @@ const METHOD_MAP: Record<string, ObtainMethod> = {
   'npc-trade': 'trade',
 };
 
-const ROD_METHODS = new Set(['old-rod', 'good-rod', 'super-rod', 'super-rod-spots']);
+/** Fishing-rod encounter methods — also drives the rod chip in the obtain view. */
+export const ROD_METHODS: ReadonlySet<string> = new Set([
+  'old-rod',
+  'good-rod',
+  'super-rod',
+  'super-rod-spots',
+]);
 
 export function prettyLocation(slug: string): string {
   return slug

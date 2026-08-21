@@ -5,13 +5,15 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ## Git workflow
 
 ### Do
-- Commit and push **directly to `main`** after every discrete change. No feature branches, no PRs.
+- **Default to `main`.** Commit and push directly to `main` after every discrete change — that's still the path for ordinary work.
 - One logical change = one commit. Finish the change → `git add <specific files>` → `git commit` → `git push origin main` → move on.
+- **Branch and open a PR when the user asks for one.** Branch off `main`, keep one-logical-change-per-commit inside the branch, then `gh pr create --base main`.
+- Prefer one branch over several when the changes touch the same files — parallel branches that rewrite the same file just conflict.
 - Write commit messages that explain **why**, not just what.
-- Follow the `pokemax-commit-format` skill (`~/.claude/skills/pokemax-commit-format/SKILL.md`) for subject/body/backtick rules.
+- Follow the `pokemax-commit-format` skill (`~/.claude/skills/pokemax-commit-format/SKILL.md`) for subject/body/backtick rules — PR titles and bodies too, including the zero-AI-attribution rule.
 
 ### Don't
-- Don't open pull requests. Don't create branches.
+- Don't open a PR for routine work the user didn't ask to review — branches are permitted, not the default.
 - Don't bundle unrelated changes into one commit "to save time" — the user explicitly wants tight, change-per-commit history.
 - Don't pause to confirm the push each time. Standing authorization is granted for `git push origin main` in this repo.
 - Don't run `git push --force`, `git reset --hard`, or anything destructive without explicit per-action approval.

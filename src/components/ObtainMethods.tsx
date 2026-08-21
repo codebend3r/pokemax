@@ -1,5 +1,5 @@
 import { useState, type SyntheticEvent } from 'react';
-import { getGen } from '@/generations';
+import { getGen, REGIONS, REGION_OF_VERSION_GROUP } from '@/generations';
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
 import { TYPE_COLORS } from '@/typeChart';
 
@@ -46,44 +46,15 @@ const METHOD_COLOR: Record<ObtainEntry['method'], string> = {
   special: TYPE_COLORS.steel,
 };
 
-// Version groups whose home region differs from their generation's default
-// region (see `generations.ts`) — remakes, spin-offs, and DLC pairs that
-// don't share their gen-mates' setting.
-const VG_REGION: Record<string, string> = {
-  'firered-leafgreen': 'Kanto',
-  'heartgold-soulsilver': 'Johto',
-  'omega-ruby-alpha-sapphire': 'Hoenn',
-  'lets-go-pikachu-lets-go-eevee': 'Kanto',
-  'brilliant-diamond-shining-pearl': 'Sinnoh',
-  'legends-arceus': 'Hisui',
-};
-
 // Groups are by REGION, not generation — BDSP belongs with the other Sinnoh
-// games regardless of when it was released.
-// Hisui sits directly under Sinnoh (it's the same land, ancient era).
-const REGION_ORDER = [
-  'Kanto',
-  'Johto',
-  'Hoenn',
-  'Sinnoh',
-  'Hisui',
-  'Unova',
-  'Kalos',
-  'Alola',
-  'Galar',
-  'Paldea',
-];
-
-const REGION_LABELS: Record<string, string> = {
-  Hisui: 'HISUI · ANCIENT SINNOH',
-};
-
-function regionLabel(region: string): string {
-  return REGION_LABELS[region] ?? region.toUpperCase();
+// games regardless of when it shipped, and Hisui sits under Sinnoh. Both facts
+// live in the canonical `REGIONS` model.
+function regionLabel({ name, note }: { name: string; note?: string }): string {
+  return note ? `${name.toUpperCase()} · ${note.toUpperCase()}` : name.toUpperCase();
 }
 
 function regionOf(game: ObtainGame): string {
-  return VG_REGION[game.versionGroup] ?? getGen(game.gen).region;
+  return REGION_OF_VERSION_GROUP[game.versionGroup];
 }
 
 function prettyVersions(versions: string[]): string {
@@ -362,12 +333,12 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
   }
   if (error || !data) return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
 
-  const regions = REGION_ORDER.filter((r) => data.games.some((g) => regionOf(g) === r));
+  const regions = REGIONS.filter((r) => data.games.some((g) => regionOf(g) === r.name));
   // Regional forms can carry a `currentGen` whose home region the file's
   // games never reach (e.g. Alolan Vulpix is gen 1, but its file starts in
   // Alola) — default to the first region actually present.
   const homeRegion = getGen(currentGen).region;
-  const defaultRegion = regions.includes(homeRegion) ? homeRegion : regions[0];
+  const defaultRegion = regions.some((r) => r.name === homeRegion) ? homeRegion : regions[0]?.name;
   const expanded = userExpanded ?? new Set(defaultRegion === undefined ? [] : [defaultRegion]);
   const toggle = (region: string) =>
     setUserExpanded((prev) => {
@@ -389,15 +360,15 @@ export default function ObtainMethods({ data, loading, error, currentGen, enable
       )}
       <Legend />
       {regions.map((region) => {
-        const open = expanded.has(region);
-        const gamesInRegion = data.games.filter((g) => regionOf(g) === region);
+        const open = expanded.has(region.name);
+        const gamesInRegion = data.games.filter((g) => regionOf(g) === region.name);
         return (
-          <div key={region} className="crt-obtain-gen">
+          <div key={region.name} className="crt-obtain-region">
             <button
               type="button"
-              className="crt-obtain-gen-toggle"
+              className="crt-obtain-region-toggle"
               aria-expanded={open}
-              onClick={() => toggle(region)}
+              onClick={() => toggle(region.name)}
             >
               {open ? '▼' : '▶'} {regionLabel(region)}
             </button>

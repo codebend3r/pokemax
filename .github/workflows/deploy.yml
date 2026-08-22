@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: 🚀 Deploy to GitHub Pages
 
 on:
   push:
@@ -14,10 +14,14 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  BUN_VERSION: 1.4.0
+
 jobs:
   build:
     name: 🏗️ Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
@@ -25,11 +29,20 @@ jobs:
       - name: 🥟 Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: ♻️ Restore dependency cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
 
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
 
+      # Kept despite CI covering `main` — `workflow_dispatch` can deploy a
+      # commit CI never gated.
       - name: 🧪 Test
         run: bun run test
 
@@ -48,6 +61,7 @@ jobs:
     name: 🚀 Deploy
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

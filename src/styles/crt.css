@@ -1710,7 +1710,7 @@ button.crt-type:hover,
   font-size: 0.75rem;
   margin-bottom: 8px;
 }
-.crt-obtain-gen-toggle {
+.crt-obtain-region-toggle {
   background: none;
   border: none;
   color: var(--primary);

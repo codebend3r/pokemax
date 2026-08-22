@@ -10,14 +10,15 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 - **Branch and open a PR when the user asks for one.** Branch off `main`, keep one-logical-change-per-commit inside the branch, then `gh pr create --base main`.
 - Prefer one branch over several when the changes touch the same files — parallel branches that rewrite the same file just conflict.
 - Write commit messages that explain **why**, not just what.
-- Follow the `pokemax-commit-format` skill (`~/.claude/skills/pokemax-commit-format/SKILL.md`) for subject/body/backtick rules — PR titles and bodies too, including the zero-AI-attribution rule.
+- Follow the `commit-format` skill (`.claude/skills/commit-format/SKILL.md`) for commit subject/body/backtick rules, including the zero-AI-attribution rule.
+- Follow the `create-pull-request` skill (`.claude/skills/create-pull-request/SKILL.md`) for every PR title and body — it owns the section order, bullet style, and the same zero-AI-attribution rule.
 
 ### Don't
 - Don't open a PR for routine work the user didn't ask to review — branches are permitted, not the default.
 - Don't bundle unrelated changes into one commit "to save time" — the user explicitly wants tight, change-per-commit history.
 - Don't pause to confirm the push each time. Standing authorization is granted for `git push origin main` in this repo.
 - Don't run `git push --force`, `git reset --hard`, or anything destructive without explicit per-action approval.
-- Don't append `Co-Authored-By: Claude` (or any AI/agent attribution) to commits. See the `pokemax-commit-format` skill — zero AI mentions anywhere in the message.
+- Don't append `Co-Authored-By: Claude` (or any AI/agent attribution) to commits. See the `commit-format` skill — zero AI mentions anywhere in the message.
 
 ## Imports
 

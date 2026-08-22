@@ -1,19 +1,24 @@
 import { GENERATIONS } from '@/generations';
 
-export type ObtainMethod =
-  | 'grass'
-  | 'surf'
-  | 'fish'
-  | 'cave'
-  | 'wild'
-  | 'static'
-  | 'gift'
-  | 'trade'
-  | 'egg'
-  | 'evolve'
-  | 'transfer'
-  | 'unavailable'
-  | 'special';
+// Single source for the method vocabulary — the union, the runtime guard, and
+// the label/color tables in `@/obtain/labels` all derive from this list.
+export const OBTAIN_METHODS = [
+  'grass',
+  'surf',
+  'fish',
+  'cave',
+  'wild',
+  'static',
+  'gift',
+  'trade',
+  'egg',
+  'evolve',
+  'transfer',
+  'unavailable',
+  'special',
+] as const;
+
+export type ObtainMethod = (typeof OBTAIN_METHODS)[number];
 
 export interface ObtainEntry {
   method: ObtainMethod;
@@ -86,6 +91,26 @@ export const GROUP_GEN: Record<string, number> = Object.fromEntries(
   GENERATIONS.flatMap((g) => g.versionGroups.map((vg) => [vg, g.num])),
 );
 
+const METHOD_SET: ReadonlySet<string> = new Set(OBTAIN_METHODS);
+
+function isObtainEntry(v: unknown): v is ObtainEntry {
+  if (typeof v !== 'object' || v === null) return false;
+  const e: Record<string, unknown> = { ...v };
+  return typeof e.method === 'string' && METHOD_SET.has(e.method);
+}
+
+function isObtainGame(v: unknown): v is ObtainGame {
+  if (typeof v !== 'object' || v === null) return false;
+  const g: Record<string, unknown> = { ...v };
+  return (
+    typeof g.gen === 'number' &&
+    typeof g.versionGroup === 'string' &&
+    Array.isArray(g.versions) &&
+    Array.isArray(g.entries) &&
+    g.entries.every(isObtainEntry)
+  );
+}
+
 export function isObtainFile(v: unknown): v is ObtainFile {
   if (typeof v !== 'object' || v === null) return false;
   const o: Record<string, unknown> = { ...v };
@@ -93,6 +118,7 @@ export function isObtainFile(v: unknown): v is ObtainFile {
     typeof o.pokemonId === 'number' &&
     typeof o.name === 'string' &&
     Array.isArray(o.games) &&
+    o.games.every(isObtainGame) &&
     'breeding' in o
   );
 }

@@ -1,18 +1,28 @@
-name: CI
+name: 🔁 CI
 
 on:
   pull_request:
   push:
-    branches: ['**']
+    branches: [main]
+  workflow_dispatch:
 
+# `pull_request` already covers branch pushes; `branches: ['**']` ran every
+# PR commit twice.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: 1.4.0
 
 jobs:
   checks:
     name: 🔍 Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
@@ -20,7 +30,14 @@ jobs:
       - name: 🥟 Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: ♻️ Restore dependency cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
 
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile

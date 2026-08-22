@@ -2,7 +2,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import ObtainMethods from '@/components/ObtainMethods';
+import type { ObtainState } from '@/hooks/useObtainData';
 import type { ObtainFile } from '@/obtain/types';
+
+const ready = (file: ObtainFile): ObtainState => ({ status: 'ready', file });
 
 const FILE: ObtainFile = {
   pokemonId: 25,
@@ -52,9 +55,7 @@ const FILE: ObtainFile = {
 
 describe('ObtainMethods', () => {
   it('shows breeding info and the current gen expanded', () => {
-    const { container } = render(
-      <ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />,
-    );
+    const { container } = render(<ObtainMethods state={ready(FILE)} currentGen={1} />);
     expect(screen.getByText(/FIELD\/FAIRY/)).toBeInTheDocument();
     expect(screen.getByText(/2,560 STEPS/)).toBeInTheDocument();
     // Gen 1 expanded: entries visible
@@ -72,11 +73,61 @@ describe('ObtainMethods', () => {
   });
 
   it('gives a weather condition chip its icon', () => {
-    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
+    render(<ObtainMethods state={ready(FILE)} currentGen={1} />);
     // weather-intense-sun renders with the sun-specific weather glyph
     // (U+2600 + U+FE0E text-presentation selector)
     const sunIcon = '☀︎';
     expect(screen.getByText(`${sunIcon} INTENSE SUN`)).toBeInTheDocument();
+  });
+
+  it('renders each condition family with its own icon and label', () => {
+    const file: ObtainFile = {
+      pokemonId: 1,
+      name: 'testmon',
+      breeding: null,
+      games: [
+        {
+          gen: 1,
+          versionGroup: 'red-blue',
+          versions: ['red'],
+          entries: [
+            {
+              method: 'grass',
+              location: 'Route 1',
+              conditions: [
+                'time-night',
+                'season-winter',
+                'weather-snow',
+                'old-rod',
+                'story-progress-hall-of-fame',
+                'trade-machoke',
+                'slot2-emerald',
+                'radio-hoenn',
+                'starter-bulbasaur',
+                'weekday-tuesday',
+                'no-such-family-here',
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    render(<ObtainMethods state={ready(file)} currentGen={1} />);
+    // Prefix-stripping families
+    expect(screen.getByText('◔︎ NIGHT')).toBeInTheDocument();
+    expect(screen.getByText('✿︎ WINTER')).toBeInTheDocument();
+    expect(screen.getByText('❄︎ SNOW')).toBeInTheDocument();
+    expect(screen.getByText('⚑︎ AFTER HALL OF FAME')).toBeInTheDocument();
+    expect(screen.getByText('✧︎ TUESDAY')).toBeInTheDocument();
+    // Prefix-replacing families
+    expect(screen.getByText('⇄︎ GIVE MACHOKE')).toBeInTheDocument();
+    expect(screen.getByText('◎︎ GBA: EMERALD')).toBeInTheDocument();
+    expect(screen.getByText('✧︎ RADIO: HOENN')).toBeInTheDocument();
+    expect(screen.getByText('✧︎ STARTER: BULBASAUR')).toBeInTheDocument();
+    // Exact-slug family with no common prefix
+    expect(screen.getByText('≈︎ OLD ROD')).toBeInTheDocument();
+    // Unknown slug falls back to the generic chip, slug preserved
+    expect(screen.getByText('✧︎ NO SUCH FAMILY HERE')).toBeInTheDocument();
   });
 
   it('labels the special method OTHER, not SPECIAL', () => {
@@ -91,9 +142,7 @@ describe('ObtainMethods', () => {
         },
       ],
     };
-    const { container } = render(
-      <ObtainMethods data={file} loading={false} error={null} currentGen={1} enabled />,
-    );
+    const { container } = render(<ObtainMethods state={ready(file)} currentGen={1} />);
     // The legend also glosses OTHER for `special`, so scope to the entry chip.
     const entryTag = container.querySelector('.crt-obtain-entries .crt-obtain-tag');
     expect(entryTag).toHaveTextContent('OTHER');
@@ -101,7 +150,7 @@ describe('ObtainMethods', () => {
   });
 
   it('renders a collapsible legend that expands to show glosses', async () => {
-    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
+    render(<ObtainMethods state={ready(FILE)} currentGen={1} />);
     const summary = screen.getByText(/LEGEND/);
     expect(summary).not.toHaveTextContent('?');
     const details = summary.closest('details');
@@ -139,7 +188,7 @@ describe('ObtainMethods', () => {
         },
       ],
     };
-    render(<ObtainMethods data={mixed} loading={false} error={null} currentGen={8} enabled />);
+    render(<ObtainMethods state={ready(mixed)} currentGen={8} />);
     // Region tabs, no generation numbers; Hisui is its own tab right after
     // Sinnoh, labeled as ancient Sinnoh
     expect(screen.getByRole('button', { name: /GALAR/ })).toBeInTheDocument();
@@ -157,7 +206,7 @@ describe('ObtainMethods', () => {
   });
 
   it('collapses other gens until toggled', async () => {
-    render(<ObtainMethods data={FILE} loading={false} error={null} currentGen={1} enabled />);
+    render(<ObtainMethods state={ready(FILE)} currentGen={1} />);
     expect(screen.queryByText(/Trade\/migrate/)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /UNOVA/ }));
     expect(screen.getByText(/Trade\/migrate/)).toBeInTheDocument();
@@ -165,32 +214,19 @@ describe('ObtainMethods', () => {
 
   it('renders the unavailable state on error', () => {
     render(
-      <ObtainMethods
-        data={null}
-        loading={false}
-        error="No obtain data (404)"
-        currentGen={1}
-        enabled
-      />,
+      <ObtainMethods state={{ status: 'error', message: 'No obtain data (404)' }} currentGen={1} />,
     );
     expect(screen.getByText('OBTAIN DATA UNAVAILABLE')).toBeInTheDocument();
   });
 
   it('renders a loading line', () => {
-    render(<ObtainMethods data={null} loading error={null} currentGen={1} enabled />);
-    expect(screen.getByText(/LOADING/)).toBeInTheDocument();
-  });
-
-  it('shows loading, not unavailable, the instant it is enabled but data has not arrived', () => {
-    render(<ObtainMethods data={null} loading={false} error={null} currentGen={1} enabled />);
+    render(<ObtainMethods state={{ status: 'loading' }} currentGen={1} />);
     expect(screen.getByText(/LOADING/)).toBeInTheDocument();
     expect(screen.queryByText('OBTAIN DATA UNAVAILABLE')).not.toBeInTheDocument();
   });
 
-  it('stays unavailable (not loading) when disabled with no data', () => {
-    render(
-      <ObtainMethods data={null} loading={false} error={null} currentGen={1} enabled={false} />,
-    );
+  it('renders nothing useful before anything has been asked for', () => {
+    render(<ObtainMethods state={{ status: 'idle' }} currentGen={1} />);
     expect(screen.getByText('OBTAIN DATA UNAVAILABLE')).toBeInTheDocument();
   });
 
@@ -210,7 +246,7 @@ describe('ObtainMethods', () => {
     };
     // Alolan Vulpix: currentGen is 1 (its national dex gen) but the file
     // only has gen-7-and-later games.
-    render(<ObtainMethods data={gen7Only} loading={false} error={null} currentGen={1} enabled />);
+    render(<ObtainMethods state={ready(gen7Only)} currentGen={1} />);
     expect(screen.getByText('Mount Lanakila')).toBeInTheDocument();
   });
 });

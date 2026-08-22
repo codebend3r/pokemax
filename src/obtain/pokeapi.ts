@@ -27,7 +27,13 @@ const METHOD_MAP: Record<string, ObtainMethod> = {
   'npc-trade': 'trade',
 };
 
-const ROD_METHODS = new Set(['old-rod', 'good-rod', 'super-rod', 'super-rod-spots']);
+/** Fishing-rod encounter methods — also drives the rod chip in the obtain view. */
+export const ROD_METHODS: ReadonlySet<string> = new Set([
+  'old-rod',
+  'good-rod',
+  'super-rod',
+  'super-rod-spots',
+]);
 
 export function prettyLocation(slug: string): string {
   return slug
@@ -58,7 +64,9 @@ export function encountersToEntries(areas: ApiEncounterArea[]): Map<string, Obta
         const method = mapMethod(d.method.name);
         const conditions = d.condition_values.map((c) => c.name).sort();
         if (ROD_METHODS.has(d.method.name)) conditions.unshift(d.method.name);
-        if (method === 'special' && !METHOD_MAP[d.method.name]) conditions.unshift(d.method.name);
+        // Nothing in `METHOD_MAP` maps to 'special', so this is exactly the
+        // unmapped case — keep the raw slug so the UI can still name it.
+        if (method === 'special') conditions.unshift(d.method.name);
         const key = `${location}|${method}|${conditions.join(',')}`;
         const prev = slots.get(key);
         if (prev) {

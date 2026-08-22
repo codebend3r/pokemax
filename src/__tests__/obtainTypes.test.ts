@@ -33,4 +33,35 @@ describe('isObtainFile', () => {
     expect(isObtainFile(null)).toBe(false);
     expect(isObtainFile({ pokemonId: 'x' })).toBe(false);
   });
+
+  it('accepts a file whose games carry known methods', () => {
+    const game = {
+      gen: 1,
+      versionGroup: 'red-blue',
+      versions: ['red'],
+      entries: [{ method: 'grass', location: 'Route 1' }],
+    };
+    expect(isObtainFile({ pokemonId: 25, name: 'pikachu', breeding: null, games: [game] })).toBe(
+      true,
+    );
+  });
+
+  it('rejects a file whose entries carry an unknown method', () => {
+    const game = {
+      gen: 1,
+      versionGroup: 'red-blue',
+      versions: ['red'],
+      entries: [{ method: 'teleported-in', location: 'Route 1' }],
+    };
+    expect(isObtainFile({ pokemonId: 25, name: 'pikachu', breeding: null, games: [game] })).toBe(
+      false,
+    );
+  });
+
+  it('rejects a file whose games are missing required fields', () => {
+    const game = { versionGroup: 'red-blue', entries: [] };
+    expect(isObtainFile({ pokemonId: 25, name: 'pikachu', breeding: null, games: [game] })).toBe(
+      false,
+    );
+  });
 });

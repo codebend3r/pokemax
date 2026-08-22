@@ -1,3 +1,5 @@
+import { REGIONS } from '@/generations';
+
 // Trainer browser data — types + curated fixture set.
 //
 // All fields below are the canonical contract. Other modules (`TrainerGrid`,
@@ -51,26 +53,36 @@ export const GAME_LABELS: Record<GameId, string> = {
   'scarlet-violet': 'Scarlet / Violet',
 };
 
+const GAME_IDS: ReadonlySet<string> = new Set(Object.keys(GAME_LABELS));
+
+function isGameId(v: string): v is GameId {
+  return GAME_IDS.has(v);
+}
+
+// Every `GameId` is already its PokéAPI version-group slug except the Let's Go
+// pair, which the trainer browser shortened before the obtain dataset existed.
+const VERSION_GROUP_GAME: Record<string, GameId> = {
+  'lets-go-pikachu-lets-go-eevee': 'lets-go',
+};
+
+function gameIdForVersionGroup(vg: string): GameId | null {
+  const aliased = VERSION_GROUP_GAME[vg];
+  if (aliased) return aliased;
+  return isGameId(vg) ? vg : null;
+}
+
 /**
- * Games grouped by the region they take place in — regions in first-appearance
- * order, games within a region in release order. Hisui gets its own group
- * (with a note) placed right after Sinnoh, since it's Sinnoh's ancient past.
+ * Games grouped by the region they take place in. Derived from the canonical
+ * `REGIONS` model in `generations.ts` so the trainer browser, the teams
+ * browser, and the obtain panel can never disagree on region order.
  */
-export const GAMES_BY_REGION: { region: string; note?: string; games: GameId[] }[] = [
-  { region: 'Kanto', games: ['red-blue', 'yellow', 'firered-leafgreen', 'lets-go'] },
-  { region: 'Johto', games: ['gold-silver', 'crystal', 'heartgold-soulsilver'] },
-  { region: 'Hoenn', games: ['ruby-sapphire', 'emerald', 'omega-ruby-alpha-sapphire'] },
-  {
-    region: 'Sinnoh',
-    games: ['diamond-pearl', 'platinum', 'brilliant-diamond-shining-pearl'],
-  },
-  { region: 'Hisui', note: 'Ancient Sinnoh', games: ['legends-arceus'] },
-  { region: 'Unova', games: ['black-white', 'black-2-white-2'] },
-  { region: 'Kalos', games: ['x-y'] },
-  { region: 'Alola', games: ['sun-moon', 'ultra-sun-ultra-moon'] },
-  { region: 'Galar', games: ['sword-shield'] },
-  { region: 'Paldea', games: ['scarlet-violet'] },
-];
+export const GAMES_BY_REGION: { region: string; note?: string; games: GameId[] }[] = REGIONS.map(
+  ({ name, note, versionGroups }) => ({
+    region: name,
+    note,
+    games: versionGroups.map(gameIdForVersionGroup).filter((g): g is GameId => g !== null),
+  }),
+).filter(({ games }) => games.length > 0);
 
 /** Best available portrait — animated APNG when the trainer has one, else the static VS sprite. */
 export function trainerPortraitUrl(t: Trainer): string | undefined {

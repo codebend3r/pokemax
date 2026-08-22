@@ -3,7 +3,10 @@
 staged=$(git diff --cached --name-only --diff-filter=ACMR)
 [ -n "$staged" ] || exit 0
 
-unformatted=$(printf '%s\n' "$staged" | tr '\n' '\0' | xargs -0 bunx oxfmt --list-different)
+# `|| true`: oxfmt exits 2 when no staged file is a type it formats (a
+# docs-only commit). husky runs hooks under `set -e`, so the bare
+# assignment would abort the commit.
+unformatted=$(printf '%s\n' "$staged" | tr '\n' '\0' | xargs -0 bunx oxfmt --list-different || true)
 [ -n "$unformatted" ] || exit 0
 
 printf '%s\n' "$unformatted" | tr '\n' '\0' | xargs -0 bunx oxfmt

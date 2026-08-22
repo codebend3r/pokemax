@@ -11,22 +11,24 @@ Match `git log`. It is the specification.
 
 ## Subject
 
-- Imperative verb first — `Add`, `Drop`, `Fold`, `Make`, `Give`, `Collapse`, `Point`
-- Sentence case; capitalize the first word only
+- **`PMX: ` prefix, always** — repo code, colon, one space, then the subject
+- Imperative verb first after the prefix — `Add`, `Drop`, `Fold`, `Make`, `Give`
+- Sentence case; capitalize the first word after the prefix
 - Backtick every identifier, path, script, and package name
-- No prefix — no `feat:`, no `chore:`, no `CJR:`, no ticket id
+- No second prefix — no `feat:`, no `chore:`, no ticket id
 - No trailing period
-- Target 72 characters; the repo median is 53
+- Target 72 characters including the prefix; the subject body median is 53
 
 ```text
-Good: Give the region model one owner in `generations.ts`
-Good: Make `isObtainFile` validate the shape its consumers index
-Bad:  feat: refactored the region stuff.
+Good: PMX: Give the region model one owner in `generations.ts`
+Good: PMX: Make `isObtainFile` validate the shape its consumers index
+Bad:  Give the region model one owner in `generations.ts`
+Bad:  PMX: feat: refactored the region stuff.
 ```
 
-**Two exceptions in the history, neither hand-typed:**
-- `(#5)` suffixes come from squash-merging a PR — never append one yourself
-- version bumps are the bare number, `0.3.4`
+The prefix is on every hand-written commit, version bumps included — `PMX: 0.3.4`.
+
+`(#5)` suffixes are appended by GitHub on squash-merge; never type one yourself. Commits made before this convention landed keep their bare subjects.
 
 ## Body
 
@@ -39,7 +41,7 @@ Bad:  feat: refactored the region stuff.
 - One fact per bullet
 
 ```text
-Drop the nullable expansion state from `ObtainRegions`
+PMX: Drop the nullable expansion state from `ObtainRegions`
 
 - `Set<string> | null` existed only because the default region was unknown
   until the file loaded — inside `ObtainRegions` it is known at mount
@@ -72,7 +74,7 @@ Use `-F -` with a quoted heredoc. Backticks inside a double-quoted `-m` string a
 ```bash
 git add <specific files>
 git commit -F - <<'EOF'
-Subject line here
+PMX: Subject line here
 
 - first bullet
 - second bullet
@@ -89,8 +91,8 @@ EOF
 
 | Element | Rule |
 |---|---|
+| Prefix | `PMX: ` — mandatory, every commit |
 | Subject | Imperative, sentence case, backticked, no period, ≤72 chars |
-| Prefix | None |
 | Body form | Bullets only — no prose lines |
 | Bullet case | Lowercase, unless it opens with an identifier |
 | Bullet period | Never |

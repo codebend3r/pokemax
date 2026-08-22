@@ -11,15 +11,17 @@ Every pokemax PR reads the same way: a reviewer scans the title, gets the shape 
 
 ## Title
 
-- Sentence case, no prefix — no `feat:`, no `chore:`, no ticket id
+- **`PMX: ` prefix, always** — repo code, colon, one space, then the title
+- Sentence case; no second prefix — no `feat:`, no `chore:`, no ticket id
 - Names the outcome, not the mechanics
 - Backticks on every identifier, path, and package name
-- No trailing period; target 72 characters
+- No trailing period; target 72 characters including the prefix
 - Same voice as the commit subjects in `git log` — the title is a commit subject for the whole branch
 
 ```text
-Good: Swap lint, format, and test toolchains for `oxlint`, `oxfmt`, `bun test`
-Bad:  chore: various fixes and improvements.
+Good: PMX: Swap lint, format, and test toolchains for `oxlint`, `oxfmt`
+Bad:  Swap lint, format, and test toolchains for `oxlint`, `oxfmt`
+Bad:  PMX: chore: various fixes and improvements.
 ```
 
 ## Body contract
@@ -86,7 +88,8 @@ Editing an existing PR: `gh pr edit <n> --body-file /tmp/pr-body.md`.
 
 | Element | Rule |
 |---|---|
-| Title | Sentence case, no prefix, backticked identifiers, ≤72 chars |
+| Prefix | `PMX: ` — mandatory, every PR title |
+| Title | Sentence case, backticked identifiers, ≤72 chars |
 | Lede | 1–2 sentences, no heading |
 | Sections | `What changed` → `Verification` → `Notes` |
 | Body form | Bullets; prose only in the lede |

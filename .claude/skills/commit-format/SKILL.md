@@ -1,9 +1,9 @@
 ---
-name: pokemax-commit-format
+name: commit-format
 description: Use when authoring, amending, squashing, fixup-ing, rebasing, or cherry-picking any git commit message in the pokemax repo — covers subject line, bullet body, backtick rules, and the ban on AI attribution.
 ---
 
-# pokemax commit format
+# Commit format
 
 Every commit is a subject line plus a bullet body. Measured across the last 60 commits: 188 bullets, **zero** ending in a period, **zero** prose paragraphs in a body.
 

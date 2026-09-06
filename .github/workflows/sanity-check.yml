@@ -1,0 +1,49 @@
+name: ✅ Sanity check
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: 1.4.0
+
+jobs:
+  sanity-check:
+    name: 🩺 Sanity check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🥟 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: ♻️ Restore dependency cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🚦 Full check
+        run: bun run system-check
+
+      - name: 🎉 All clear
+        run: echo "✅ ${GITHUB_SHA:0:7} landed on \`main\` clean — format, types, lint, tests, and build all green." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🚨 Something broke
+        if: failure()
+        run: echo "💥 ${GITHUB_SHA:0:7} broke \`main\` — check the failed step above." >> "$GITHUB_STEP_SUMMARY"

@@ -1,13 +1,8 @@
-name: 🔁 CI
+name: 🧪 Pull request checks
 
 on:
   pull_request:
-  push:
-    branches: [main]
-  workflow_dispatch:
 
-# `pull_request` already covers branch pushes; `branches: ['**']` ran every
-# PR commit twice.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

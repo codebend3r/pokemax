@@ -124,22 +124,17 @@ export interface ExtraFormsState {
 }
 
 export function useExtraForms(species: Gen8Species[], enabled: boolean): ExtraFormsState {
-  const [state, setState] = useState<ExtraFormsState>({
+  const [state, setState] = useState<{ forms: Gen8Species[]; error: string | null }>({
     forms: cache ?? [],
-    loading: false,
     error: null,
   });
 
   useEffect(() => {
     if (!enabled) return;
-    if (cache) {
-      setState({ forms: cache, loading: false, error: null });
-      return;
-    }
+    if (cache) return;
     if (species.length === 0) return;
 
     let active = true;
-    setState((s) => ({ ...s, loading: true, error: null }));
     if (!inflight) {
       const byName = new Map(species.map((s) => [s.name, s]));
       inflight = fetchExtraForms(byName);
@@ -147,15 +142,18 @@ export function useExtraForms(species: Gen8Species[], enabled: boolean): ExtraFo
     inflight
       .then((f) => {
         cache = f;
-        if (active) setState({ forms: f, loading: false, error: null });
+        if (active) setState({ forms: f, error: null });
       })
       .catch((e: Error) => {
-        if (active) setState({ forms: [], loading: false, error: e.message });
+        if (active) setState({ forms: [], error: e.message });
       });
     return () => {
       active = false;
     };
   }, [enabled, species]);
 
-  return state;
+  if (enabled && cache) {
+    return { forms: cache, loading: false, error: null };
+  }
+  return { forms: state.forms, loading: enabled && species.length > 0, error: state.error };
 }

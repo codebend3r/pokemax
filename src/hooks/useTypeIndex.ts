@@ -51,33 +51,34 @@ export interface TypeIndexState {
  * chip) and the 18 type endpoints are fetched in parallel exactly once across the app.
  */
 export function useTypeIndex(enabled = false): TypeIndexState {
-  const [state, setState] = useState<TypeIndexState>({
+  const [state, setState] = useState<{
+    index: Map<number, PokeType[]> | null;
+    error: string | null;
+  }>({
     index: cache,
-    loading: false,
     error: null,
   });
 
   useEffect(() => {
     if (!enabled) return;
-    if (cache) {
-      setState({ index: cache, loading: false, error: null });
-      return;
-    }
+    if (cache) return;
     let active = true;
-    setState((s) => ({ ...s, loading: true, error: null }));
     if (!inflight) inflight = fetchTypeIndex();
     inflight
       .then((m) => {
         cache = m;
-        if (active) setState({ index: m, loading: false, error: null });
+        if (active) setState({ index: m, error: null });
       })
       .catch((e: Error) => {
-        if (active) setState({ index: null, loading: false, error: e.message });
+        if (active) setState({ index: null, error: e.message });
       });
     return () => {
       active = false;
     };
   }, [enabled]);
 
-  return state;
+  if (enabled && cache) {
+    return { index: cache, loading: false, error: null };
+  }
+  return { index: state.index, loading: enabled && !cache, error: state.error };
 }

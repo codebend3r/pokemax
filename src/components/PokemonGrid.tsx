@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Gen8Species } from '@/types';
 import type { PokeType } from '@/typeChart';
 import type { ViewMode } from '@/hooks/useViewMode';
@@ -147,9 +147,16 @@ export default function PokemonGrid({
 
   // Reset to page 1 whenever the underlying filtered set changes — keeps the user
   // from landing on a stale out-of-range page after they narrow results.
-  useEffect(() => {
+  const [prevFilters, setPrevFilters] = useState({ species, query, selectedTypes, pageSize });
+  if (
+    prevFilters.species !== species ||
+    prevFilters.query !== query ||
+    prevFilters.selectedTypes !== selectedTypes ||
+    prevFilters.pageSize !== pageSize
+  ) {
+    setPrevFilters({ species, query, selectedTypes, pageSize });
     setPage(0);
-  }, [species, query, selectedTypes, pageSize]);
+  }
 
   if (species.length === 0) return null;
 

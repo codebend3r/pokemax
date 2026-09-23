@@ -14,30 +14,36 @@ export interface CompetitiveState {
  * those mechanics didn't exist yet, so the walk is the better default.
  */
 export function useCompetitiveSet(name: string | null, gen: number | null): CompetitiveState {
-  const [state, setState] = useState<CompetitiveState>({
+  const [state, setState] = useState<{ build: ResolvedBuild | null; error: string | null }>({
     build: null,
-    loading: !!name,
     error: null,
   });
 
+  // A new name/gen invalidates whatever build we last resolved — clear it synchronously
+  // so the previous Pokémon's set can't flash while the new one loads.
+  const [prevKey, setPrevKey] = useState({ name, gen });
+  if (prevKey.name !== name || prevKey.gen !== gen) {
+    setPrevKey({ name, gen });
+    setState({ build: null, error: null });
+  }
+
   useEffect(() => {
-    if (!name) {
-      setState({ build: null, loading: false, error: null });
-      return;
-    }
+    if (!name) return;
     let active = true;
-    setState((s) => ({ ...s, loading: true, error: null }));
     (gen === null ? findBestBuild(name) : findBuildForGen(name, gen))
       .then((build) => {
-        if (active) setState({ build, loading: false, error: null });
+        if (active) setState({ build, error: null });
       })
       .catch((e: Error) => {
-        if (active) setState({ build: null, loading: false, error: e.message });
+        if (active) setState({ build: null, error: e.message });
       });
     return () => {
       active = false;
     };
   }, [name, gen]);
 
-  return state;
+  if (!name) {
+    return { build: null, loading: false, error: null };
+  }
+  return { build: state.build, loading: !state.build && !state.error, error: state.error };
 }

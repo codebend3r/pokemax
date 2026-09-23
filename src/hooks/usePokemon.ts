@@ -26,25 +26,25 @@ export function usePokemon(
   gen8Species: Gen8Species[],
   attempt: number,
 ): UsePokemonState {
-  const [state, setState] = useState<UsePokemonState>({
+  const entry = name ? gen8Species.find((s) => s.name === name) : undefined;
+  const notInGen8 = Boolean(name) && gen8Species.length > 0 && !entry;
+
+  const [state, setState] = useState<{ data: PokemonBundle | null; error: PokemonError | null }>({
     data: null,
-    loading: false,
     error: null,
   });
 
-  useEffect(() => {
-    if (!name) {
-      setState({ data: null, loading: false, error: null });
-      return;
-    }
-    const entry = gen8Species.find((s) => s.name === name);
-    if (gen8Species.length > 0 && !entry) {
-      setState({ data: null, loading: false, error: { kind: 'not-in-gen-8' } });
-      return;
-    }
+  // A new name/attempt invalidates whatever we last fetched — clear it synchronously
+  // so the previous Pokémon's data can't flash while the new one loads.
+  const [prevKey, setPrevKey] = useState({ name, attempt });
+  if (prevKey.name !== name || prevKey.attempt !== attempt) {
+    setPrevKey({ name, attempt });
+    setState({ data: null, error: null });
+  }
 
+  useEffect(() => {
+    if (!name || notInGen8) return;
     let active = true;
-    setState({ data: null, loading: true, error: null });
 
     (async () => {
       try {
@@ -57,11 +57,11 @@ export function usePokemon(
         ]);
         const chain = await fetchEvolutionChain(species.evolution_chain.url);
         if (active) {
-          setState({ data: { pokemon, species, chain }, loading: false, error: null });
+          setState({ data: { pokemon, species, chain }, error: null });
         }
       } catch {
         if (active) {
-          setState({ data: null, loading: false, error: { kind: 'transmission' } });
+          setState({ data: null, error: { kind: 'transmission' } });
         }
       }
     })();
@@ -69,7 +69,13 @@ export function usePokemon(
     return () => {
       active = false;
     };
-  }, [name, gen8Species, attempt]);
+  }, [name, notInGen8, entry, attempt]);
 
-  return state;
+  if (!name) {
+    return { data: null, loading: false, error: null };
+  }
+  if (notInGen8) {
+    return { data: null, loading: false, error: { kind: 'not-in-gen-8' } };
+  }
+  return { data: state.data, loading: !state.data && !state.error, error: state.error };
 }

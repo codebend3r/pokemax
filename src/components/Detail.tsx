@@ -157,6 +157,30 @@ function TypeChip({ type }: { type: PokeType }) {
   );
 }
 
+function MatchupRow({
+  label,
+  items,
+  mult,
+}: {
+  label: string;
+  items: { type: PokeType }[];
+  mult: string;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="crt-mu-row">
+      <span className="crt-mu-label">
+        {label} <span className="crt-mu-mult">{mult}</span>
+      </span>
+      <span className="crt-mu-chips">
+        {items.map((m) => (
+          <TypeChip key={m.type} type={m.type} />
+        ))}
+      </span>
+    </div>
+  );
+}
+
 function TypeBody({ name }: { name: string }) {
   if (!isPokeType(name)) {
     return <div className="crt-detail-effect">Unknown type.</div>;
@@ -177,46 +201,22 @@ function TypeBody({ name }: { name: string }) {
     none: offense.filter((o) => o.multiplier === 0).map((o) => ({ type: o.type })),
   };
 
-  function Row({
-    label,
-    items,
-    mult,
-  }: {
-    label: string;
-    items: { type: PokeType }[];
-    mult: string;
-  }) {
-    if (items.length === 0) return null;
-    return (
-      <div className="crt-mu-row">
-        <span className="crt-mu-label">
-          {label} <span className="crt-mu-mult">{mult}</span>
-        </span>
-        <span className="crt-mu-chips">
-          {items.map((m) => (
-            <TypeChip key={m.type} type={m.type} />
-          ))}
-        </span>
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="crt-detail-section">OFFENSIVE</div>
       <div className="crt-mu">
-        <Row label="STRONG vs" items={off.super2} mult="×2" />
-        <Row label="WEAK vs" items={off.not} mult="×½" />
-        <Row label="NO EFFECT" items={off.none} mult="×0" />
+        <MatchupRow label="STRONG vs" items={off.super2} mult="×2" />
+        <MatchupRow label="WEAK vs" items={off.not} mult="×½" />
+        <MatchupRow label="NO EFFECT" items={off.none} mult="×0" />
         {off.super2.length === 0 && off.not.length === 0 && off.none.length === 0 && (
           <div style={{ color: 'var(--dim)' }}>· neutral against all types</div>
         )}
       </div>
       <div className="crt-detail-section">DEFENSIVE</div>
       <div className="crt-mu">
-        <Row label="WEAK TO" items={def.weak2x} mult="×2" />
-        <Row label="RESISTS" items={def.resist2x} mult="×½" />
-        <Row label="IMMUNE" items={def.immune} mult="×0" />
+        <MatchupRow label="WEAK TO" items={def.weak2x} mult="×2" />
+        <MatchupRow label="RESISTS" items={def.resist2x} mult="×½" />
+        <MatchupRow label="IMMUNE" items={def.immune} mult="×0" />
         {def.weak2x.length === 0 && def.resist2x.length === 0 && def.immune.length === 0 && (
           <div style={{ color: 'var(--dim)' }}>· perfectly neutral</div>
         )}

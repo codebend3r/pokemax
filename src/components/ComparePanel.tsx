@@ -68,7 +68,6 @@ export default function ComparePanel({ base, species, onClose }: Props) {
   useEffect(() => {
     if (!target) return;
     let active = true;
-    setError(null);
     fetchPokemon(target.id)
       .then((p) => {
         if (active) setTargetData(p);
@@ -84,6 +83,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
   const pick = (s: Gen8Species) => {
     setTarget(s);
     setTargetData(null);
+    setError(null);
     setQuery('');
   };
 

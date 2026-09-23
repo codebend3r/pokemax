@@ -356,17 +356,16 @@ export default function PokemonCard({
   const audioRef = cryAudioRef ?? localCryRef;
 
   // On species (route) change, snap the active variety to whatever the URL says.
-  useEffect(() => {
+  const [prevSpeciesForm, setPrevSpeciesForm] = useState({ name: species.name, form });
+  if (prevSpeciesForm.name !== species.name || prevSpeciesForm.form !== form) {
+    setPrevSpeciesForm({ name: species.name, form });
     setActiveVariety(varietyFromForm(species.name, form));
     setVarietyData(null);
-  }, [species.name, form]);
+  }
 
   // Fetch alternate variety data when user picks a different form
   useEffect(() => {
-    if (activeVariety === defaultPokemon.name) {
-      setVarietyData(null);
-      return;
-    }
+    if (activeVariety === defaultPokemon.name) return;
     let active = true;
     fetchPokemon(activeVariety)
       .then((p) => {
@@ -390,19 +389,17 @@ export default function PokemonCard({
   // Showdown mirror by id → Smogon's fan animation by slug. If neither URL
   // resolves, hide the 2D toggle and force the view to 3D. 3D always has
   // something — its static fallback gets a CSS bob, which 2D does not.
-  const [has2D, setHas2D] = useState(true);
+  // Known-good 2D sources don't need probing; everything else is probed async below.
+  const has2DKnownGood = pokemon.id <= MAX_BW_ID || Boolean(localAnimUrl(pokemon.name));
+  const [has2DProbed, setHas2DProbed] = useState(true);
+  const [prevProbeTarget, setPrevProbeTarget] = useState(pokemon.name);
+  if (prevProbeTarget !== pokemon.name) {
+    setPrevProbeTarget(pokemon.name);
+    setHas2DProbed(true);
+  }
   useEffect(() => {
-    if (pokemon.id <= MAX_BW_ID) {
-      setHas2D(true);
-      return;
-    }
-    // A locally-shipped GIF is a known-good 2D animation — no probing needed.
-    if (localAnimUrl(pokemon.name)) {
-      setHas2D(true);
-      return;
-    }
+    if (has2DKnownGood) return;
     let cancelled = false;
-    setHas2D(true);
     const probe = (url: string) =>
       new Promise<boolean>((resolve) => {
         const img = new Image();
@@ -416,12 +413,13 @@ export default function PokemonCard({
         (await probe(`${SHOWDOWN_BASE}/${pokemon.id}.gif`)) ||
         (await probe(`${SD_ANI}/${slug}.gif`)) ||
         (await probe(`${SD_GEN5_ANI}/${slug}.gif`));
-      if (!cancelled) setHas2D(found);
+      if (!cancelled) setHas2DProbed(found);
     })();
     return () => {
       cancelled = true;
     };
-  }, [pokemon.id, pokemon.name]);
+  }, [pokemon.id, pokemon.name, has2DKnownGood]);
+  const has2D = has2DKnownGood || has2DProbed;
   useEffect(() => {
     if (!has2D && view === '2d') onViewChange('3d');
   }, [has2D, view, onViewChange]);
@@ -439,8 +437,18 @@ export default function PokemonCard({
   const [obtainOpen, setObtainOpen] = useState(false);
   const obtain = useObtainData(pokemon.id, obtainOpen);
   const buildSectionRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
+  const [prevBuildTarget, setPrevBuildTarget] = useState({
+    name: pokemon.name,
+    initialBuildGame,
+  });
+  if (
+    prevBuildTarget.name !== pokemon.name ||
+    prevBuildTarget.initialBuildGame !== initialBuildGame
+  ) {
+    setPrevBuildTarget({ name: pokemon.name, initialBuildGame });
     setBuildGame(initialBuildGame ?? null);
+  }
+  useEffect(() => {
     // Arriving from a TEAMS pick — jump straight to the build for that game.
     if (initialBuildGame) {
       buildSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -481,6 +489,31 @@ export default function PokemonCard({
     }
     return Array.from(byText, ([text, versions]) => ({ text, versions }));
   })();
+
+  const handleVarietyChange = (varietyName: string) => {
+    setActiveVariety(varietyName);
+    setVarietyData(null);
+    onFormChange(formFromVariety(species.name, varietyName));
+    // Pre-warm + play the new variety's cry synchronously inside this
+    // user-gesture handler. The variety data fetch is async — by the
+    // time `CardSprite`'s auto-play effect would run, browsers no
+    // longer count the click as a user gesture and `play()` rejects.
+    const v = species.varieties.find((x) => x.pokemon.name === varietyName);
+    const idMatch = v?.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
+    if (idMatch) {
+      const id = parseInt(idMatch[1], 10);
+      const cryUrl =
+        cryOverrideFor(varietyName) ??
+        `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+      const audio = new Audio(cryUrl);
+      audioRef.current = audio;
+      playCryWithIntro(audio, varietyName, cryVolume);
+    }
+  };
 
   return (
     <div className="crt-card">
@@ -549,29 +582,7 @@ export default function PokemonCard({
         varieties={species.varieties}
         speciesName={species.name}
         active={activeVariety}
-        onChange={(varietyName) => {
-          setActiveVariety(varietyName);
-          onFormChange(formFromVariety(species.name, varietyName));
-          // Pre-warm + play the new variety's cry synchronously inside this
-          // user-gesture handler. The variety data fetch is async — by the
-          // time `CardSprite`'s auto-play effect would run, browsers no
-          // longer count the click as a user gesture and `play()` rejects.
-          const v = species.varieties.find((x) => x.pokemon.name === varietyName);
-          const idMatch = v?.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
-          if (idMatch) {
-            const id = parseInt(idMatch[1], 10);
-            const cryUrl =
-              cryOverrideFor(varietyName) ??
-              `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
-            if (audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current.src = '';
-            }
-            const audio = new Audio(cryUrl);
-            audioRef.current = audio;
-            playCryWithIntro(audio, varietyName, cryVolume);
-          }
-        }}
+        onChange={handleVarietyChange}
       />
 
       {compareOpen && speciesPool && speciesPool.length > 0 && (

@@ -13,16 +13,19 @@ function Harness({ onSearch }: { onSearch: (name: string) => void }) {
 
 describe('SearchBar', () => {
   it('passes typed value to onValueChange', async () => {
-    let last = '';
     function Capture() {
       const [v, setV] = useState('');
-      last = v;
-      return <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={() => {}} />;
+      return (
+        <>
+          <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={() => {}} />
+          <output data-testid="value">{v}</output>
+        </>
+      );
     }
     render(<Capture />);
     const user = userEvent.setup();
     await user.type(screen.getByRole('textbox'), 'sc');
-    expect(last).toBe('sc');
+    expect(screen.getByTestId('value')).toHaveTextContent('sc');
   });
 
   it('calls onSearch with the typed name on Enter', async () => {

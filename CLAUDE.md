@@ -51,7 +51,7 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ### Don't
 - Don't mock `localStorage` per test — `src/__tests__/setup.ts` already installs a working in-memory shim because Node 22+ ships an empty experimental `localStorage` that shadows jsdom's.
 - Don't assert on internal CSS class names or DOM structure when a role/label query works.
-- Don't "fix" the two known pre-existing `PokemonCard` sprite-source test failures unless that's the actual task — they predate recent changes and aren't owned by drive-by edits.
+- Don't un-skip the two quarantined `PokemonCard` sprite tests (`it.skip`) unless that's the actual task — they still describe the old static sprite ladder and need a sprite-spec update, not a drive-by edit.
 
 ## UI / styling
 

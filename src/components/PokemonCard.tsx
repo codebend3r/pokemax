@@ -111,10 +111,9 @@ export default function PokemonCard({
 
   const handleVarietyChange = (varietyName: string) => {
     onFormChange(varietyName === base.name ? 'base' : formFromVariety(species.name, varietyName));
-    // Pre-warm + play the new variety's cry synchronously inside this
-    // user-gesture handler. The variety data fetch is async — by the
-    // time `CardSprite`'s auto-play effect would run, browsers no
-    // longer count the click as a user gesture and `play()` rejects.
+    // Play the new variety's cry synchronously inside this user-gesture
+    // handler. Its data loads async — by the time it lands, browsers no
+    // longer count the click as a gesture and `play()` can reject.
     const v = species.varieties.find((x) => x.pokemon.name === varietyName);
     const id = v ? idFromUrl(v.pokemon.url) : 0;
     if (id) playCry(varietyName, cryUrlById(varietyName, id));

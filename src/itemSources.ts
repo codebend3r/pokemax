@@ -1,5 +1,4 @@
-import type { GameId } from '@/trainers';
-import { GAME_LABELS } from '@/trainers';
+import { GAMES, type GameId } from '@/games';
 
 export interface CraftingRecipe {
   /** League Points cost (SV style). */
@@ -604,5 +603,5 @@ export const ITEM_SOURCES: Record<string, ItemSource[]> = {
  */
 export function formatSourceLine(src: ItemSource): string {
   if (src.game === 'multiple') return 'Multiple games';
-  return GAME_LABELS[src.game];
+  return GAMES[src.game].label;
 }

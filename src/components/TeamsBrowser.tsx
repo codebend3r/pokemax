@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
-import { GAME_LABELS, type GameId } from '@/trainers';
+import { GAMES, type GameId } from '@/games';
 import { localAnimUrl, showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
@@ -25,15 +25,14 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
     const build = TEAM_BUILDS[g];
     if (!build) return false;
     if (region.toLowerCase().includes(q)) return true;
-    if (GAME_LABELS[g].toLowerCase().includes(q)) return true;
+    if (GAMES[g].label.toLowerCase().includes(q)) return true;
     if (build.title.toLowerCase().includes(q)) return true;
     return build.team.some((p) => p.species.includes(q) || p.role.toLowerCase().includes(q));
   };
 
-  const visible = TEAM_REGIONS.map(({ region, note, games }) => ({
-    region,
-    note,
-    games: games.filter((g) => matches(region, g)),
+  const visible = TEAM_REGIONS.map((r) => ({
+    ...r,
+    games: r.games.filter((g) => matches(r.name, g)),
   })).filter(({ games }) => games.length > 0);
 
   return (
@@ -55,7 +54,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
           <button
             type="button"
             className="crt-trainer-chip"
-            onClick={() => expandAll(TEAM_REGIONS.map((r) => r.region))}
+            onClick={() => expandAll(TEAM_REGIONS.map((r) => r.name))}
           >
             ▼ EXPAND ALL
           </button>
@@ -67,7 +66,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
 
       {visible.length === 0 && <div className="crt-trainer-empty">▶ NO TEAMS MATCH FILTER</div>}
 
-      {visible.map(({ region, note, games }) => {
+      {visible.map(({ name: region, note, games }) => {
         // An active search auto-expands so matches are never hidden.
         const isCollapsed = !q && !expanded.has(region);
         return (
@@ -119,7 +118,7 @@ function GameTeamCard({
   return (
     <section className="crt-team-card">
       <header className="crt-team-card-header">
-        <div className="crt-team-card-game">{GAME_LABELS[gameId]}</div>
+        <div className="crt-team-card-game">{GAMES[gameId].label}</div>
         <div className="crt-team-card-title">{build.title}</div>
         {build.note && <div className="crt-team-card-note">{build.note}</div>}
       </header>

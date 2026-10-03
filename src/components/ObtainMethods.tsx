@@ -1,5 +1,6 @@
 import { useState, type SyntheticEvent } from 'react';
-import { getGen, REGIONS, REGION_OF_VERSION_GROUP, type RegionMeta } from '@/generations';
+import { GAMES, REGIONS, type Region } from '@/games';
+import { getGen } from '@/generations';
 import type { ObtainState } from '@/hooks/useObtainData';
 import {
   conditionMeta,
@@ -19,13 +20,13 @@ interface Props {
 
 // Groups are by REGION, not generation — BDSP belongs with the other Sinnoh
 // games regardless of when it shipped, and Hisui sits under Sinnoh. Both facts
-// live in the canonical `REGIONS` model.
-function regionLabel({ name, note }: RegionMeta): string {
+// live in the canonical game catalog.
+function regionLabel({ name, note }: Region): string {
   return note ? `${name.toUpperCase()} · ${note.toUpperCase()}` : name.toUpperCase();
 }
 
 function regionOf(game: ObtainGame): string {
-  return REGION_OF_VERSION_GROUP[game.versionGroup];
+  return GAMES[game.versionGroup].region;
 }
 
 function prettyVersions(versions: string[]): string {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMinLevelMap, pickCounterTeam, GAME_MAX_GEN } from '@/counters';
+import { buildMinLevelMap, pickCounterTeam } from '@/counters';
 import type { PokeType } from '@/typeChart';
 
 describe('pickCounterTeam', () => {
@@ -102,13 +102,6 @@ describe('pickCounterTeam', () => {
 
     expect(team).toHaveLength(2);
     expect(new Set(team.map((p) => p.id)).size).toBe(2); // unique picks
-  });
-
-  it('GAME_MAX_GEN covers every shipped game', () => {
-    // sanity: shouldn't be missing entries
-    expect(Object.keys(GAME_MAX_GEN).length).toBeGreaterThanOrEqual(20);
-    expect(GAME_MAX_GEN['scarlet-violet']).toBe(9);
-    expect(GAME_MAX_GEN['red-blue']).toBe(1);
   });
 });
 

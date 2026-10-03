@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CompetitiveBuild from '@/components/CompetitiveBuild';
 import type { ResolvedBuild } from '@/competitive';
-import type { GameId } from '@/trainers';
+import type { GameId } from '@/games';
 
 const GAMES: GameId[] = ['firered-leafgreen', 'scarlet-violet'];
 

@@ -1,34 +1,4 @@
 import { defensiveMatchups, type PokeType } from '@/typeChart';
-import type { GameId } from '@/trainers';
-
-/**
- * Maps a `GameId` to the latest generation whose Pokédex was canonically
- * available in that game. Used to cap the candidate pool when picking a
- * counter team — recommending a Gen 9 Fairy against Brock would be silly.
- */
-export const GAME_MAX_GEN: Record<GameId, number> = {
-  'red-blue': 1,
-  yellow: 1,
-  'gold-silver': 2,
-  crystal: 2,
-  'ruby-sapphire': 3,
-  emerald: 3,
-  'firered-leafgreen': 3,
-  'diamond-pearl': 4,
-  platinum: 4,
-  'heartgold-soulsilver': 4,
-  'black-white': 5,
-  'black-2-white-2': 5,
-  'x-y': 6,
-  'omega-ruby-alpha-sapphire': 6,
-  'sun-moon': 7,
-  'ultra-sun-ultra-moon': 7,
-  'lets-go': 1,
-  'sword-shield': 8,
-  'brilliant-diamond-shining-pearl': 4,
-  'legends-arceus': 8,
-  'scarlet-violet': 9,
-};
 
 interface PSDexEntry {
   num: number;

@@ -1,7 +1,7 @@
 import type { ResolvedBuild, SmogonSet } from '@/competitive';
 import { formatEVs, SMOGON_DEX_SLUGS } from '@/competitive';
 import type { PokemonResponse } from '@/types';
-import { GAME_LABELS, type GameId } from '@/trainers';
+import { GAMES, isGameId, type GameId } from '@/games';
 import Detail from '@/components/Detail';
 
 interface Props {
@@ -15,10 +15,6 @@ interface Props {
   /** null = latest gen with a published set (the richest modern build). */
   selectedGame: GameId | null;
   onSelectGame: (game: GameId | null) => void;
-}
-
-function isGameId(v: string): v is GameId {
-  return v in GAME_LABELS;
 }
 
 function smogonToApi(name: string): string {
@@ -96,7 +92,7 @@ export default function CompetitiveBuild({
         <option value="">LATEST (BEST AVAILABLE)</option>
         {games.map((g) => (
           <option key={g} value={g}>
-            {GAME_LABELS[g].toUpperCase()}
+            {GAMES[g].label.toUpperCase()}
           </option>
         ))}
       </select>
@@ -127,7 +123,7 @@ export default function CompetitiveBuild({
         {gameSelect}
         <div className="crt-build-empty">
           {selectedGame
-            ? `· no Smogon set for this entry in ${GAME_LABELS[selectedGame]}`
+            ? `· no Smogon set for this entry in ${GAMES[selectedGame].label}`
             : '· no competitive data on Smogon for this entry'}
           <div style={{ fontSize: 14, marginTop: 4, color: 'var(--dim)' }}>
             {selectedGame

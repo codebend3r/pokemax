@@ -1,4 +1,4 @@
-import { GENERATIONS } from '@/generations';
+import { isGameId, type GameId } from '@/games';
 
 // Single source for the method vocabulary — the union, the runtime guard, and
 // the label/color tables in `@/obtain/labels` all derive from this list.
@@ -32,7 +32,7 @@ export interface ObtainEntry {
 
 export interface ObtainGame {
   gen: number;
-  versionGroup: string;
+  versionGroup: GameId;
   versions: string[]; // merged when entry lists are identical
   entries: ObtainEntry[];
 }
@@ -51,46 +51,6 @@ export interface ObtainFile {
   games: ObtainGame[];
 }
 
-// PokéAPI version names per version group, canonical release order.
-// prettier-ignore
-export const VERSION_GROUP_VERSIONS: Record<string, string[]> = {
-  'red-blue': ['red', 'blue'],
-  'yellow': ['yellow'],
-  'gold-silver': ['gold', 'silver'],
-  'crystal': ['crystal'],
-  'ruby-sapphire': ['ruby', 'sapphire'],
-  'emerald': ['emerald'],
-  'firered-leafgreen': ['firered', 'leafgreen'],
-  'diamond-pearl': ['diamond', 'pearl'],
-  'platinum': ['platinum'],
-  'heartgold-soulsilver': ['heartgold', 'soulsilver'],
-  'black-white': ['black', 'white'],
-  'black-2-white-2': ['black-2', 'white-2'],
-  'x-y': ['x', 'y'],
-  'omega-ruby-alpha-sapphire': ['omega-ruby', 'alpha-sapphire'],
-  'sun-moon': ['sun', 'moon'],
-  'ultra-sun-ultra-moon': ['ultra-sun', 'ultra-moon'],
-  'lets-go-pikachu-lets-go-eevee': ['lets-go-pikachu', 'lets-go-eevee'],
-  'sword-shield': ['sword', 'shield'],
-  'brilliant-diamond-shining-pearl': ['brilliant-diamond', 'shining-pearl'],
-  'legends-arceus': ['legends-arceus'],
-  'scarlet-violet': ['scarlet', 'violet'],
-};
-
-export const VERSION_ORDER: string[] = GENERATIONS.flatMap((g) =>
-  g.versionGroups.flatMap((vg) => VERSION_GROUP_VERSIONS[vg] ?? []),
-);
-
-export const VERSION_TO_GROUP: Record<string, string> = Object.fromEntries(
-  Object.entries(VERSION_GROUP_VERSIONS).flatMap(([group, versions]) =>
-    versions.map((v) => [v, group]),
-  ),
-);
-
-export const GROUP_GEN: Record<string, number> = Object.fromEntries(
-  GENERATIONS.flatMap((g) => g.versionGroups.map((vg) => [vg, g.num])),
-);
-
 const METHOD_SET: ReadonlySet<string> = new Set(OBTAIN_METHODS);
 
 function isObtainEntry(v: unknown): v is ObtainEntry {
@@ -105,6 +65,7 @@ function isObtainGame(v: unknown): v is ObtainGame {
   return (
     typeof g.gen === 'number' &&
     typeof g.versionGroup === 'string' &&
+    isGameId(g.versionGroup) &&
     Array.isArray(g.versions) &&
     Array.isArray(g.entries) &&
     g.entries.every(isObtainEntry)

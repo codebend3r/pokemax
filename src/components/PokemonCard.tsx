@@ -23,7 +23,7 @@ import Detail from '@/components/Detail';
 import ObtainMethods from '@/components/ObtainMethods';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { useObtainData } from '@/hooks/useObtainData';
-import { GAME_GENS, GAME_ORDER, type GameId } from '@/trainers';
+import { GAMES, GAME_ORDER, type GameId } from '@/games';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
 import { localAnimUrl, pokeapiToShowdownSlug } from '@/showdownSprite';
@@ -432,7 +432,7 @@ export default function PokemonCard({
     0,
   );
   // Games this Pokémon can appear in — everything from its home gen onward.
-  const buildGames = GAME_ORDER.filter((g) => GAME_GENS[g] >= gen);
+  const buildGames = GAME_ORDER.filter((g) => GAMES[g].gen >= gen);
   const [buildGame, setBuildGame] = useState<GameId | null>(initialBuildGame ?? null);
   const [obtainOpen, setObtainOpen] = useState(false);
   const obtain = useObtainData(pokemon.id, obtainOpen);
@@ -454,7 +454,7 @@ export default function PokemonCard({
       buildSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [pokemon.name, initialBuildGame]);
-  const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAME_GENS[buildGame] : null);
+  const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAMES[buildGame].gen : null);
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
 

@@ -1,13 +1,7 @@
 import { useMemo, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
-import {
-  GAME_LABELS,
-  GAME_ORDER,
-  GAMES_BY_REGION,
-  trainerPortraitUrl,
-  type GameId,
-  type Trainer,
-} from '@/trainers';
+import { GAMES, GAME_ORDER, REGIONS, type GameId } from '@/games';
+import { trainerPortraitUrl, type Trainer } from '@/trainers';
 import { showdownSpriteUrl } from '@/showdownSprite';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
@@ -16,7 +10,7 @@ interface Props {
   onSelect: (trainer: Trainer) => void;
 }
 
-const ALL_REGIONS: readonly string[] = GAMES_BY_REGION.map((r) => r.region);
+const ALL_REGIONS: readonly string[] = REGIONS.map((r) => r.name);
 
 // Stale key from the brief collapsed-by-default version — its mount write
 // froze `[]` into storage, which would override the expanded default below.
@@ -70,7 +64,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
 
   const regionGroups = useMemo(
     () =>
-      GAMES_BY_REGION.map(({ region, note, games }) => ({
+      REGIONS.map(({ name: region, note, games }) => ({
         region,
         note,
         trainers: games.flatMap((g) => filtered.filter((t) => t.game === g)),
@@ -159,7 +153,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                     <div className="crt-trainer-list-card-class">
                       {t.trainerClass.toUpperCase()}
                     </div>
-                    <div className="crt-trainer-list-card-game">{GAME_LABELS[t.game]}</div>
+                    <div className="crt-trainer-list-card-game">{GAMES[t.game].label}</div>
                     <div className="crt-trainer-list-card-roster-mini">
                       {t.team.map((m, i) => (
                         <img

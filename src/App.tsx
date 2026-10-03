@@ -33,7 +33,8 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
 import type { PokeType } from '@/typeChart';
 import { CRY_VOLUME_SCALE } from '@/textUtil';
 import { cryOverrideFor } from '@/cryOverrides';
-import { TRAINERS, type GameId, type Trainer } from '@/trainers';
+import { TRAINERS, type Trainer } from '@/trainers';
+import type { GameId } from '@/games';
 
 // Lazy-loaded — only fetched when first needed
 const PokemonCard = lazy(() => import('@/components/PokemonCard'));

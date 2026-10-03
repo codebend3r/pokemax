@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { GAME_LABELS, trainerPortraitUrl, type Trainer } from '@/trainers';
-import { GAME_MAX_GEN, pickCounterTeam } from '@/counters';
+import { GAMES } from '@/games';
+import { trainerPortraitUrl, type Trainer } from '@/trainers';
+import { pickCounterTeam } from '@/counters';
 import Detail from '@/components/Detail';
 import { useTypeIndex } from '@/hooks/useTypeIndex';
 import { useMinLevels } from '@/hooks/useMinLevels';
@@ -55,7 +56,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
     const nameToId = new Map<string, number>();
     const idToName = new Map<number, string>();
     const allowed = new Set<number>();
-    const maxGen = GAME_MAX_GEN[trainer.game];
+    const maxGen = GAMES[trainer.game].dexGen;
     // A counter must be able to EXIST at this fight: at or below the
     // trainer's strongest level, given how its evolution line works.
     const maxLevel = Math.max(...trainer.team.map((m) => m.level));
@@ -111,7 +112,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         <div className="crt-trainer-detail-header-text">
           <div className="crt-trainer-detail-name">{trainer.name.toUpperCase()}</div>
           <div className="crt-trainer-detail-class">{trainer.trainerClass.toUpperCase()}</div>
-          <div className="crt-trainer-detail-game">{GAME_LABELS[trainer.game]}</div>
+          <div className="crt-trainer-detail-game">{GAMES[trainer.game].label}</div>
           {trainer.location && (
             <div className="crt-trainer-detail-location">{trainer.location}</div>
           )}
@@ -205,7 +206,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         title={
           trainer.availableBefore
             ? 'BEST COUNTER TEAM (OBTAINABLE BY THIS FIGHT)'
-            : `BEST COUNTER TEAM (Gen ≤ ${GAME_MAX_GEN[trainer.game]})`
+            : `BEST COUNTER TEAM (Gen ≤ ${GAMES[trainer.game].dexGen})`
         }
         open={openCounters}
         onToggle={() => setOpenCounters((v) => !v)}
@@ -262,7 +263,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
 
       <Section title="LOCATION" open={openLoc} onToggle={() => setOpenLoc((v) => !v)}>
         <div>{trainer.location ?? '—'}</div>
-        <div>{GAME_LABELS[trainer.game]}</div>
+        <div>{GAMES[trainer.game].label}</div>
       </Section>
     </div>
   );

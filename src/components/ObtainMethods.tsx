@@ -13,6 +13,7 @@ import {
   prettyCondition,
 } from '@/obtain/labels';
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
+import { tintStyle } from '@/typeChart';
 
 interface Props {
   state: AsyncState<ObtainFile>;
@@ -32,12 +33,6 @@ function regionOf(game: ObtainGame): string {
 
 function prettyVersions(versions: string[]): string {
   return versions.map((v) => v.toUpperCase().replace(/-/g, ' ')).join(' / ');
-}
-
-// Sanctioned colorful-chip pattern from `PokemonCard.tsx`'s type pills:
-// palette color as text + border, plus a matching low-opacity glow.
-function tintStyle(color: string): React.CSSProperties {
-  return { color, borderColor: color, textShadow: `0 0 4px ${color}66` };
 }
 
 function EntryRow({ entry }: { entry: ObtainEntry }) {

@@ -80,8 +80,8 @@ function CardSprite({
           className={`crt-card-particle ${p.type}`}
           aria-hidden="true"
           style={{
-            ['--x' as string]: `${p.x}px`,
-            ['--rotate' as string]: `${p.rotate}deg`,
+            '--x': `${p.x}px`,
+            '--rotate': `${p.rotate}deg`,
             animationDelay: `${p.delay}ms`,
           }}
         >

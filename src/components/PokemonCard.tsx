@@ -18,7 +18,7 @@ import PokedexEntries from '@/components/PokedexEntries';
 import { useAsync } from '@/async';
 import { obtainFiles } from '@/obtain/files';
 import type { GameId } from '@/games';
-import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
+import { tintStyle, typeColor } from '@/typeChart';
 import { varietyFromForm, formFromVariety, type Dimension } from '@/routes';
 import { formatHeight, formatWeight } from '@/units';
 import { cryUrlById, cryUrlOf, playCry } from '@/cry';
@@ -144,20 +144,16 @@ export default function PokemonCard({
             {genus ? ` · ${genus.toUpperCase()}` : ''}
           </div>
           <div className="crt-types">
-            {pokemon.types.map((t) => {
-              const isPoke = (TYPES as readonly string[]).includes(t.type.name);
-              const color = isPoke ? TYPE_COLORS[t.type.name as PokeType] : 'var(--primary)';
-              return (
-                <Detail
-                  key={t.type.name}
-                  kind="type"
-                  name={t.type.name}
-                  label={t.type.name}
-                  triggerClassName="crt-type"
-                  triggerStyle={{ color, borderColor: color, textShadow: `0 0 4px ${color}66` }}
-                />
-              );
-            })}
+            {pokemon.types.map((t) => (
+              <Detail
+                key={t.type.name}
+                kind="type"
+                name={t.type.name}
+                label={t.type.name}
+                triggerClassName="crt-type"
+                triggerStyle={tintStyle(typeColor(t.type.name))}
+              />
+            ))}
           </div>
           <div className="crt-card-vitals">
             <span>

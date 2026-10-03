@@ -2,7 +2,14 @@ import { useState, type ReactNode } from 'react';
 import { memoAsync, useAsync, type AsyncState } from '@/async';
 import { fetchAbility, fetchItem, fetchMove, fetchNature } from '@/api';
 import { cleanFlavorText } from '@/textUtil';
-import { defensiveMatchups, groupMatchups, TYPES, TYPE_COLORS, type PokeType } from '@/typeChart';
+import {
+  defensiveMatchups,
+  groupMatchups,
+  isPokeType,
+  TYPES,
+  TYPE_COLORS,
+  type PokeType,
+} from '@/typeChart';
 import { ITEM_SOURCES, formatSourceLine, type ItemSource } from '@/itemSources';
 import type { EffectEntry, ItemResponse, MoveResponse, NatureResponse } from '@/types';
 
@@ -23,10 +30,6 @@ interface Props {
 
 function pretty(name: string) {
   return name.replace(/-/g, ' ');
-}
-
-function isPokeType(t: string): t is PokeType {
-  return (TYPES as readonly string[]).includes(t);
 }
 
 function pickEffect(entries: EffectEntry[]): string {

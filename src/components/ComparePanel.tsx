@@ -3,7 +3,7 @@ import { useAsync } from '@/async';
 import { pokemonData } from '@/dex';
 import type { DexEntry, PokemonResponse } from '@/types';
 import { pokeapiShowdownGif } from '@/sprites';
-import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
+import { tintStyle, typeColor } from '@/typeChart';
 
 interface Props {
   base: PokemonResponse;
@@ -40,13 +40,8 @@ function statByName(p: PokemonResponse, key: string): number {
 }
 
 function TypeChip({ name }: { name: string }) {
-  const isKnown = (TYPES as readonly string[]).includes(name);
-  const color = isKnown ? TYPE_COLORS[name as PokeType] : 'var(--primary)';
   return (
-    <span
-      className="crt-type"
-      style={{ color, borderColor: color, textShadow: `0 0 4px ${color}66` }}
-    >
+    <span className="crt-type" style={tintStyle(typeColor(name))}>
       {name}
     </span>
   );

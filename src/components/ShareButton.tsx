@@ -10,12 +10,10 @@ export default function ShareButton({ selected }: Props) {
   const handle = async () => {
     const text = window.location.href;
 
-    const nav = navigator as Navigator & {
-      share?: (data: { title?: string; url?: string }) => Promise<void>;
-    };
-    if (nav.share) {
+    // `lib.dom` types `share` as always present; desktop Firefox doesn't have it.
+    if ('share' in navigator) {
       try {
-        await nav.share({
+        await navigator.share({
           title: selected ? `Pokemax | ${selected}` : 'Pokemax',
           url: text,
         });

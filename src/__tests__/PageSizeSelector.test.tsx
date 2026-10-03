@@ -6,7 +6,7 @@ import PageSizeSelector from '@/components/PageSizeSelector';
 describe('PageSizeSelector', () => {
   it('reflects the current page size as the selected option', () => {
     render(<PageSizeSelector pageSize={100} onChange={() => {}} />);
-    expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('100');
+    expect(screen.getByRole('combobox')).toHaveValue('100');
   });
 
   it('calls onChange with a number for numeric options', async () => {

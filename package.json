@@ -8,9 +8,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "run-s build:types build:vite",
-    "build:types": "tsc -b",
+    "build": "run-s typecheck build:vite",
     "build:vite": "vite build",
+    "typecheck": "tsgo -b --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
@@ -19,7 +19,7 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "system-check": "run-s format:check build:types lint test build:vite",
+    "system-check": "run-s format:check typecheck lint test build:vite",
     "prepare": "husky"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "@vitejs/plugin-react": "6.0.3",
     "@vitest/ui": "4.1.10",
     "globals": "17.7.0",

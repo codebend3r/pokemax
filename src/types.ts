@@ -67,11 +67,6 @@ export interface AltForm {
 
 export type DexEntry = BaseSpecies | AltForm;
 
-/** The species to fetch `/pokemon-species/` for — a form's parent, or the species itself. */
-export function speciesNameOf(entry: DexEntry): string {
-  return entry.kind === 'form' ? entry.speciesName : entry.name;
-}
-
 export interface PokemonResponse {
   id: number;
   name: string;

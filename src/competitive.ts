@@ -177,9 +177,3 @@ export function formatEVs(evs?: SmogonSet['evs']): string {
   const spreads = (Array.isArray(evs) ? evs : [evs]).map(formatSpread).filter(Boolean);
   return spreads.length > 0 ? spreads.join(' or ') : '—';
 }
-
-export function formatMaybeArray(value: string | string[] | undefined): string {
-  if (!value) return '—';
-  if (Array.isArray(value)) return value.join(' / ');
-  return value;
-}

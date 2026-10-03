@@ -565,14 +565,6 @@ button.crt-type:hover,
   background: rgba(255, 0, 170, 0.08);
 }
 
-.crt-empty {
-  color: var(--dim);
-  border: 1px dashed var(--border);
-  padding: 24px;
-  text-align: center;
-  margin-top: 16px;
-}
-
 .crt-error {
   color: var(--error);
   text-shadow: 0 0 4px var(--error);
@@ -624,9 +616,6 @@ button.crt-type:hover,
 .crt-build-tier-name {
   color: var(--primary);
   font-size: 19px;
-}
-.crt-build-row {
-  display: contents;
 }
 .crt-build-label {
   color: var(--dim);
@@ -1368,64 +1357,12 @@ button.crt-type:hover,
   }
 }
 
-/* Generation tabs */
 .crt-subheader {
   color: var(--dim);
   font-size: 14px;
   letter-spacing: 3px;
   margin-bottom: 16px;
 }
-.crt-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 16px 0 16px;
-  border-bottom: 1px dashed var(--border);
-  padding-bottom: 12px;
-}
-.crt-tab {
-  background: rgba(0, 255, 159, 0.04);
-  border: 1px solid var(--border);
-  color: var(--primary);
-  font: inherit;
-  text-shadow: inherit;
-  padding: 6px 10px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  min-width: 70px;
-  transition:
-    background 80ms,
-    border-color 80ms;
-}
-.crt-tab:hover {
-  background: rgba(0, 255, 159, 0.12);
-  border-color: var(--primary);
-}
-.crt-tab.active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(255, 0, 170, 0.08);
-  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
-  box-shadow: 0 0 10px rgba(255, 0, 170, 0.2);
-}
-.crt-tab-roman {
-  font-size: 18px;
-  letter-spacing: 1px;
-}
-.crt-tab-region {
-  font-size: 12px;
-  color: var(--dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.crt-tab.active .crt-tab-region {
-  color: var(--accent);
-  opacity: 0.8;
-}
-
 .crt-grid-dex {
   color: var(--accent);
   text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
@@ -1434,21 +1371,6 @@ button.crt-type:hover,
 }
 
 @media (max-width: 600px) {
-  .crt-tabs {
-    gap: 3px;
-    padding-bottom: 8px;
-    margin: 12px 0;
-  }
-  .crt-tab {
-    min-width: 56px;
-    padding: 4px 6px;
-  }
-  .crt-tab-roman {
-    font-size: 15px;
-  }
-  .crt-tab-region {
-    font-size: 10px;
-  }
   .crt-card-dex {
     font-size: 28px;
   }
@@ -1848,7 +1770,6 @@ button.crt-type:hover,
 :root[data-theme='light'] .crt-card-particle.heart,
 :root[data-theme='light'] .crt-card-particle.star,
 :root[data-theme='light'] .crt-card-particle.sparkle,
-:root[data-theme='light'] .crt-tab.active,
 :root[data-theme='light'] .crt-gen-chip.active,
 :root[data-theme='light'] .crt-form-chip.active,
 :root[data-theme='light'] .crt-shiny button[aria-pressed='true'] {
@@ -1989,33 +1910,6 @@ button.crt-type:hover,
   letter-spacing: 1px;
   font-size: 12px;
   margin-right: 4px;
-}
-
-/* Pokédex flavor-text entry block */
-.crt-pokedex-entry {
-  margin-top: 12px;
-  border-top: 1px dashed var(--border);
-  padding-top: 12px;
-}
-.crt-pokedex-entry-label {
-  display: block;
-  color: var(--accent);
-  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
-  letter-spacing: 1px;
-  font-size: 18px;
-  margin-bottom: 6px;
-}
-.crt-pokedex-entry p {
-  margin: 0;
-  color: var(--primary);
-  line-height: 1.5;
-  font-size: 18px;
-  font-style: italic;
-  border-left: 2px solid var(--accent);
-  padding-left: 10px;
-  background: rgba(255, 0, 170, 0.04);
-  padding-top: 6px;
-  padding-bottom: 6px;
 }
 
 /* Alt-forms filter row */
@@ -2511,7 +2405,6 @@ button.crt-type:hover,
 :root[data-theme='light'] .crt-detail-panel {
   background: rgba(156, 52, 21, 0.06);
 }
-:root[data-theme='light'] .crt-tab.active,
 :root[data-theme='light'] .crt-gen-chip.active,
 :root[data-theme='light'] .crt-form-chip.active,
 :root[data-theme='light'] .crt-extra-chip.active {

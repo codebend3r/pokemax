@@ -150,7 +150,7 @@ const LOCAL_ANIM_FILES: Record<string, string> = {
 };
 
 /** URL of the local animated GIF for a slug, or null when we don't ship one. */
-export function localAnimUrl(pokeapiSlug: string): string | null {
+function localAnimUrl(pokeapiSlug: string): string | null {
   const file = LOCAL_ANIM_FILES[pokeapiSlug];
   if (!file) return null;
   return `${import.meta.env.BASE_URL}sprites/anim/${file}.gif`;

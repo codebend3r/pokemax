@@ -11,7 +11,7 @@
 // and reference it as `${import.meta.env.BASE_URL}audio/cries/<file>.<ext>`.
 const A = (file: string): string => `${import.meta.env.BASE_URL}audio/cries/${file}`;
 
-export const CRY_OVERRIDES: Record<string, string> = {
+const CRY_OVERRIDES: Record<string, string> = {
   // Gen 1 starters' Gmax forms — from the compilation
   'venusaur-gmax': A('venusaur-gmax.mp3'),
   'charizard-gmax': A('charizard-gmax.mp3'),

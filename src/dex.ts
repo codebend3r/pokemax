@@ -12,7 +12,7 @@ import {
 import { GENERATIONS } from '@/generations';
 import { TYPES, type PokeType } from '@/typeChart';
 import type { Form } from '@/routes';
-import type { AltForm, BaseSpecies, FormCategory } from '@/types';
+import type { AltForm, BaseSpecies, DexEntry, FormCategory } from '@/types';
 
 /**
  * Splits a variety slug into its base species and form suffix by the longest
@@ -205,3 +205,27 @@ export const speciesDetails = memoAsync(async (name: string) => {
   const chain = await fetchEvolutionChain(species.evolution_chain.url);
   return { species, chain };
 });
+
+/**
+ * The grid's entries. With no form category on: every base species. With
+ * some on: only the species that have a matching form, each followed by
+ * those forms. Then the generation filter applies to both.
+ */
+export function filterDex(
+  species: BaseSpecies[],
+  forms: AltForm[],
+  formCategories: ReadonlySet<FormCategory>,
+  gens: ReadonlySet<number>,
+): DexEntry[] {
+  let entries: DexEntry[] = species;
+  if (formCategories.size > 0) {
+    const matching = forms.filter((f) => formCategories.has(f.formCategory));
+    const parents = new Set(matching.map((f) => f.speciesName));
+    const baseId = (e: DexEntry) => (e.kind === 'form' ? e.speciesId : e.id);
+    entries = [...species.filter((s) => parents.has(s.name)), ...matching].sort(
+      // Base before its forms: a form's own id is always in the 10000s.
+      (a, b) => baseId(a) - baseId(b) || a.id - b.id,
+    );
+  }
+  return gens.size === 0 ? entries : entries.filter((e) => gens.has(e.gen));
+}

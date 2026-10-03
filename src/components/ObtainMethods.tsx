@@ -1,4 +1,5 @@
 import { useState, type SyntheticEvent } from 'react';
+import { useToggleSet } from '@/hooks/useToggleSet';
 import { GAMES, REGIONS, type Region } from '@/games';
 import { getGen } from '@/generations';
 import type { AsyncState } from '@/async';
@@ -123,16 +124,9 @@ function ObtainRegions({ file, currentGen }: { file: ObtainFile; currentGen: num
   // Alola) — default to the first region actually present.
   const homeRegion = getGen(currentGen).region;
   const defaultRegion = regions.some((r) => r.name === homeRegion) ? homeRegion : regions[0]?.name;
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(defaultRegion === undefined ? [] : [defaultRegion]),
+  const { set: expanded, toggle } = useToggleSet<string>(
+    defaultRegion === undefined ? [] : [defaultRegion],
   );
-  const toggle = (region: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(region)) next.delete(region);
-      else next.add(region);
-      return next;
-    });
 
   return (
     <div className="crt-obtain">

@@ -4,6 +4,7 @@ import { GAMES, GAME_ORDER, REGIONS, type GameId } from '@/games';
 import { trainerPortraitUrl, type Trainer } from '@/trainers';
 import { showdownSpriteUrl } from '@/sprites';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
+import { useToggleSet } from '@/hooks/useToggleSet';
 
 interface Props {
   trainers: Trainer[];
@@ -23,8 +24,10 @@ function normalize(s: string): string {
 }
 
 export default function TrainerGrid({ trainers, onSelect }: Props) {
-  const [selectedGames, setSelectedGames] = useState<Set<GameId>>(new Set());
-  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
+  const games = useToggleSet<GameId>();
+  const classes = useToggleSet<string>();
+  const selectedGames = games.set;
+  const selectedClasses = classes.set;
   const [nameQuery, setNameQuery] = useState('');
   const [pokemonQuery, setPokemonQuery] = useState('');
   // Trainers default to everything expanded (unlike TEAMS, which starts collapsed).
@@ -81,24 +84,10 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
         pokemonQuery={pokemonQuery}
         allGames={allGames}
         allClasses={allClasses}
-        onToggleGame={(g) =>
-          setSelectedGames((prev) => {
-            const next = new Set(prev);
-            if (next.has(g)) next.delete(g);
-            else next.add(g);
-            return next;
-          })
-        }
-        onToggleClass={(c) =>
-          setSelectedClasses((prev) => {
-            const next = new Set(prev);
-            if (next.has(c)) next.delete(c);
-            else next.add(c);
-            return next;
-          })
-        }
-        onClearGames={() => setSelectedGames(new Set())}
-        onClearClasses={() => setSelectedClasses(new Set())}
+        onToggleGame={games.toggle}
+        onToggleClass={classes.toggle}
+        onClearGames={games.clear}
+        onClearClasses={classes.clear}
         onNameChange={setNameQuery}
         onPokemonChange={setPokemonQuery}
       />

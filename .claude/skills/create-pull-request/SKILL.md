@@ -50,7 +50,7 @@ The body is these parts, in this order:
 
 Report what was run, not what should pass:
 
-- `bun run system-check` green — `format:check`, `tsc -b`, `oxlint`, 143 tests, `vite build`
+- `bun run system-check` green — `format:check`, `typecheck`, `oxlint`, 143 tests, `vite build`
 - Test count before → after
 - Any dataset or generated-file impact, including "none"
 

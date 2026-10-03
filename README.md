@@ -1,6 +1,6 @@
 # pokemax
 
-A retro CRT-terminal-styled Pokédex for the whole main series — **all 1,022 species across Gen I → IX**. Browse the dex as a sprite grid, filter by generation or type, page through results, and inspect every stat, ability, evolution, form and move — plus the canonical competitive build sourced live from Smogon.
+A retro CRT-terminal-styled Pokédex for the whole main series — **all 1,025 species across Gen I → IX**. Browse the dex as a sprite grid, filter by generation or type, page through results, and inspect every stat, ability, evolution, form and move — plus where to catch it in each game and the canonical competitive build sourced live from Smogon. Two more tabs cover the games themselves: gym leaders, Elite Four and champions with a counter team for each fight, and a curated playthrough team per game.
 
 🔗 **Live:** [codebend3r.github.io/pokemax](https://codebend3r.github.io/pokemax/)
 
@@ -24,7 +24,7 @@ Click any combination of type chips to find every species that matches **all** s
 
 ### Pokémon card
 
-Click any cell (or hit Enter in the search bar) to open the full card: official artwork with `2D ⇄ 3D` toggle, `NORMAL ⇄ SHINY` toggle, click-to-play cry with volume slider, color-coded type chips, height/weight, alternate forms picker (Mega X/Y, Gmax, regional variants, battle forms), Pokédex flavor text grouped by version, base stats with bar graphs, abilities (hidden ability marked), full branching evolution chain, every move learned in that generation's canonical version pair grouped by learn method, and a Smogon competitive build with tier, item, ability, nature, EVs and moves.
+Click any cell (or hit Enter in the search bar) to open the full card: animated sprite with `2D ⇄ 3D` toggle, `NORMAL ⇄ SHINY` toggle, click-to-play cry with volume slider, color-coded type chips, height/weight, alternate forms picker (Mega X/Y, Gmax, regional variants, battle forms), Pokédex flavor text grouped by version, base stats with bar graphs, abilities (hidden ability marked), full branching evolution chain, every move learned in that generation's canonical version pair grouped by learn method, how to obtain it in every game, and a Smogon competitive build with tier, item, ability, nature, EVs and moves.
 
 ![Pokémon card](docs/screenshots/desktop-card.png)
 
@@ -57,7 +57,7 @@ The whole layout is responsive. Card top stacks, stat bars compress, type chips 
 - **Multi-type filter** — pick one or more of the 18 types; cells are shown only if they match **every** selected type
 - **Alt-form chips** — opt-in fetches for `MEGA / PRIMAL`, `GIGANTAMAX`, `REGIONAL`, and other `BATTLE FORMS`; forms render inline next to their base species
 - **Live search** — typing filters the visible grid in real time; Enter jumps to the first match; Esc clears
-- **Pagination + view mode** — choose page size (30/60/120/all) and toggle between sprite-grid and compact list view; settings persist
+- **Pagination + view mode** — choose page size (25/50/100/200/all) and toggle between sprite-grid and compact list view; settings persist
 - **Hover-animated sprites** — flat 2D pixel sprite by default; on hover, the animated Black/White or Showdown GIF plays. Only the hovered cell animates.
 - **Pokémon card** with collapsible sections:
   - All six base stats as bar graphs
@@ -65,16 +65,19 @@ The whole layout is responsive. Card top stacks, stat bars compress, type chips 
   - Branching evolution chain with conditions (Toxel → Toxtricity Amped/Low Key, Applin → Flapple/Appletun, eevee → 8 evolutions, etc.) — every node clickable to jump
   - Pokédex flavor text deduplicated and grouped by version
   - Every move available in that generation's canonical version pair, grouped by learn method
+  - How to obtain it in every game — wild encounters with levels and rates, gifts, trades, evolutions, plus egg groups and hatch steps
   - Smogon competitive build (tier, item, ability, nature, EVs, moves) — fetched live from `pkmn.github.io`, generation-aware
   - In-card **form switcher** (e.g. Charizard ⇆ Mega X ⇆ Mega Y ⇆ Gmax)
   - **Compare** button to diff base stats against another species side-by-side
 - **Click for details** — moves, abilities, items, natures and types are all clickable; each expands inline
-- **2D / 3D sprite toggle** — flat pixel art ↔ animated Showdown rendering (with Pokémon HOME / official-artwork fallbacks)
-- **Shiny toggle** — official-artwork shiny variant with graceful fallback to pixel shiny
+- **2D / 3D sprite toggle** — both views are animated (Black/White and Showdown GIFs); official artwork appears only for the few forms with no animated sprite, and the 2D toggle hides when a form has no pixel animation
+- **Shiny toggle** — the shiny versions of the same animated sprites
 - **Click-to-play cry** — every Pokémon's cry plays from the card sprite, with a volume slider
 - **Built-in chiptune player** — Web Audio synthesizes a small NES-style playlist; play/pause/skip and volume controls in the header
 - **Two themes** — dark phosphor CRT and a light parchment theme; persisted to `localStorage`
-- **Share button** — copies a deep-link URL like `?p=charizard` that opens the app directly to that card
+- **Share button** — copies a deep link like `/pokedex/charizard` that opens the app directly to that card (old `?p=charizard` links still redirect)
+- **Trainers tab** — gym leaders, Elite Four, champions, rivals and team bosses for each game, with their full rosters (moves, items, abilities, natures) and the best counter team obtainable by that fight; filter by game, class, name or a Pokémon on the roster
+- **Teams tab** — a curated six-Pokémon playthrough team for each game, with each pick's role and why it's there
 - **CRT aesthetic** — Pixelify Sans, scanline overlay, power-on flash, blinking cursor, color-coded type chips
 - **Mobile responsive** — single-column card, compressed stats, wrapping chips
 - **Accessible** — keyboard navigation, ARIA roles, focus rings on tab-only
@@ -83,17 +86,19 @@ The whole layout is responsive. Card top stacks, stat bars compress, type chips 
 
 ## Tech stack
 
-- **Vite 6** + **React 19** + **TypeScript** (strict)
+- **Vite 8** + **React 19** + **TypeScript** (strict)
+- **wouter** — routing for the Pokédex, Trainers and Teams tabs and the deep links
 - **Plain CSS** — no Tailwind, no styled-components; one `crt.css` file with CSS variables and media queries
 - **Native `fetch`** — no Axios or similar
 - **Web Audio API** — chiptune synthesis, no audio files in the bundle
 - **Vitest** + **@testing-library/react** + **jsdom** for tests
-- **Pixelify Sans** Google Font
-- **oxlint + oxfmt + Husky pre-commit** keep the tree lint-clean
+- **Pixelify Sans** + **Space Mono** Google Fonts — the pixel display face, and a legible mono for small body text and stat numbers
+- **oxlint + oxfmt + lefthook pre-commit** keep the tree lint-clean
 - **Data sources:**
   - [PokeAPI](https://pokeapi.co) — species, stats, abilities, evolutions, moves, sprites, cries
   - [Smogon sets via pkmn.github.io](https://pkmn.github.io) — competitive builds per generation
   - [PokeAPI sprites repo](https://github.com/PokeAPI/sprites) — pixel + animated Black/White + Showdown GIFs + official artwork
+  - [PokemonDB](https://pokemondb.net) + [Bulbapedia](https://bulbapedia.bulbagarden.net) — where-to-find and in-game trades, prebuilt with PokeAPI encounters into `public/obtain/` by `scripts/build-obtain-data.mts`
 
 ---
 
@@ -165,6 +170,7 @@ scripts/build-obtain-data.mts  # builds public/obtain/{id}.json
 
 ```bash
 bun run dev &                                    # in one shell
+bun add --no-save playwright                     # not a project dependency
 bunx playwright install chromium                 # one-time
 bun scripts/screenshot.mjs                       # writes to docs/screenshots/
 ```
@@ -177,6 +183,7 @@ The script clips to the viewport (no `fullPage: true`) so README images stay lan
 
 - **PokeAPI** for the data backend (species, moves, abilities, sprites, cries)
 - **Smogon University** + **pkmn.cc** for competitive analyses per generation
-- **Pokémon HOME** team for the 3D renders
 - **Pokémon Showdown** for the animated pixel sprites
+- **PokemonDB** + **Bulbapedia** for where-to-find and in-game trade data
 - **Pixelify Sans** font by Stefie Justprince
+- **Space Mono** font by Colophon Foundry

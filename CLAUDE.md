@@ -1,79 +1,95 @@
-# Guardrails for this repo (CLAUDE.md, AGENTS.md)
+# CLAUDE.md
 
-Short, opinionated rules. When something here conflicts with a default behavior, **this file wins**.
+Pokemax is a retro CRT-styled Pokédex: a Vite + React 19 + TypeScript single-page app with wouter routing, deployed to GitHub Pages. Species, moves and sprites come live from PokeAPI, competitive sets from Smogon, and the how-to-obtain data is prebuilt into `public/obtain/`.
 
-## Git workflow
+## Workflow
 
-### Do
-- **Default to `main`.** Commit and push directly to `main` after every discrete change — that's still the path for ordinary work.
-- One logical change = one commit. Finish the change → `git add <specific files>` → `git commit` → `git push origin main` → move on.
-- **Branch and open a PR when the user asks for one.** Branch off `main`, keep one-logical-change-per-commit inside the branch, then `gh pr create --base main`.
-- Prefer one branch over several when the changes touch the same files — parallel branches that rewrite the same file just conflict.
-- Write commit messages that explain **why**, not just what.
-- Follow the `commit-format` skill (`.claude/skills/commit-format/SKILL.md`) for commit subject/body/backtick rules, including the zero-AI-attribution rule.
-- Follow the `create-pull-request` skill (`.claude/skills/create-pull-request/SKILL.md`) for every PR title and body — it owns the section order, bullet style, and the same zero-AI-attribution rule.
+- Do not commit anything until I tell you to. Finishing a change is not permission to commit it.
+- Do not push anything until I tell you to. Once I have told you to commit on a branch that already tracks a remote, push it in the same step, don't ask again.
+- Do not merge anything until I tell you to.
+- Do not create a PR until I tell you to.
 
-### Don't
-- Don't open a PR for routine work the user didn't ask to review — branches are permitted, not the default.
-- Don't bundle unrelated changes into one commit "to save time" — the user explicitly wants tight, change-per-commit history.
-- Don't pause to confirm the push each time. Standing authorization is granted for `git push origin main` in this repo.
-- Don't run `git push --force`, `git reset --hard`, or anything destructive without explicit per-action approval.
-- Don't append `Co-Authored-By: Claude` (or any AI/agent attribution) to commits. See the `commit-format` skill — zero AI mentions anywhere in the message.
+## Tooling
+
+- All scripts run through Bun (`bun install`, `bun run …`). Never invoke npm or yarn.
+- Pin every dependency to an exact version, with no `^` or `~`. The root `bunfig.toml` enforces this with `exact = true`. Workspace siblings are the one exception: they use `workspace:*`.
+- Run tests with `bun run test`, never bare `bun test`. The unit-tester skill explains why.
+- Tests are co-located: `lib/foo.ts` ↔ `lib/foo.test.ts`, `components/Foo/Foo.tsx` ↔ `components/Foo/Foo.test.tsx`.
 
 ## Imports
 
-### Do
-- Use the `@/` alias for anything under `src/` (e.g. `import { useTheme } from '@/hooks/useTheme'`).
-- Configured in `tsconfig.json`, `tsconfig.app.json`, and `vite.config.ts` (which Vitest also reads) — all three must stay in sync if the alias changes.
-
-### Don't
-- Don't use `../`-style relative imports across directories. Use `@/...` instead.
-- Don't introduce a second alias (`~/`, `#/`, etc.) — one alias is enough.
-
-## TypeScript
-
-### Do
-- Keep `strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, and `noUncheckedSideEffectImports` on. Fix the cause, not the lint.
-- Run `npx tsc -b --pretty false` before committing if you've touched types — silent green is the bar.
-- Reach for **type narrowing or type guards** to satisfy the checker. For platform-typed globals (e.g. `webkitAudioContext`), declare the real shape via an ambient declaration in `src/vite-env.d.ts` instead of asserting it at the call site.
-
-### Don't
-- Don't use TypeScript type assertions of **any** kind — no `as SomeType`, no `as unknown as`, no `as any`, no `// @ts-ignore`. Narrow the type, write a type guard, or declare the correct type. Assertions are banned outright; `as const` (a const assertion, not a cast) is fine.
-- Don't disable strict flags.
+- Never use relative paths, not even for same-directory siblings or co-located style sheets. `@/*` maps to `src/`; it is configured in `tsconfig.json`, `tsconfig.app.json` and `vite.config.ts`, which must stay in sync.
+- SCSS `@use` follows the same rule: `@use "@/styles/mixins" as *`.
 
 ## Tests
 
-### Do
-- Use `bun run test` (vitest). New components/hooks get a minimal test for default state + the main interactions. **Never** invoke `bun test` directly — that runs bun's built-in test runner, which this project does not use.
-- Use `@testing-library/react` patterns: query by role/label, drive with `userEvent`.
-- Put tests in `src/__tests__/<name>.test.{ts,tsx}`.
+- Tests live in `src/__tests__/<name>.test.{ts,tsx}`. New components and hooks get a minimal test for their default state and main interactions.
+- Use `@testing-library/react` patterns: query by role or label, drive with `userEvent`. Don't assert on CSS class names or DOM structure when a role or label query works.
+- Don't mock `localStorage` per test. `src/__tests__/setup.ts` installs an in-memory shim, because Node 22+ ships an empty experimental `localStorage` that shadows jsdom's.
 
-### Don't
-- Don't mock `localStorage` per test — `src/__tests__/setup.ts` already installs a working in-memory shim because Node 22+ ships an empty experimental `localStorage` that shadows jsdom's.
-- Don't assert on internal CSS class names or DOM structure when a role/label query works.
-- Don't "fix" the two known pre-existing `PokemonCard` sprite-source test failures unless that's the actual task — they predate recent changes and aren't owned by drive-by edits.
+## TypeScript
 
-## UI / styling
+- Always use type aliases. Never use interfaces, including in `declare global` augmentations.
+- Use type guards wherever possible, and unit test every type guard function.
+- Never use `any`. Prefer type narrowing or type guards.
+- Never cast types, and never double cast (`as any as string`).
+- If a type can't be inferred and narrowing isn't an option, use `unknown`.
+- Keep `strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch` and `noUncheckedSideEffectImports` on. Fix the cause, not the lint.
+- For platform-typed globals (e.g. `webkitAudioContext`), declare the real shape in `src/vite-env.d.ts` instead of working around it at the call site.
 
-### Do
-- Keep the CRT phosphor aesthetic: `--primary` (phosphor green), `--accent` (magenta), `--tertiary` (cyan), `--dim`, all defined at the top of `src/styles/crt.css`. Pull from these variables, don't hardcode hex.
-- Two fonts are loaded in `index.html`: `Pixelify Sans` (the global retro display font — logo, names, headers; fallback chain `'Pixelify Sans', 'VT323', 'Courier New', monospace`) and `Space Mono` (the `--font-body` used for small body text and stat numbers where pixel-art legibility suffers). `VT323` is only a fallback name, not a loaded import.
-- Persist user preferences in `localStorage` under the `pokemax.*` namespace (`pokemax.theme`, `pokemax.view`, `pokemax.pageSize`, etc.).
-- Light theme overrides live near the bottom of `crt.css` under `:root[data-theme="light"] ...`. Add matching overrides when introducing new tinted elements.
+## SCSS/CSS
 
-### Don't
-- Don't introduce a CSS framework (Tailwind, etc.). The whole UI is hand-rolled CSS in one file by design.
-- Don't add new font imports without dropping an old one — keep the network cost flat.
-- Don't break the `html { zoom: 1.15 }` baseline at the top of `crt.css` — it's the global "make text legible" lever.
+- Use SCSS modules (`*.module.scss`) for component styles.
+- Use the global stylesheet (`src/styles/globals.scss`) only for design tokens and true typographic primitives.
+- Layout is container-driven. The container sets width and height and positions its children, so a child moved to a different container can lay out differently there.
+- Prefer CSS grid with `gap` for spacing. Avoid margins for spacing. Flex is the second choice.
+- Avoid plain divs, meaning divs with no class or id.
+- Always use the token values from `src/styles/globals.scss` for font sizes, colors, padding, margin, gap and border radius.
+
+## UI
+
+- Keep the CRT phosphor aesthetic: `--primary` (phosphor green), `--accent` (magenta), `--tertiary` (cyan) and `--dim`, currently defined at the top of `src/styles/crt.css`. Never hardcode hex.
+- Two fonts load in `index.html`: `Pixelify Sans`, the retro display font for the logo, names and headers, and `Space Mono` (`--font-body`), for small body text and stat numbers where pixel art loses legibility. `VT323` is only a fallback name. Don't add a font import without dropping one.
+- Light theme overrides go under `:root[data-theme="light"]`. Add a matching override when introducing a new tinted element.
+- Don't break the `html { zoom: 1.15 }` baseline at the top of `crt.css`. It is the global "make text legible" lever.
+- Persist user preferences in `localStorage` under the `pokemax.*` namespace (`pokemax.theme`, `pokemax.view`, `pokemax.pageSize`, …).
+- Don't introduce a CSS framework (Tailwind, etc.).
+
+## Code style
+
+- Prefer immutable data structures and operations.
+- Prefer `reduce` over `for` loops. Never use `for/in` or `for/of`; use `Array.prototype` methods (`map`, `filter`, `reduce`, `flatMap`).
+- Prefer double-bang (`!!value`) for boolean conversion.
+- Prefer short-circuit `&&` over a ternary whose else branch is `null` or `undefined`, especially in JSX.
+  - Do: `{isActive && <Badge />}`. Don't: `{isActive ? <Badge /> : null}`.
+  - Make the condition a real boolean (`!!count && …`) so a bare `0` never renders.
+- Prefer optional chaining (`?.`), and always pair it with nullish coalescing (`??`) to supply a fallback.
+- Prefer a single object parameter over positional ones, so argument order doesn't matter. Do: `doSomething({ foo, bar })`. Don't: `doSomething(foo, bar)`.
+
+## Accessibility (WCAG AA)
+
+- Use semantic HTML before ARIA: a native `button`, never a clickable `div`. Add ARIA only to fill a gap, and never override a native role.
+- Everything must be operable by keyboard, with a visible `:focus-visible` style. Modals, drawers and menus move focus in, trap it, restore it to the trigger on close, and close on `Escape`.
+- Every control needs an accessible name:
+  - form fields get a `label`, with `aria-describedby` for hints and errors;
+  - icon-only buttons get an `aria-label`;
+  - decorative icons get `aria-hidden="true"`, and decorative images `alt=""`.
+- Announce async changes (toasts, status, form errors) with `aria-live` or `role="alert"`.
+- Text needs at least 4.5:1 contrast, and large text and UI elements 3:1, measured against the `globals.scss` tokens. Never signal meaning by color alone.
+- Respect `prefers-reduced-motion` and size with `rem`. Each page has one `h1` with no skipped heading levels, and the document sets `lang`.
+
+## Specs and plans
+
+- Design specs and implementation plans live in `docs/superpowers/specs/` and `docs/superpowers/plans/`. Check them before extending an existing feature.
 
 ## Scope discipline
 
-### Do
-- Touch only what the task needs. Land it. Push. Move on.
-- If a bug fix surfaces an adjacent issue, mention it in the response, don't silently bundle the fix.
-
-### Don't
+- Touch only what the task needs. If a fix surfaces an adjacent issue, mention it in the response; don't silently bundle the fix.
 - Don't refactor surrounding code while doing a feature change.
-- Don't add "future-proof" abstractions (interfaces, registries, dependency-injection helpers) for code that has one caller.
-- Don't add comments that just describe what the code already says. Comments are for the *why* — a hidden invariant, an external constraint, a workaround.
+- Don't add "future-proof" abstractions (registries, dependency-injection helpers) for code that has one caller.
+- Don't add comments that just describe what the code already says. Comments are for the *why*: a hidden invariant, an external constraint, a workaround.
 - Don't generate documentation files (`*.md`, `README` additions) unless the task explicitly asks for it. This file is the exception.
+
+## Creating PRs
+
+- When creating a PR, always run the /thermo-nuclear-code-quality-review skill, then apply all of suggestions, commit as a separate commit and push to origin, then open PR

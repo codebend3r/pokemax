@@ -1,0 +1,12 @@
+pre-commit:
+  jobs:
+    - name: format
+      # A commit can stage only files oxfmt skips (`.md`, `.json`) — without
+      # the flag it exits non-zero and blocks the commit.
+      run: bunx oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: system-check
+      run: bun run system-check

@@ -166,12 +166,7 @@ describe('PokemonCard', () => {
     expect(screen.getAllByText('ghost').length).toBeGreaterThan(0);
   });
 
-  // Quarantined: the card's 2D default for Gen 6+ is now the animated Showdown
-  // GIF (constructed from id), not the fixture's `front_default`. These two
-  // assertions still describe the original sprite ladder, so they stay in the
-  // file as a pointer for whoever updates the sprite spec — they just don't run
-  // until then. See `cardSprites` in `sprites.ts`.
-  it.skip('renders the static flat pixel sprite by default (2D, Gen 6+)', () => {
+  it('renders the animated Showdown GIF by default (2D, Gen 6+)', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
@@ -186,10 +181,13 @@ describe('PokemonCard', () => {
         onFormChange={() => {}}
       />,
     );
-    expect(screen.getByRole('img')).toHaveAttribute('src', 'normal.png');
+    expect(screen.getByRole('img', { name: 'dragapult' })).toHaveAttribute(
+      'src',
+      expect.stringContaining('other/showdown/887.gif'),
+    );
   });
 
-  it.skip('renders the static shiny sprite by default when shiny is true', () => {
+  it('renders the animated shiny Showdown GIF when shiny is true', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
@@ -204,7 +202,10 @@ describe('PokemonCard', () => {
         onFormChange={() => {}}
       />,
     );
-    expect(screen.getByRole('img')).toHaveAttribute('src', 'shiny.png');
+    expect(screen.getByRole('img', { name: 'dragapult' })).toHaveAttribute(
+      'src',
+      expect.stringContaining('other/showdown/shiny/887.gif'),
+    );
   });
 
   it('renders the evolution chain', () => {

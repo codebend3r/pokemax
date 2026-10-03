@@ -11,11 +11,11 @@ permissions:
   contents: read
 
 env:
-  BUN_VERSION: 1.4.0
+  BUN_VERSION: 1.4.2
 
 jobs:
   checks:
-    name: 🔍 Checks
+    name: 🚦 Pull request checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -44,10 +44,10 @@ jobs:
         run: bun run lint
 
       - name: 🔤 Typecheck
-        run: bun run build:types
+        run: bun run typecheck
 
       - name: 🧪 Test
         run: bun run test
 
       - name: 🏗️ Build
-        run: bun run build:vite
+        run: bun run build

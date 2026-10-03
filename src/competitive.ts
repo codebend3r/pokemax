@@ -61,36 +61,22 @@ function pokeapiToSmogon(name: string): string {
  * Walk Smogon gens from latest to oldest and return the first complete-ish set
  * for the given Pokémon. Older gens (1-2) had no abilities/items/natures/EVs, so
  * preferring the latest gen surfaces the richer modern competitive build.
+ * A failed fetch rejects — `null` strictly means "Smogon has no set".
  */
 export async function findBestBuild(name: string): Promise<ResolvedBuild | null> {
   for (const gen of [9, 8, 7, 6, 5, 4, 3, 2, 1]) {
-    try {
-      const data = await fetchSmogonData(gen);
-      const build = pickBuild(data, name);
-      if (build) {
-        build.sourceGen = gen;
-        return build;
-      }
-    } catch {
-      // Try the next gen
-    }
+    const build = pickBuild(await fetchSmogonData(gen), name, gen);
+    if (build) return build;
   }
   return null;
 }
 
 /**
  * Look up a set in ONE specific gen — for "show me the build for the game I'm
- * playing". Returns null (no cross-gen walking) when that gen has no set.
+ * playing". Resolves null (no cross-gen walking) when that gen has no set.
  */
 export async function findBuildForGen(name: string, gen: number): Promise<ResolvedBuild | null> {
-  try {
-    const data = await fetchSmogonData(gen);
-    const build = pickBuild(data, name);
-    if (build) build.sourceGen = gen;
-    return build;
-  } catch {
-    return null;
-  }
+  return pickBuild(await fetchSmogonData(gen), name, gen);
 }
 
 /** Smogon strategy-dex slug for a gen (`smogon.com/dex/<slug>`). */
@@ -111,11 +97,15 @@ export interface ResolvedBuild {
   tier: string;
   buildName: string;
   set: SmogonSet;
-  /** Which Smogon gen JSON the set came from (1..9). Set by findBestBuild. */
-  sourceGen?: number;
+  /** Which Smogon gen JSON the set came from (1..9). */
+  sourceGen: number;
 }
 
-export function pickBuild(data: SmogonData, pokeapiName: string): ResolvedBuild | null {
+export function pickBuild(
+  data: SmogonData,
+  pokeapiName: string,
+  sourceGen: number,
+): ResolvedBuild | null {
   const candidates = [pokeapiToSmogon(pokeapiName)];
   const baseName = pokeapiName.split('-')[0];
   if (baseName !== pokeapiName) candidates.push(pokeapiToSmogon(baseName));
@@ -127,13 +117,19 @@ export function pickBuild(data: SmogonData, pokeapiName: string): ResolvedBuild 
       const builds = tiers[tier];
       if (!builds) continue;
       const buildName = Object.keys(builds)[0];
-      return { pokemonKey: key, tier, buildName, set: builds[buildName] };
+      return { pokemonKey: key, tier, buildName, set: builds[buildName], sourceGen };
     }
     const fallbackTier = Object.keys(tiers)[0];
     if (fallbackTier) {
       const builds = tiers[fallbackTier];
       const buildName = Object.keys(builds)[0];
-      return { pokemonKey: key, tier: fallbackTier, buildName, set: builds[buildName] };
+      return {
+        pokemonKey: key,
+        tier: fallbackTier,
+        buildName,
+        set: builds[buildName],
+        sourceGen,
+      };
     }
   }
   return null;

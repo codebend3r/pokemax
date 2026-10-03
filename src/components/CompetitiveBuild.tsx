@@ -182,7 +182,7 @@ export default function CompetitiveBuild({
         </ul>
       </div>
       <div className="crt-build-source">
-        data: smogon.com/dex/{SMOGON_DEX_SLUGS[build.sourceGen ?? 9] ?? 'sv'}
+        data: smogon.com/dex/{SMOGON_DEX_SLUGS[build.sourceGen]}
       </div>
     </div>
   );

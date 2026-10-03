@@ -636,7 +636,7 @@ export default function PokemonCard({
           label="COMPETITIVE BUILD"
           count={
             competitive.build
-              ? `GEN ${competitive.build.sourceGen ?? '?'} · ${competitive.build.tier.toUpperCase()}`
+              ? `GEN ${competitive.build.sourceGen} · ${competitive.build.tier.toUpperCase()}`
               : undefined
           }
         >

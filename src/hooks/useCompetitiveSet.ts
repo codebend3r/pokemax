@@ -14,17 +14,18 @@ export interface CompetitiveState {
  * those mechanics didn't exist yet, so the walk is the better default.
  */
 export function useCompetitiveSet(name: string | null, gen: number | null): CompetitiveState {
-  const [state, setState] = useState<{ build: ResolvedBuild | null; error: string | null }>({
-    build: null,
-    error: null,
-  });
+  // `null` until the lookup settles — a resolved `build: null` is a real answer
+  // ("Smogon has no set"), not "still loading".
+  const [state, setState] = useState<{ build: ResolvedBuild | null; error: string | null } | null>(
+    null,
+  );
 
   // A new name/gen invalidates whatever build we last resolved — clear it synchronously
   // so the previous Pokémon's set can't flash while the new one loads.
   const [prevKey, setPrevKey] = useState({ name, gen });
   if (prevKey.name !== name || prevKey.gen !== gen) {
     setPrevKey({ name, gen });
-    setState({ build: null, error: null });
+    setState(null);
   }
 
   useEffect(() => {
@@ -45,5 +46,6 @@ export function useCompetitiveSet(name: string | null, gen: number | null): Comp
   if (!name) {
     return { build: null, loading: false, error: null };
   }
-  return { build: state.build, loading: !state.build && !state.error, error: state.error };
+  if (!state) return { build: null, loading: true, error: null };
+  return { build: state.build, loading: false, error: state.error };
 }

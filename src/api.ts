@@ -12,7 +12,7 @@ import {
   isTypeResponse,
   type AbilityResponse,
   type EvolutionChainResponse,
-  type Gen8Species,
+  type BaseSpecies,
   type ItemResponse,
   type MoveResponse,
   type NatureResponse,
@@ -39,15 +39,12 @@ export function idFromUrl(url: string): number {
   return m ? parseInt(m[1], 10) : 0;
 }
 
-export async function fetchGenerationList(gen: number): Promise<Gen8Species[]> {
+export async function fetchGenerationList(gen: number): Promise<BaseSpecies[]> {
   const data = await getJson(`${BASE}/generation/${gen}`, isGenerationResponse);
   return data.pokemon_species
-    .map((s) => ({ name: s.name, id: idFromUrl(s.url), gen }))
+    .map((s): BaseSpecies => ({ kind: 'species', name: s.name, id: idFromUrl(s.url), gen }))
     .sort((a, b) => a.id - b.id);
 }
-
-// Backwards-compat alias
-export const fetchGen8List = () => fetchGenerationList(8);
 
 /** Every Pokémon variety PokeAPI knows — base species and alternate forms alike. */
 export async function fetchPokemonList(): Promise<{ name: string; id: number }[]> {

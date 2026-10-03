@@ -23,6 +23,7 @@ export const GENERATIONS: GenerationMeta[] = [
   { num: 9, roman: 'IX',   region: 'Paldea', primaryVersionGroup: 'scarlet-violet' },
 ];
 
+/** A generation newer than this table falls back to the latest one it knows. */
 export function getGen(num: number): GenerationMeta {
-  return GENERATIONS.find((g) => g.num === num) ?? GENERATIONS[7];
+  return GENERATIONS.find((g) => g.num === num) ?? GENERATIONS[GENERATIONS.length - 1];
 }

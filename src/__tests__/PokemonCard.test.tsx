@@ -92,6 +92,7 @@ const chainLink: ChainLink = {
 
 const species: SpeciesResponse = {
   name: 'dragapult',
+  generation: { name: 'generation-viii', url: 'https://pokeapi.co/api/v2/generation/8/' },
   evolution_chain: { url: 'X' },
   varieties: [{ is_default: true, pokemon: { name: 'dragapult', url: '' } }],
   flavor_text_entries: [
@@ -118,7 +119,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByText('88')).toBeInTheDocument();
@@ -138,7 +138,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     const item = screen.getByText(/cursed body/i).closest('li');
@@ -158,7 +157,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getAllByText('dragon').length).toBeGreaterThan(0);
@@ -182,7 +180,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'normal.png');
@@ -200,7 +197,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'shiny.png');
@@ -218,7 +214,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByText('DREEPY')).toBeInTheDocument();
@@ -238,7 +233,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByText(/dragon darts/i)).toBeInTheDocument();

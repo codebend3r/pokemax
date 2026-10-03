@@ -11,10 +11,10 @@ import {
 } from '@/api';
 import { GENERATIONS } from '@/generations';
 import { TYPES, type PokeType } from '@/typeChart';
-import type { FormCategory, Gen8Species } from '@/types';
+import type { AltForm, BaseSpecies, FormCategory } from '@/types';
 
 /** Every base species across all generations, national-dex order. */
-export const speciesIndex = memoAsync(async (): Promise<Gen8Species[]> => {
+export const speciesIndex = memoAsync(async (): Promise<BaseSpecies[]> => {
   const lists = await Promise.all(GENERATIONS.map((g) => fetchGenerationList(g.num)));
   return lists.flat().sort((a, b) => a.id - b.id);
 });
@@ -90,11 +90,11 @@ function categorizeForm(suffix: string): FormCategory {
 }
 
 /** Alternate forms (Mega, Gmax, regional, battle forms), matched to their base species. */
-export const formIndex = memoAsync(async (): Promise<Gen8Species[]> => {
+export const formIndex = memoAsync(async (): Promise<AltForm[]> => {
   const [species, varieties] = await Promise.all([speciesIndex.get(), fetchPokemonList()]);
   const byName = new Map(species.map((s) => [s.name, s]));
 
-  const forms: Gen8Species[] = [];
+  const forms: AltForm[] = [];
   for (const { name, id } of varieties) {
     if (id < 10000) continue; // skip base species (already in main list)
 
@@ -102,7 +102,7 @@ export const formIndex = memoAsync(async (): Promise<Gen8Species[]> => {
     // dash-separated prefixes. e.g. 'charizard-mega-x' → tries 'charizard-mega'
     // then 'charizard'.
     const parts = name.split('-');
-    let base: Gen8Species | undefined;
+    let base: BaseSpecies | undefined;
     let suffix = '';
     for (let i = parts.length - 1; i >= 1; i--) {
       const candidate = parts.slice(0, i).join('-');
@@ -115,10 +115,12 @@ export const formIndex = memoAsync(async (): Promise<Gen8Species[]> => {
     if (!base || !suffix) continue;
 
     forms.push({
+      kind: 'form',
       name,
       id,
       gen: base.gen,
       speciesName: base.name,
+      speciesId: base.id,
       formLabel: prettifyForm(suffix),
       formCategory: categorizeForm(suffix),
     });

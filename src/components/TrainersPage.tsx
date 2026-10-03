@@ -2,7 +2,7 @@ import TrainerCard from '@/components/TrainerCard';
 import TrainerGrid from '@/components/TrainerGrid';
 import type { GameId } from '@/games';
 import { TRAINERS } from '@/trainers';
-import type { Gen8Species } from '@/types';
+import type { DexEntry } from '@/types';
 
 interface Props {
   /** `null` renders the trainer list; an id renders that trainer's page. */
@@ -11,7 +11,7 @@ interface Props {
   onBack: () => void;
   /** `game` is the trainer's game — roster and counter picks preselect its build. */
   onSelectPokemon: (name: string, game: GameId) => void;
-  speciesIndex: Gen8Species[];
+  speciesIndex: DexEntry[];
 }
 
 // The roster dataset is ~108 KB of source. It is only ever imported from this

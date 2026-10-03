@@ -47,7 +47,7 @@ const moves: PokemonResponse['moves'] = [
 
 describe('groupMoves', () => {
   it('only includes sword-shield moves', () => {
-    const groups = groupMoves(moves);
+    const groups = groupMoves(moves, 'sword-shield');
     const all = Object.values(groups)
       .flat()
       .map((m) => m.name);
@@ -55,7 +55,7 @@ describe('groupMoves', () => {
   });
 
   it('groups by learn method', () => {
-    const groups = groupMoves(moves);
+    const groups = groupMoves(moves, 'sword-shield');
     expect(groups['level-up'].map((m) => m.name).sort()).toEqual(['pyro-ball', 'tackle']);
     expect(groups['machine'].map((m) => m.name)).toEqual(['flame-charge']);
   });
@@ -103,7 +103,7 @@ describe('groupMoves', () => {
         ],
       },
     ];
-    const groups = groupMoves(sample);
+    const groups = groupMoves(sample, 'sword-shield');
     expect(groups['level-up'].map((m) => m.name)).toEqual(['a', 'b']);
     expect(groups['egg'].map((m) => m.name)).toEqual(['m', 'z']);
   });

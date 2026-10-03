@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Gen8Species } from '@/types';
+import type { DexEntry } from '@/types';
 import type { PokeType } from '@/typeChart';
 import type { ViewMode } from '@/hooks/useViewMode';
 import type { PageSize } from '@/hooks/usePageSize';
@@ -9,7 +9,7 @@ import PageSizeSelector from '@/components/PageSizeSelector';
 import Pagination from '@/components/Pagination';
 
 interface Props {
-  species: Gen8Species[];
+  species: DexEntry[];
   query: string;
   selected: string | null;
   onSelect: (name: string) => void;
@@ -35,11 +35,8 @@ function pretty(name: string): string {
   return name.replace(/-/g, ' ');
 }
 
-function cellLabel(s: Gen8Species): string {
-  if (s.formLabel && s.speciesName) {
-    return `${pretty(s.speciesName)} · ${s.formLabel}`;
-  }
-  return pretty(s.name);
+function cellLabel(s: DexEntry): string {
+  return s.kind === 'form' ? `${pretty(s.speciesName)} · ${s.formLabel}` : pretty(s.name);
 }
 
 function GridCell({
@@ -48,7 +45,7 @@ function GridCell({
   selected,
   onSelect,
 }: {
-  s: Gen8Species;
+  s: DexEntry;
   /** Base species' national-dex ID — used as the sprite fallback if this form has none */
   parentId?: number;
   selected: boolean;
@@ -121,12 +118,6 @@ export default function PokemonGrid({
   onClearTypes,
 }: Props) {
   const [page, setPage] = useState(0);
-  // Lookup parent species's national-dex ID so alt forms whose own sprite is missing
-  // fall back to their parent's sprite instead of showing a broken image.
-  const parentIdByName = new Map<string, number>();
-  for (const s of species) {
-    if (!s.speciesName) parentIdByName.set(s.name, s.id);
-  }
 
   const q = query.trim().toLowerCase();
   const visible = species.filter((s) => {
@@ -182,7 +173,7 @@ export default function PokemonGrid({
               <GridCell
                 key={s.id}
                 s={s}
-                parentId={s.speciesName ? parentIdByName.get(s.speciesName) : undefined}
+                parentId={s.kind === 'form' ? s.speciesId : undefined}
                 selected={s.name === selected}
                 onSelect={onSelect}
               />

@@ -6,7 +6,7 @@ import Detail from '@/components/Detail';
 import { useAsync } from '@/async';
 import { typeIndex } from '@/dex';
 import { TYPE_COLORS } from '@/typeChart';
-import type { Gen8Species } from '@/types';
+import type { DexEntry } from '@/types';
 import { showdownSpriteUrl } from '@/showdownSprite';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
   onBack: () => void;
   onSelectPokemon: (speciesSlug: string) => void;
   /** Full species index (base + alt forms). Used to map slug ↔ id and apply a gen cap. */
-  speciesIndex: Gen8Species[];
+  speciesIndex: DexEntry[];
 }
 
 // A failed level fetch turns the level gate off rather than blocking counters.

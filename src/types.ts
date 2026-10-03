@@ -39,16 +39,37 @@ export function isTypeResponse(v: unknown): v is TypeResponse {
 
 export type FormCategory = 'mega' | 'gmax' | 'regional' | 'other';
 
-export interface Gen8Species {
-  name: string; // pokemon endpoint name (may include form suffix, e.g. 'charizard-mega-x')
-  id: number; // /pokemon/{id} works for both base species and forms
+/** A base species in the Pokédex index. */
+export interface BaseSpecies {
+  kind: 'species';
+  /** Species slug — `/pokemon-species/{name}`. */
+  name: string;
+  /** National dex number — `/pokemon/{id}` returns the default variety. */
+  id: number;
   gen: number;
-  /** Species (parent) name used for /pokemon-species/{name}. Defaults to `name` if absent. */
-  speciesName?: string;
-  /** Human-readable form label, only set for non-default forms (e.g. "Mega X", "Gigantamax"). */
-  formLabel?: string;
-  /** Category of alternate form. Absent on default species. */
-  formCategory?: FormCategory;
+}
+
+/** An alternate form (Mega, Gmax, regional, battle form) listed beside its species. */
+export interface AltForm {
+  kind: 'form';
+  /** Variety slug, e.g. `charizard-mega-x`. */
+  name: string;
+  /** PokéAPI's 10000+ variety id. */
+  id: number;
+  /** The parent species' generation. */
+  gen: number;
+  speciesName: string;
+  speciesId: number;
+  /** Human-readable label, e.g. "Mega X", "Gigantamax". */
+  formLabel: string;
+  formCategory: FormCategory;
+}
+
+export type DexEntry = BaseSpecies | AltForm;
+
+/** The species to fetch `/pokemon-species/` for — a form's parent, or the species itself. */
+export function speciesNameOf(entry: DexEntry): string {
+  return entry.kind === 'form' ? entry.speciesName : entry.name;
 }
 
 export interface PokemonResponse {
@@ -142,6 +163,8 @@ export function isPokemonResponse(v: unknown): v is PokemonResponse {
 
 export interface SpeciesResponse {
   name: string;
+  /** `generation-i` … — `idFromUrl(url)` is the generation number. */
+  generation: { name: string; url: string };
   evolution_chain: { url: string };
   varieties: { is_default: boolean; pokemon: { name: string; url: string } }[];
   flavor_text_entries: {
@@ -156,6 +179,7 @@ export function isSpeciesResponse(v: unknown): v is SpeciesResponse {
   return (
     isRecord(v) &&
     isString(v.name) &&
+    isResource(v.generation) &&
     isRecord(v.evolution_chain) &&
     isString(v.evolution_chain.url) &&
     Array.isArray(v.varieties) &&

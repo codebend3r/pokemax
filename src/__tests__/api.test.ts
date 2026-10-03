@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fetchGen8List, fetchPokemon, fetchSpecies, fetchEvolutionChain } from '@/api';
+import { fetchGenerationList, fetchPokemon, fetchSpecies, fetchEvolutionChain } from '@/api';
 
 const fetchMock = vi.fn();
 
@@ -18,7 +18,7 @@ function notOk(status: number) {
   return Promise.resolve({ ok: false, status, json: () => Promise.resolve({}) });
 }
 
-describe('fetchGen8List', () => {
+describe('fetchGenerationList', () => {
   it('returns species with name and id, sorted by id', async () => {
     fetchMock.mockReturnValue(
       ok({
@@ -28,17 +28,17 @@ describe('fetchGen8List', () => {
         ],
       }),
     );
-    const list = await fetchGen8List();
+    const list = await fetchGenerationList(8);
     expect(list).toEqual([
-      { name: 'grookey', id: 810, gen: 8 },
-      { name: 'scorbunny', id: 813, gen: 8 },
+      { kind: 'species', name: 'grookey', id: 810, gen: 8 },
+      { kind: 'species', name: 'scorbunny', id: 813, gen: 8 },
     ]);
     expect(fetchMock).toHaveBeenCalledWith('https://pokeapi.co/api/v2/generation/8');
   });
 
   it('throws on non-2xx', async () => {
     fetchMock.mockReturnValue(notOk(500));
-    await expect(fetchGen8List()).rejects.toThrow();
+    await expect(fetchGenerationList(8)).rejects.toThrow();
   });
 });
 
@@ -74,6 +74,7 @@ describe('fetchSpecies', () => {
     fetchMock.mockReturnValue(
       ok({
         name: 'scorbunny',
+        generation: { name: 'generation-viii', url: 'https://pokeapi.co/api/v2/generation/8/' },
         evolution_chain: { url: 'X' },
         varieties: [],
         flavor_text_entries: [],

@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useAsync } from '@/async';
 import { pokemonData } from '@/dex';
-import type { Gen8Species, PokemonResponse } from '@/types';
+import type { DexEntry, PokemonResponse } from '@/types';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 
 interface Props {
   base: PokemonResponse;
-  species: Gen8Species[];
+  species: DexEntry[];
   onClose: () => void;
 }
 
@@ -56,7 +56,7 @@ function TypeChip({ name }: { name: string }) {
 
 export default function ComparePanel({ base, species, onClose }: Props) {
   const [query, setQuery] = useState('');
-  const [target, setTarget] = useState<Gen8Species | null>(null);
+  const [target, setTarget] = useState<DexEntry | null>(null);
   const targetState = useAsync(pokemonData, target !== null, target?.id ?? 0);
 
   const suggestions = useMemo(() => {
@@ -65,7 +65,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     return species.filter((s) => s.name !== base.name && s.name.includes(q)).slice(0, 10);
   }, [query, species, base.name]);
 
-  const pick = (s: Gen8Species) => {
+  const pick = (s: DexEntry) => {
     setTarget(s);
     setQuery('');
   };

@@ -13,7 +13,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useViewMode } from '@/hooks/useViewMode';
 import { usePageSize } from '@/hooks/usePageSize';
 import { useVolume } from '@/hooks/useVolume';
-import type { FormCategory, Gen8Species } from '@/types';
+import type { AltForm, BaseSpecies, DexEntry, FormCategory } from '@/types';
 import {
   pokedexPath,
   trainersPath,
@@ -40,7 +40,8 @@ const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
 const TrainersPage = lazy(() => import('@/components/TrainersPage'));
 const TeamsBrowser = lazy(() => import('@/components/TeamsBrowser'));
 
-const NO_SPECIES: Gen8Species[] = [];
+const NO_SPECIES: BaseSpecies[] = [];
+const NO_FORMS: AltForm[] = [];
 
 export default function App() {
   const speciesState = useAsync(speciesIndex, true, undefined);
@@ -91,7 +92,7 @@ export default function App() {
   const typeIndexState = useAsync(typeIndex, typeIndexEnabled, undefined);
   const [activeFormCats, setActiveFormCats] = useState<Set<FormCategory>>(new Set());
   const formState = useAsync(formIndex, activeFormCats.size > 0, undefined);
-  const forms = formState.status === 'ready' ? formState.data : NO_SPECIES;
+  const forms = formState.status === 'ready' ? formState.data : NO_FORMS;
   const shiny = pokedexSearch.variant === 'shiny';
   const dimension = pokedexSearch.dimension;
   const formKey = pokedexSearch.form;
@@ -100,7 +101,7 @@ export default function App() {
   // preselects the competitive build.
   const [selection, setSelection] = useState<{ buildGame: GameId | null } | null>(null);
   const pendingBuildGame = selection?.buildGame ?? null;
-  const fullSpeciesIndex = useMemo(() => [...species, ...forms], [species, forms]);
+  const fullSpeciesIndex = useMemo((): DexEntry[] => [...species, ...forms], [species, forms]);
   const result = usePokemon(selected, fullSpeciesIndex);
   const bundle = result.status === 'ready' ? result.data : null;
   const setShiny = (v: boolean) => {
@@ -131,33 +132,22 @@ export default function App() {
   // base species that have at least one matching form plus those forms — interleaved
   // by base species ID so each form sits next to its parent.
   const filteredSpecies = useMemo(() => {
-    let merged: Gen8Species[];
+    let merged: DexEntry[];
     if (activeFormCats.size === 0) {
       merged = species;
     } else {
-      const matchingForms = forms.filter(
-        (f) => f.formCategory && activeFormCats.has(f.formCategory),
-      );
-      const parentIdByName = new Map(species.map((s) => [s.name, s.id]));
-      const baseNames = new Set(
-        matchingForms.map((f) => f.speciesName).filter(Boolean) as string[],
-      );
+      const matchingForms = forms.filter((f) => activeFormCats.has(f.formCategory));
+      const baseNames = new Set(matchingForms.map((f) => f.speciesName));
       const matchingBases = species.filter((s) => baseNames.has(s.name));
-      merged = [...matchingBases, ...matchingForms].sort((a, b) => {
-        const baseIdA = a.speciesName ? (parentIdByName.get(a.speciesName) ?? a.id) : a.id;
-        const baseIdB = b.speciesName ? (parentIdByName.get(b.speciesName) ?? b.id) : b.id;
-        if (baseIdA !== baseIdB) return baseIdA - baseIdB;
-        return a.id - b.id; // base before its forms
-      });
+      const baseId = (e: DexEntry) => (e.kind === 'form' ? e.speciesId : e.id);
+      merged = [...matchingBases, ...matchingForms].sort(
+        // Base before its forms: a form's own id is always in the 10000s.
+        (a, b) => baseId(a) - baseId(b) || a.id - b.id,
+      );
     }
     if (selectedGens.size === 0) return merged;
     return merged.filter((s) => selectedGens.has(s.gen));
   }, [species, forms, selectedGens, activeFormCats]);
-
-  const selectedEntry = selected
-    ? (fullSpeciesIndex.find((s) => s.name === selected) ?? null)
-    : null;
-  const selectedGen = selectedEntry?.gen ?? 8;
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
   if (speciesState.status === 'loading') status = 'loading-dex';
@@ -369,7 +359,6 @@ export default function App() {
                   onFormChange={setFormKey}
                   onSelectEvolution={handleSelect}
                   onBack={goHome}
-                  gen={selectedGen}
                   cryAudioRef={cryAudioRef}
                   cryVolume={cryVolume}
                   onCryVolumeChange={setCryVolume}

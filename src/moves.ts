@@ -2,7 +2,7 @@ import type { GroupedMove, PokemonResponse } from '@/types';
 
 export function groupMoves(
   moves: PokemonResponse['moves'],
-  versionGroup = 'sword-shield',
+  versionGroup: string,
 ): Record<string, GroupedMove[]> {
   const groups: Record<string, GroupedMove[]> = {};
 

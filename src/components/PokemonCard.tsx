@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type {
-  EvolutionChainResponse,
-  Gen8Species,
-  PokemonResponse,
-  SpeciesResponse,
-} from '@/types';
+import type { EvolutionChainResponse, DexEntry, PokemonResponse, SpeciesResponse } from '@/types';
 import { groupMoves } from '@/moves';
 import { getGen } from '@/generations';
 import { fetchPokemon, idFromUrl } from '@/api';
@@ -45,12 +40,11 @@ interface Props {
   onSelectEvolution?: (name: string) => void;
   /** Navigates back to the Pokédex grid. */
   onBack?: () => void;
-  gen: number;
   cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume?: number;
   onCryVolumeChange?: (v: number) => void;
   /** Pool of species the compare picker can choose from */
-  speciesPool?: Gen8Species[];
+  speciesPool?: DexEntry[];
   /** Preselects the competitive-build game and scrolls to the section (TEAMS picks). */
   initialBuildGame?: GameId | null;
 }
@@ -341,7 +335,6 @@ export default function PokemonCard({
   onFormChange,
   onSelectEvolution,
   onBack,
-  gen,
   cryAudioRef,
   cryVolume = 0.25,
   onCryVolumeChange,
@@ -424,6 +417,7 @@ export default function PokemonCard({
   useEffect(() => {
     if (!has2D && view === '2d') onViewChange('3d');
   }, [has2D, view, onViewChange]);
+  const gen = idFromUrl(species.generation.url);
   const meta = getGen(gen);
   const sortedStats = [...pokemon.stats].sort(
     (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),

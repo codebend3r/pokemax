@@ -35,11 +35,29 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ### Do
 - Keep `strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, and `noUncheckedSideEffectImports` on. Fix the cause, not the lint.
 - Run `npx tsc -b --pretty false` before committing if you've touched types — silent green is the bar.
-- Reach for **type narrowing or type guards** to satisfy the checker. For platform-typed globals (e.g. `webkitAudioContext`), declare the real shape via an ambient declaration in `src/vite-env.d.ts` instead of asserting it at the call site.
+- Always use `type` aliases.
+- Use **type guards** wherever possible, and type narrowing where a guard doesn't fit. For platform-typed globals (e.g. `webkitAudioContext`), declare the real shape via an ambient declaration in `src/vite-env.d.ts` instead of asserting it at the call site.
+- Unit test every type guard function.
+- If a type can't be inferred and type narrowing is not an option, use `unknown`.
 
 ### Don't
-- Don't use TypeScript type assertions of **any** kind — no `as SomeType`, no `as unknown as`, no `as any`, no `// @ts-ignore`. Narrow the type, write a type guard, or declare the correct type. Assertions are banned outright; `as const` (a const assertion, not a cast) is fine.
+- Don't use TypeScript interfaces anywhere, including `declare global` augmentations — use a `type` alias.
+- Don't use `any` types — prefer type narrowing or type guards.
+- Don't cast types under any circumstance, and never double cast (`as any as string`, `as unknown as T`). That covers `as SomeType`, `as any`, and `// @ts-ignore` too — narrow the type, write a type guard, or declare the correct type. `as const` (a const assertion, not a cast) is fine.
 - Don't disable strict flags.
+
+## Code style
+
+### Do
+- Always prefer immutable data structures and operations.
+- Reach for `Array.prototype` methods (`map`, `filter`, `reduce`, `flatMap`, etc.) when the value is an array; prefer `reduce` over a `for` loop when possible.
+- Prefer double-bang (`!!value`) for boolean conversion.
+- Prefer short-circuit (`&&`) over a ternary when the else branch is `null` or `undefined`, especially in React rendering. Do: `{isActive && <Badge />}`. Don't: `{isActive ? <Badge /> : null}`. Guard the condition so it is a real boolean (`!!count && ...`), never a bare number that could render `0`.
+- Prefer optional chaining (`?.`). When optional chaining is used, **always** pair it with nullish coalescing (`??`) to supply a fallback.
+- Prefer a single configurable object parameter over multiple positional parameters so argument order doesn't matter. Do: `doSomething({ foo, bar, hello })`. Don't: `doSomething(foo, bar, hello)`.
+
+### Don't
+- Don't use `for/in` or `for/of` loops.
 
 ## Tests
 
@@ -56,13 +74,21 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 ## UI / styling
 
 ### Do
-- Keep the CRT phosphor aesthetic: `--primary` (phosphor green), `--accent` (magenta), `--tertiary` (cyan), `--dim`, all defined at the top of `src/styles/crt.css`. Pull from these variables, don't hardcode hex.
+- Use SCSS modules (`*.module.scss`) for component styles.
+- Only use global stylesheets (`src/styles/globals.scss`) for design tokens and true typographic primitives.
+- Always use token values from `src/styles/globals.scss` when defining font sizes, colors, and other design tokens like padding, margin, gap, and border radius.
+- Use a container-driven approach: the container defines the width and height and the children are positioned within it, so children moved to a different container may lay out differently depending on what that container specifies.
+- Prefer `display: grid` for layout, with the `gap` property for spacing between grid items. `flex` is the second choice.
+- Keep the CRT phosphor aesthetic: `--primary` (phosphor green), `--accent` (magenta), `--tertiary` (cyan), `--dim`, currently defined at the top of `src/styles/crt.css`. Pull from these tokens, don't hardcode hex.
 - Two fonts are loaded in `index.html`: `Pixelify Sans` (the global retro display font — logo, names, headers; fallback chain `'Pixelify Sans', 'VT323', 'Courier New', monospace`) and `Space Mono` (the `--font-body` used for small body text and stat numbers where pixel-art legibility suffers). `VT323` is only a fallback name, not a loaded import.
 - Persist user preferences in `localStorage` under the `pokemax.*` namespace (`pokemax.theme`, `pokemax.view`, `pokemax.pageSize`, etc.).
-- Light theme overrides live near the bottom of `crt.css` under `:root[data-theme="light"] ...`. Add matching overrides when introducing new tinted elements.
+- Light theme overrides go under `:root[data-theme="light"] ...`. Add matching overrides when introducing new tinted elements.
 
 ### Don't
-- Don't introduce a CSS framework (Tailwind, etc.). The whole UI is hand-rolled CSS in one file by design.
+- Don't introduce a CSS framework (Tailwind, etc.).
+- Don't add new component styles to `src/styles/crt.css` — it's the single stylesheet from before SCSS modules; component styles go in the component's `*.module.scss`.
+- Don't use margins for spacing between items — use `gap`.
+- Don't use plain `div`s — every `div` gets a class or id.
 - Don't add new font imports without dropping an old one — keep the network cost flat.
 - Don't break the `html { zoom: 1.15 }` baseline at the top of `crt.css` — it's the global "make text legible" lever.
 

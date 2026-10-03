@@ -9,15 +9,17 @@ Pokemax is a retro CRT-styled Pokédex: a Vite + React 19 + TypeScript single-pa
 - Do not merge anything until I tell you to.
 - Do not create a PR until I tell you to.
 
+## Tooling
+
+- All scripts run through Bun (`bun install`, `bun run …`). Never invoke npm or yarn.
+- Pin every dependency to an exact version, with no `^` or `~`. The root `bunfig.toml` enforces this with `exact = true`. Workspace siblings are the one exception: they use `workspace:*`.
+- Run tests with `bun run test`, never bare `bun test`. The unit-tester skill explains why.
+- Tests are co-located: `lib/foo.ts` ↔ `lib/foo.test.ts`, `components/Foo/Foo.tsx` ↔ `components/Foo/Foo.test.tsx`.
+
 ## Imports
 
 - Never use relative paths, not even for same-directory siblings or co-located style sheets. `@/*` maps to `src/`; it is configured in `tsconfig.json`, `tsconfig.app.json` and `vite.config.ts`, which must stay in sync.
 - SCSS `@use` follows the same rule: `@use "@/styles/mixins" as *`.
-
-## Tooling
-
-- All scripts run through Bun (`bun install`, `bun run …`). Never invoke npm or yarn.
-- Run tests with `bun run test`, never bare `bun test`, which runs Bun's built-in runner instead of Vitest.
 
 ## Tests
 

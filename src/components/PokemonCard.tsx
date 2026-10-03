@@ -20,6 +20,7 @@ import { obtainFiles } from '@/obtain/files';
 import type { GameId } from '@/games';
 import { tintStyle, typeColor } from '@/typeChart';
 import { varietyFromForm, formFromVariety, type Dimension } from '@/routes';
+import { STAT_ORDER } from '@/stats';
 import { formatHeight, formatWeight } from '@/units';
 import { cryUrlById, cryUrlOf, playCry } from '@/cry';
 
@@ -51,7 +52,6 @@ interface Props {
   pick?: { buildGame: GameId | null } | null;
 }
 
-const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
 export default function PokemonCard({
   pokemon,
   base,
@@ -93,8 +93,9 @@ export default function PokemonCard({
   const movesPokemon = pokemon.moves.length > 0 ? pokemon : base;
   const gen = idFromUrl(species.generation.url);
   const meta = getGen(gen);
+  const statRank = (name: string) => STAT_ORDER.findIndex((s) => s === name);
   const sortedStats = [...pokemon.stats].sort(
-    (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
+    (a, b) => statRank(a.stat.name) - statRank(b.stat.name),
   );
   const moveCount = Object.values(groupMoves(movesPokemon.moves, meta.primaryVersionGroup)).reduce(
     (n, g) => n + g.length,

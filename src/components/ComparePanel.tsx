@@ -3,6 +3,7 @@ import { useAsync } from '@/async';
 import { pokemonData } from '@/dex';
 import type { DexEntry, PokemonResponse } from '@/types';
 import { pokeapiShowdownGif } from '@/sprites';
+import { STAT_ORDER, statLabel } from '@/stats';
 import { tintStyle, typeColor } from '@/typeChart';
 import { titleCase } from '@/textUtil';
 
@@ -11,23 +12,6 @@ interface Props {
   species: DexEntry[];
   onClose: () => void;
 }
-
-const STAT_ORDER = [
-  'hp',
-  'attack',
-  'defense',
-  'special-attack',
-  'special-defense',
-  'speed',
-] as const;
-const STAT_LABELS: Record<string, string> = {
-  hp: 'HP',
-  attack: 'ATK',
-  defense: 'DEF',
-  'special-attack': 'SP.ATK',
-  'special-defense': 'SP.DEF',
-  speed: 'SPD',
-};
 
 function statByName(p: PokemonResponse, key: string): number {
   return p.stats.find((s) => s.stat.name === key)?.base_stat ?? 0;
@@ -172,9 +156,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
               >
                 {a}
               </span>
-              <span className="crt-compare-stat-label">
-                {STAT_LABELS[key] ?? key.toUpperCase()}
-              </span>
+              <span className="crt-compare-stat-label">{statLabel(key)}</span>
               <span
                 className={'crt-compare-stat-num' + (diff < 0 ? ' win' : diff > 0 ? ' lose' : '')}
               >

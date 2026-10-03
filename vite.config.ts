@@ -1,13 +1,10 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
-import { readFileSync } from 'node:fs';
+import pkg from './package.json' with { type: 'json' };
 
-const pkg = JSON.parse(readFileSync(path.resolve(__dirname, './package.json'), 'utf-8')) as {
-  version: string;
-};
-
-// https://vite.dev/config/
+// https://vite.dev/config/ — Vitest reads this file too (`test` below).
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
   // GitHub Pages serves the site under `/pokemax/`, but Netlify serves it from
@@ -26,5 +23,10 @@ export default defineConfig(({ mode }) => ({
     // Allow tunnel hosts for phone testing (`cloudflared`, `ngrok`).
     // Vite 6 blocks unknown `Host` headers by default.
     allowedHosts: ['.trycloudflare.com', '.ngrok-free.app', '.ngrok.io'],
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/__tests__/setup.ts'],
   },
 }));

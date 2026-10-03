@@ -11,6 +11,7 @@ import {
 } from '@/api';
 import { GENERATIONS } from '@/generations';
 import { TYPES, type PokeType } from '@/typeChart';
+import { categorizeForm, formLabel } from '@/forms';
 import type { Form } from '@/routes';
 import type { AltForm, BaseSpecies, DexEntry, FormCategory } from '@/types';
 
@@ -74,76 +75,6 @@ export const speciesIndex = memoAsync(async (): Promise<BaseSpecies[]> => {
   return lists.flat().sort((a, b) => a.id - b.id);
 });
 
-const FORM_LABEL_OVERRIDES: Record<string, string> = {
-  alola: 'Alolan',
-  galar: 'Galarian',
-  hisui: 'Hisuian',
-  paldea: 'Paldean',
-  'paldea-combat': 'Paldean Combat',
-  'paldea-blaze': 'Paldean Blaze',
-  'paldea-aqua': 'Paldean Aqua',
-  mega: 'Mega',
-  'mega-x': 'Mega X',
-  'mega-y': 'Mega Y',
-  gmax: 'Gigantamax',
-  'gmax-single-strike': 'Gmax Single Strike',
-  'gmax-rapid-strike': 'Gmax Rapid Strike',
-  'low-key-gmax': 'Gmax Low Key',
-  'amped-gmax': 'Gmax Amped',
-  primal: 'Primal',
-  origin: 'Origin',
-  ash: 'Ash',
-  totem: 'Totem',
-  zen: 'Zen Mode',
-  'galar-zen': 'Galarian Zen',
-  busted: 'Busted',
-  crowned: 'Crowned',
-  hero: 'Hero',
-  ice: 'Ice Rider',
-  shadow: 'Shadow Rider',
-  'low-key': 'Low Key',
-  amped: 'Amped',
-  'single-strike': 'Single Strike',
-  'rapid-strike': 'Rapid Strike',
-  'three-segment': 'Three-Segment',
-  'family-of-three': 'Family of Three',
-  'family-of-four': 'Family of Four',
-  hangry: 'Hangry',
-  noice: 'Noice',
-  blade: 'Blade',
-  therian: 'Therian',
-  incarnate: 'Incarnate',
-  resolute: 'Resolute',
-  pirouette: 'Pirouette',
-  black: 'Black Kyurem',
-  white: 'White Kyurem',
-  attack: 'Attack',
-  defense: 'Defense',
-  speed: 'Speed',
-  altered: 'Altered',
-  sky: 'Sky',
-  female: 'Female',
-  male: 'Male',
-  eternamax: 'Eternamax',
-};
-
-function prettifyForm(suffix: string): string {
-  return (
-    FORM_LABEL_OVERRIDES[suffix] ??
-    suffix
-      .split('-')
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-      .join(' ')
-  );
-}
-
-function categorizeForm(suffix: string): FormCategory {
-  if (/^mega(-[xy])?$/.test(suffix) || suffix === 'primal') return 'mega';
-  if (suffix === 'gmax' || suffix.startsWith('gmax-') || suffix.endsWith('-gmax')) return 'gmax';
-  if (/^(alola|galar|hisui|paldea)(-|$)/.test(suffix)) return 'regional';
-  return 'other';
-}
-
 /** Alternate forms (Mega, Gmax, regional, battle forms), matched to their base species. */
 export const formIndex = memoAsync(async (): Promise<AltForm[]> => {
   const [species, varieties] = await Promise.all([speciesIndex.get(), fetchPokemonList()]);
@@ -164,7 +95,7 @@ export const formIndex = memoAsync(async (): Promise<AltForm[]> => {
       gen: base.gen,
       speciesName: base.name,
       speciesId: base.id,
-      formLabel: prettifyForm(suffix),
+      formLabel: formLabel(suffix),
       formCategory: categorizeForm(suffix),
     });
   }

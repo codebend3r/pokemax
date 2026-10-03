@@ -1,4 +1,4 @@
-import { GAME_LABELS, type GameId } from '@/trainers';
+import { GAMES, type GameId } from '@/games';
 
 interface Props {
   selectedGames: Set<GameId>;
@@ -55,7 +55,7 @@ export default function TrainerFilters({
                 onClick={() => onToggleGame(g)}
                 aria-pressed={active}
               >
-                {GAME_LABELS[g]}
+                {GAMES[g].label}
               </button>
             );
           })}

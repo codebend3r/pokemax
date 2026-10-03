@@ -1,18 +1,14 @@
 import { useState } from 'react';
 import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
-import { GAME_LABELS, type GameId } from '@/trainers';
-import { localAnimUrl, showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
+import { GAMES, type GameId } from '@/games';
+import { useFallbackSrc } from '@/hooks/useFallbackSrc';
+import { showdownSpriteUrl, teamPickAnimations } from '@/sprites';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
+import { spaced } from '@/textUtil';
 
 interface Props {
   /** `game` is the team card the pick came from — used to preselect the competitive build. */
   onSelectPokemon: (speciesSlug: string, game: GameId) => void;
-}
-
-// Stale key from the short-lived collapsed-list format — remove so the
-// all-collapsed default holds for visitors who saw that version.
-if (typeof window !== 'undefined') {
-  window.localStorage.removeItem('pokemax.teamsCollapsed');
 }
 
 export default function TeamsBrowser({ onSelectPokemon }: Props) {
@@ -25,15 +21,14 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
     const build = TEAM_BUILDS[g];
     if (!build) return false;
     if (region.toLowerCase().includes(q)) return true;
-    if (GAME_LABELS[g].toLowerCase().includes(q)) return true;
+    if (GAMES[g].label.toLowerCase().includes(q)) return true;
     if (build.title.toLowerCase().includes(q)) return true;
     return build.team.some((p) => p.species.includes(q) || p.role.toLowerCase().includes(q));
   };
 
-  const visible = TEAM_REGIONS.map(({ region, note, games }) => ({
-    region,
-    note,
-    games: games.filter((g) => matches(region, g)),
+  const visible = TEAM_REGIONS.map((r) => ({
+    ...r,
+    games: r.games.filter((g) => matches(r.name, g)),
   })).filter(({ games }) => games.length > 0);
 
   return (
@@ -55,7 +50,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
           <button
             type="button"
             className="crt-trainer-chip"
-            onClick={() => expandAll(TEAM_REGIONS.map((r) => r.region))}
+            onClick={() => expandAll(TEAM_REGIONS.map((r) => r.name))}
           >
             ▼ EXPAND ALL
           </button>
@@ -67,7 +62,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
 
       {visible.length === 0 && <div className="crt-trainer-empty">▶ NO TEAMS MATCH FILTER</div>}
 
-      {visible.map(({ region, note, games }) => {
+      {visible.map(({ name: region, note, games }) => {
         // An active search auto-expands so matches are never hidden.
         const isCollapsed = !q && !expanded.has(region);
         return (
@@ -119,7 +114,7 @@ function GameTeamCard({
   return (
     <section className="crt-team-card">
       <header className="crt-team-card-header">
-        <div className="crt-team-card-game">{GAME_LABELS[gameId]}</div>
+        <div className="crt-team-card-game">{GAMES[gameId].label}</div>
         <div className="crt-team-card-title">{build.title}</div>
         {build.note && <div className="crt-team-card-note">{build.note}</div>}
       </header>
@@ -132,23 +127,13 @@ function GameTeamCard({
   );
 }
 
-/** Animated-GIF sources in preference order: local 2D → gen5ani → ani (3D-style). */
-function animSources(species: string): string[] {
-  const sources: string[] = [];
-  const local = localAnimUrl(species);
-  if (local) sources.push(local);
-  sources.push(showdownAnimSpriteUrl(species), showdownAnimSpriteUrl(species, 'ani'));
-  return sources;
-}
-
 function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: string) => void }) {
-  // Walk the source chain on load errors; past the end, CSS bounce takes over.
-  const [animLevel, setAnimLevel] = useState(0);
-  const animSrc = animSources(pick.species)[animLevel] ?? null;
+  // Past the end of the chain, CSS bounce on the still takes over.
+  const anim = useFallbackSrc(teamPickAnimations(pick.species));
   return (
     <button
       type="button"
-      className={'crt-team-pick' + (animSrc ? ' has-anim' : ' no-anim')}
+      className={'crt-team-pick' + (anim.src ? ' has-anim' : ' no-anim')}
       onClick={() => onSelect(pick.species)}
       title={`View ${pick.species}`}
     >
@@ -160,19 +145,19 @@ function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: s
           loading="lazy"
           decoding="async"
         />
-        {animSrc && (
+        {anim.src && (
           <img
             className="team-pick-anim"
-            src={animSrc}
+            src={anim.src}
             alt=""
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            onError={() => setAnimLevel((l) => l + 1)}
+            onError={anim.next}
           />
         )}
       </span>
-      <div className="crt-team-pick-name">{pick.species.replace(/-/g, ' ').toUpperCase()}</div>
+      <div className="crt-team-pick-name">{spaced(pick.species).toUpperCase()}</div>
       <div className="crt-team-pick-role">{pick.role.toUpperCase()}</div>
       <div className="crt-team-pick-why">{pick.why}</div>
     </button>

@@ -1,6 +1,8 @@
 import { useState, type SyntheticEvent } from 'react';
-import { getGen, REGIONS, REGION_OF_VERSION_GROUP, type RegionMeta } from '@/generations';
-import type { ObtainState } from '@/hooks/useObtainData';
+import { useToggleSet } from '@/hooks/useToggleSet';
+import { GAMES, REGIONS, type Region } from '@/games';
+import { getGen } from '@/generations';
+import type { AsyncState } from '@/async';
 import {
   conditionMeta,
   LEGEND_CONDITIONS,
@@ -11,31 +13,27 @@ import {
   prettyCondition,
 } from '@/obtain/labels';
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
+import { tintStyle } from '@/typeChart';
+import { spaced } from '@/textUtil';
 
 interface Props {
-  state: ObtainState;
+  state: AsyncState<ObtainFile>;
   currentGen: number;
 }
 
 // Groups are by REGION, not generation — BDSP belongs with the other Sinnoh
 // games regardless of when it shipped, and Hisui sits under Sinnoh. Both facts
-// live in the canonical `REGIONS` model.
-function regionLabel({ name, note }: RegionMeta): string {
+// live in the canonical game catalog.
+function regionLabel({ name, note }: Region): string {
   return note ? `${name.toUpperCase()} · ${note.toUpperCase()}` : name.toUpperCase();
 }
 
 function regionOf(game: ObtainGame): string {
-  return REGION_OF_VERSION_GROUP[game.versionGroup];
+  return GAMES[game.versionGroup].region;
 }
 
 function prettyVersions(versions: string[]): string {
-  return versions.map((v) => v.toUpperCase().replace(/-/g, ' ')).join(' / ');
-}
-
-// Sanctioned colorful-chip pattern from `PokemonCard.tsx`'s type pills:
-// palette color as text + border, plus a matching low-opacity glow.
-function tintStyle(color: string): React.CSSProperties {
-  return { color, borderColor: color, textShadow: `0 0 4px ${color}66` };
+  return versions.map((v) => spaced(v).toUpperCase()).join(' / ');
 }
 
 function EntryRow({ entry }: { entry: ObtainEntry }) {
@@ -122,16 +120,9 @@ function ObtainRegions({ file, currentGen }: { file: ObtainFile; currentGen: num
   // Alola) — default to the first region actually present.
   const homeRegion = getGen(currentGen).region;
   const defaultRegion = regions.some((r) => r.name === homeRegion) ? homeRegion : regions[0]?.name;
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(defaultRegion === undefined ? [] : [defaultRegion]),
+  const { set: expanded, toggle } = useToggleSet<string>(
+    defaultRegion === undefined ? [] : [defaultRegion],
   );
-  const toggle = (region: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(region)) next.delete(region);
-      else next.add(region);
-      return next;
-    });
 
   return (
     <div className="crt-obtain">
@@ -172,5 +163,5 @@ export default function ObtainMethods({ state, currentGen }: Props) {
   if (state.status !== 'ready') {
     return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
   }
-  return <ObtainRegions file={state.file} currentGen={currentGen} />;
+  return <ObtainRegions file={state.data} currentGen={currentGen} />;
 }

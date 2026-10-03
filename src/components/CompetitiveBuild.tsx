@@ -1,13 +1,14 @@
+import type { AsyncState } from '@/async';
 import type { ResolvedBuild, SmogonSet } from '@/competitive';
 import { formatEVs, SMOGON_DEX_SLUGS } from '@/competitive';
 import type { PokemonResponse } from '@/types';
-import { GAME_LABELS, type GameId } from '@/trainers';
+import { GAMES, isGameId, type GameId } from '@/games';
 import Detail from '@/components/Detail';
+import { titleCase } from '@/textUtil';
 
 interface Props {
-  build: ResolvedBuild | null;
-  loading: boolean;
-  error: string | null;
+  /** Ready with `null` means Smogon has no set. */
+  state: AsyncState<ResolvedBuild | null>;
   /** Default ability fallback when the Smogon set omits it (single-ability species). */
   pokemon?: PokemonResponse;
   /** Games this Pokémon can appear in — the per-game build options. */
@@ -15,10 +16,6 @@ interface Props {
   /** null = latest gen with a published set (the richest modern build). */
   selectedGame: GameId | null;
   onSelectGame: (game: GameId | null) => void;
-}
-
-function isGameId(v: string): v is GameId {
-  return v in GAME_LABELS;
 }
 
 function smogonToApi(name: string): string {
@@ -69,16 +66,11 @@ function defaultAbility(p: PokemonResponse | undefined): string | undefined {
   const visible = p.abilities.filter((a) => !a.is_hidden).sort((a, b) => a.slot - b.slot);
   const a = visible[0] ?? p.abilities[0];
   if (!a) return undefined;
-  return a.ability.name
-    .split('-')
-    .map((s) => (s ? s[0].toUpperCase() + s.slice(1) : ''))
-    .join(' ');
+  return titleCase(a.ability.name);
 }
 
 export default function CompetitiveBuild({
-  build,
-  loading,
-  error,
+  state,
   pokemon,
   games,
   selectedGame,
@@ -96,14 +88,22 @@ export default function CompetitiveBuild({
         <option value="">LATEST (BEST AVAILABLE)</option>
         {games.map((g) => (
           <option key={g} value={g}>
-            {GAME_LABELS[g].toUpperCase()}
+            {GAMES[g].label.toUpperCase()}
           </option>
         ))}
       </select>
     </div>
   );
 
-  if (loading) {
+  if (state.status === 'error') {
+    return (
+      <div>
+        {gameSelect}
+        <div className="crt-build-empty">ERR: {state.message}</div>
+      </div>
+    );
+  }
+  if (state.status !== 'ready') {
     return (
       <div>
         {gameSelect}
@@ -113,21 +113,14 @@ export default function CompetitiveBuild({
       </div>
     );
   }
-  if (error) {
-    return (
-      <div>
-        {gameSelect}
-        <div className="crt-build-empty">ERR: {error}</div>
-      </div>
-    );
-  }
+  const build = state.data;
   if (!build) {
     return (
       <div>
         {gameSelect}
         <div className="crt-build-empty">
           {selectedGame
-            ? `· no Smogon set for this entry in ${GAME_LABELS[selectedGame]}`
+            ? `· no Smogon set for this entry in ${GAMES[selectedGame].label}`
             : '· no competitive data on Smogon for this entry'}
           <div style={{ fontSize: 14, marginTop: 4, color: 'var(--dim)' }}>
             {selectedGame
@@ -186,7 +179,7 @@ export default function CompetitiveBuild({
         </ul>
       </div>
       <div className="crt-build-source">
-        data: smogon.com/dex/{SMOGON_DEX_SLUGS[build.sourceGen ?? 9] ?? 'sv'}
+        data: smogon.com/dex/{SMOGON_DEX_SLUGS[build.sourceGen]}
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export default function PageSizeSelector({ pageSize, onChange }: Props) {
         value={pageSize === Infinity ? 'all' : String(pageSize)}
         onChange={(e) => {
           const v = e.target.value;
-          onChange(v === 'all' ? Infinity : (Number(v) as PageSize));
+          onChange(v === 'all' ? Infinity : Number(v));
         }}
       >
         {PAGE_SIZE_OPTIONS.map((opt) => (

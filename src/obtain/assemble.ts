@@ -1,6 +1,6 @@
 import type { NpcTrade } from '@/obtain/bulbapedia';
 import type { ObtainBreeding, ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
-import { GROUP_GEN, VERSION_ORDER, VERSION_TO_GROUP } from '@/obtain/types';
+import { GAMES, GAME_OF_VERSION, VERSION_ORDER, type GameId } from '@/games';
 
 export interface AssembleInput {
   pokemonId: number;
@@ -19,7 +19,7 @@ const INDIRECT = new Set(['transfer', 'unavailable', 'special']);
 // No breeding mechanic (gen 1) or breeding present but off-limits to the
 // player (Let's Go / Legends: Arceus have no Day Care) — the EGG fallback
 // would otherwise imply a hatch path that doesn't exist in these games.
-const NO_BREEDING_GROUPS = new Set([
+const NO_BREEDING_GROUPS: ReadonlySet<GameId> = new Set<GameId>([
   'red-blue',
   'yellow',
   'lets-go-pikachu-lets-go-eevee',
@@ -28,10 +28,13 @@ const NO_BREEDING_GROUPS = new Set([
 
 // Regional-dex-only games — absence of any entry means "not in this game's
 // Pokédex," not "obtain it some other way."
-const LIMITED_DEX_GROUPS = new Set(['lets-go-pikachu-lets-go-eevee', 'legends-arceus']);
+const LIMITED_DEX_GROUPS: ReadonlySet<GameId> = new Set<GameId>([
+  'lets-go-pikachu-lets-go-eevee',
+  'legends-arceus',
+]);
 
 function entriesForVersion(input: AssembleInput, version: string): ObtainEntry[] {
-  const group = VERSION_TO_GROUP[version];
+  const group = GAME_OF_VERSION[version];
   const api = input.apiEntries.get(version) ?? [];
   const entries: ObtainEntry[] =
     api.length > 0 ? [...api] : [...(input.pdbEntries.get(version) ?? [])];
@@ -73,8 +76,8 @@ function entriesForVersion(input: AssembleInput, version: string): ObtainEntry[]
 export function assembleObtainFile(input: AssembleInput): ObtainFile {
   const games: ObtainGame[] = [];
   for (const version of VERSION_ORDER) {
-    const group = VERSION_TO_GROUP[version];
-    const gen = GROUP_GEN[group];
+    const group = GAME_OF_VERSION[version];
+    const gen = GAMES[group].gen;
     if (gen < input.debutGen) continue;
     const entries = entriesForVersion(input, version);
     if (entries.length === 0) continue; // non-default forms with no data

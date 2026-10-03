@@ -1,8 +1,8 @@
-export type SpriteView = '2d' | '3d';
+import type { Dimension } from '@/routes';
 
 interface Props {
-  value: SpriteView;
-  onChange: (v: SpriteView) => void;
+  value: Dimension;
+  onChange: (v: Dimension) => void;
   /** When false, only the 3D button renders. */
   has2D?: boolean;
 }

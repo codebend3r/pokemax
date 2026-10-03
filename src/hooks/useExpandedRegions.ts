@@ -1,27 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
-function initialExpanded(key: string, defaultExpanded: readonly string[]): Set<string> {
-  if (typeof window === 'undefined') return new Set(defaultExpanded);
+function decode(raw: string): Set<string> | null {
   try {
-    const raw = window.localStorage.getItem(key);
-    if (raw !== null) {
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return new Set(parsed.filter((r): r is string => typeof r === 'string'));
-      }
-    }
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    return new Set(parsed.filter((r): r is string => typeof r === 'string'));
   } catch {
-    // Corrupted value — fall through to the default.
+    return null;
   }
-  return new Set(defaultExpanded);
 }
+const encode = (expanded: Set<string>) => JSON.stringify([...expanded]);
 
 /**
  * Collapsible-section state persisted in `localStorage`. Tracks EXPANDED
  * region names; a missing/corrupted key falls back to `defaultExpanded`
- * (empty = everything collapsed). Nothing is written until the user actually
- * toggles — otherwise the mount write would freeze the current default into
- * storage and future default changes would never apply.
+ * (empty = everything collapsed).
  */
 export function useExpandedRegions(
   key: string,
@@ -32,36 +25,22 @@ export function useExpandedRegions(
   expandAll: (regions: readonly string[]) => void;
   collapseAll: () => void;
 } {
-  const [expanded, setExpanded] = useState<Set<string>>(() =>
-    initialExpanded(key, defaultExpanded),
+  const [expanded, setExpanded] = usePersistentState(
+    key,
+    decode,
+    encode,
+    () => new Set(defaultExpanded),
   );
-  const dirty = useRef(false);
-
-  useEffect(() => {
-    if (!dirty.current) return;
-    window.localStorage.setItem(key, JSON.stringify([...expanded]));
-  }, [key, expanded]);
-
-  const update = (next: Set<string>) => {
-    dirty.current = true;
-    setExpanded(next);
-  };
-
   return {
     expanded,
-    toggle: (region) => {
-      dirty.current = true;
+    toggle: (region) =>
       setExpanded((prev) => {
         const next = new Set(prev);
-        if (next.has(region)) {
-          next.delete(region);
-        } else {
-          next.add(region);
-        }
+        if (next.has(region)) next.delete(region);
+        else next.add(region);
         return next;
-      });
-    },
-    expandAll: (regions) => update(new Set(regions)),
-    collapseAll: () => update(new Set()),
+      }),
+    expandAll: (regions) => setExpanded(new Set(regions)),
+    collapseAll: () => setExpanded(new Set()),
   };
 }

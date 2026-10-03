@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 // prettier-ignore
 export const TYPES = [
   'normal', 'fire', 'water', 'electric', 'grass', 'ice',
@@ -6,6 +8,12 @@ export const TYPES = [
 ] as const;
 
 export type PokeType = (typeof TYPES)[number];
+
+const TYPE_SET: ReadonlySet<string> = new Set(TYPES);
+
+export function isPokeType(t: string): t is PokeType {
+  return TYPE_SET.has(t);
+}
 
 const X = 0.5; // resists
 const O = 0; // immune
@@ -38,17 +46,16 @@ export interface Matchup {
   multiplier: number;
 }
 
+/** Multiplier an `attacking`-type move deals to a Pokémon of the `defending` types. */
+export function effectiveness(attacking: PokeType, defending: readonly PokeType[]): number {
+  return defending.reduce((m, def) => m * (EFFECTIVENESS[def][attacking] ?? 1), 1);
+}
+
 export function defensiveMatchups(types: PokeType[]): Matchup[] {
-  return TYPES.map((attacking) => {
-    let m = 1;
-    for (const def of types) {
-      const row = EFFECTIVENESS[def];
-      const v = row[attacking];
-      if (v === undefined) continue;
-      m *= v;
-    }
-    return { type: attacking, multiplier: m };
-  });
+  return TYPES.map((attacking) => ({
+    type: attacking,
+    multiplier: effectiveness(attacking, types),
+  }));
 }
 
 export interface MatchupGroups {
@@ -91,3 +98,13 @@ export const TYPE_COLORS: Record<PokeType, string> = {
   steel: '#b8b8d0',
   fairy: '#ee99ac',
 };
+
+/** A type's palette color — phosphor primary for a type the chart doesn't know. */
+export function typeColor(name: string): string {
+  return isPokeType(name) ? TYPE_COLORS[name] : 'var(--primary)';
+}
+
+/** The colorful-chip look: palette color as text and border, plus a matching low glow. */
+export function tintStyle(color: string): CSSProperties {
+  return { color, borderColor: color, textShadow: `0 0 4px ${color}66` };
+}

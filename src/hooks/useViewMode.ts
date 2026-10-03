@@ -1,25 +1,12 @@
-import { useEffect, useState } from 'react';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export type ViewMode = 'grid' | 'list';
 
-const KEY = 'pokemax.view';
+const decode = (raw: string): ViewMode | null => (raw === 'list' || raw === 'grid' ? raw : null);
+const encode = (view: ViewMode) => view;
+const grid = (): ViewMode => 'grid';
 
-function detectInitial(): ViewMode {
-  if (typeof window === 'undefined') return 'grid';
-  const stored = window.localStorage.getItem(KEY);
-  return stored === 'list' ? 'list' : 'grid';
-}
-
-export function useViewMode(): { view: ViewMode; toggle: () => void; set: (v: ViewMode) => void } {
-  const [view, setView] = useState<ViewMode>(detectInitial);
-
-  useEffect(() => {
-    window.localStorage.setItem(KEY, view);
-  }, [view]);
-
-  return {
-    view,
-    set: setView,
-    toggle: () => setView((v) => (v === 'grid' ? 'list' : 'grid')),
-  };
+export function useViewMode(): { view: ViewMode; toggle: () => void } {
+  const [view, setView] = usePersistentState('pokemax.view', decode, encode, grid);
+  return { view, toggle: () => setView((v) => (v === 'grid' ? 'list' : 'grid')) };
 }

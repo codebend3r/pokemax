@@ -47,6 +47,14 @@ img {
 .crt-search input {
   user-select: text;
   -webkit-user-select: text;
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--primary);
+  font: inherit;
+  text-shadow: inherit;
+  caret-color: var(--primary);
 }
 
 body::after {
@@ -229,8 +237,9 @@ button.crt-header-link:hover {
   text-shadow: 0 0 6px rgba(255, 68, 68, 0.5);
 }
 .crt-status.scanning {
-  color: var(--accent);
-  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+  /* "Loading dex / scanning" status uses tertiary for distinct feedback */
+  color: var(--tertiary);
+  text-shadow: 0 0 6px rgba(77, 210, 255, 0.5);
 }
 
 @keyframes blink {
@@ -265,16 +274,7 @@ button.crt-header-link:hover {
   color: var(--accent);
   margin-right: 8px;
 }
-.crt-search input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  color: var(--primary);
-  font: inherit;
-  text-shadow: inherit;
-  caret-color: var(--primary);
-}
+
 .crt-search ul {
   list-style: none;
   margin: 0;
@@ -341,9 +341,10 @@ button.crt-header-link:hover {
   line-height: 1;
 }
 .crt-card-gen {
-  color: var(--dim);
-  font-size: 14px;
   letter-spacing: 2px;
+  color: var(--dim);
+  font-size: 15px;
+  font-weight: 400;
 }
 .crt-types {
   display: flex;
@@ -423,7 +424,8 @@ button.crt-type:hover,
   font-size: 20px;
 }
 .crt-section-count {
-  color: var(--dim);
+  /* Section count: use tertiary instead of low-alpha dim */
+  color: var(--tertiary);
   font-size: 16px;
 }
 .crt-section-body {
@@ -440,9 +442,13 @@ button.crt-type:hover,
 .crt-stat-bar {
   font-family: inherit;
   letter-spacing: -1px;
+  /* Stat bar gets a tertiary glow so it reads as a different thing than headings */
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.4);
 }
 .crt-stat-value {
   text-align: right;
+  color: var(--primary);
 }
 
 .crt-evo {
@@ -559,18 +565,12 @@ button.crt-type:hover,
   grid-column: 1 / -1;
 }
 .crt-shiny button[aria-pressed='true'] {
+  text-shadow: 0 0 4px var(--accent);
+  /* Shiny / SpriteToggle active buttons use tertiary as a third state distinguisher
+   (instead of all toggles looking magenta) — keeps things alive */
   border-color: var(--accent);
   color: var(--accent);
-  text-shadow: 0 0 4px var(--accent);
-  background: rgba(255, 0, 170, 0.08);
-}
-
-.crt-empty {
-  color: var(--dim);
-  border: 1px dashed var(--border);
-  padding: 24px;
-  text-align: center;
-  margin-top: 16px;
+  background: rgba(255, 0, 170, 0.1);
 }
 
 .crt-error {
@@ -625,9 +625,6 @@ button.crt-type:hover,
   color: var(--primary);
   font-size: 19px;
 }
-.crt-build-row {
-  display: contents;
-}
 .crt-build-label {
   color: var(--dim);
   letter-spacing: 1px;
@@ -650,12 +647,13 @@ button.crt-type:hover,
 }
 .crt-build-source {
   grid-column: 1 / -1;
-  color: var(--dim);
-  font-size: 14px;
   margin-top: 8px;
   padding-top: 6px;
   border-top: 1px dashed rgba(0, 255, 159, 0.25);
   text-align: right;
+  /* Dimmed text legibility bumps */
+  color: var(--dim);
+  font-size: 15px;
 }
 .crt-build-empty {
   color: var(--dim);
@@ -707,8 +705,8 @@ button.crt-type:hover,
   margin-bottom: 6px;
 }
 .crt-detail-k {
-  color: var(--dim);
-  font-size: 14px;
+  color: var(--tertiary);
+  font-size: 15px;
   letter-spacing: 1px;
 }
 .crt-detail-v {
@@ -984,8 +982,9 @@ button.crt-type:hover,
 .crt-grid-cell.active {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(255, 0, 170, 0.07);
   box-shadow: 0 0 10px rgba(255, 0, 170, 0.3);
+  /* Active grid cell uses bg-elev in both themes for stronger pop */
+  background: rgba(255, 0, 170, 0.12);
 }
 .crt-grid-sprite {
   position: relative;
@@ -1017,15 +1016,18 @@ button.crt-type:hover,
   opacity: 0;
 }
 .crt-grid-dex {
-  color: var(--dim);
-  font-size: 14px;
   letter-spacing: 1px;
+  /* Cell name + dex contrast */
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.3);
+  font-size: 16px;
 }
 .crt-grid-name {
   font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 1px;
   text-align: center;
+  color: var(--primary);
 }
 .crt-grid-empty {
   color: var(--dim);
@@ -1151,15 +1153,14 @@ button.crt-type:hover,
 }
 .crt-card-art .crt-shiny {
   width: 100%;
+  margin-top: 4px;
+  flex-wrap: nowrap;
 }
 .crt-card-top img {
   display: block;
   margin: 0 auto;
 }
-.crt-card-art .crt-shiny {
-  margin-top: 4px;
-  flex-wrap: nowrap;
-}
+
 .crt-view-toggle {
   margin-top: 6px;
 }
@@ -1349,12 +1350,13 @@ button.crt-type:hover,
   padding: 4px 10px;
   border: 1px dashed var(--dim);
   background: transparent;
-  color: var(--dim);
   font: inherit;
   text-shadow: inherit;
   cursor: pointer;
   letter-spacing: 1px;
   font-size: 14px;
+  color: var(--tertiary);
+  border-color: var(--tertiary);
 }
 .crt-tf-clear:hover {
   color: var(--primary);
@@ -1368,87 +1370,14 @@ button.crt-type:hover,
   }
 }
 
-/* Generation tabs */
 .crt-subheader {
   color: var(--dim);
   font-size: 14px;
   letter-spacing: 3px;
   margin-bottom: 16px;
 }
-.crt-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 16px 0 16px;
-  border-bottom: 1px dashed var(--border);
-  padding-bottom: 12px;
-}
-.crt-tab {
-  background: rgba(0, 255, 159, 0.04);
-  border: 1px solid var(--border);
-  color: var(--primary);
-  font: inherit;
-  text-shadow: inherit;
-  padding: 6px 10px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  min-width: 70px;
-  transition:
-    background 80ms,
-    border-color 80ms;
-}
-.crt-tab:hover {
-  background: rgba(0, 255, 159, 0.12);
-  border-color: var(--primary);
-}
-.crt-tab.active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(255, 0, 170, 0.08);
-  text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
-  box-shadow: 0 0 10px rgba(255, 0, 170, 0.2);
-}
-.crt-tab-roman {
-  font-size: 18px;
-  letter-spacing: 1px;
-}
-.crt-tab-region {
-  font-size: 12px;
-  color: var(--dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.crt-tab.active .crt-tab-region {
-  color: var(--accent);
-  opacity: 0.8;
-}
-
-.crt-grid-dex {
-  color: var(--accent);
-  text-shadow: 0 0 4px rgba(255, 0, 170, 0.4);
-  font-size: 16px;
-  letter-spacing: 1px;
-}
 
 @media (max-width: 600px) {
-  .crt-tabs {
-    gap: 3px;
-    padding-bottom: 8px;
-    margin: 12px 0;
-  }
-  .crt-tab {
-    min-width: 56px;
-    padding: 4px 6px;
-  }
-  .crt-tab-roman {
-    font-size: 15px;
-  }
-  .crt-tab-region {
-    font-size: 10px;
-  }
   .crt-card-dex {
     font-size: 28px;
   }
@@ -1657,10 +1586,11 @@ button.crt-type:hover,
   border-color: var(--primary);
 }
 .crt-music-btn.play {
-  border-color: var(--accent);
-  color: var(--accent);
-  text-shadow: 0 0 4px rgba(255, 0, 170, 0.5);
   font-size: 13px;
+  /* Music play button = tertiary, so it stands apart from prev/next */
+  border-color: var(--tertiary);
+  color: var(--tertiary);
+  text-shadow: 0 0 4px rgba(77, 210, 255, 0.5);
 }
 .crt-music-track {
   color: var(--accent);
@@ -1675,10 +1605,11 @@ button.crt-type:hover,
   white-space: nowrap;
 }
 .crt-music-counter {
-  color: var(--dim);
   font-size: 11px;
   text-shadow: none;
   margin-left: 4px;
+  /* Music counter readability */
+  color: var(--tertiary);
 }
 .crt-music .crt-volume-slider {
   width: 60px;
@@ -1808,81 +1739,6 @@ button.crt-type:hover,
   gap: 2px;
 }
 
-/* ────────────────────────────────────────────
-   Light theme — vintage warm-amber CRT
-   Same retro structure, swapped palette.
-   ──────────────────────────────────────────── */
-:root[data-theme='light'] {
-  --bg: #f6ecd0; /* aged-paper cream */
-  --bg-elev: #ece1c4; /* slightly darker paper */
-  --primary: #3a1f06; /* deep sepia — high contrast against cream */
-  --accent: #9c3415; /* burnt-orange CRT phosphor */
-  --tertiary: #1f5d83; /* slate blue — cool complement to the warm cream */
-  --dim: rgba(58, 31, 6, 0.8);
-  --border: rgba(58, 31, 6, 0.45);
-  --error: #8a1f1f;
-}
-:root[data-theme='light'] body::after {
-  /* slightly more visible scanlines on cream so they still read as "CRT" */
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0,
-    transparent 3px,
-    rgba(90, 50, 16, 0.1) 4px
-  );
-}
-:root[data-theme='light'] html,
-:root[data-theme='light'] body,
-:root[data-theme='light'] #root {
-  text-shadow: none;
-}
-:root[data-theme='light'] .crt-card-dex,
-:root[data-theme='light'] .crt-card-name,
-:root[data-theme='light'] .crt-section-label,
-:root[data-theme='light'] .crt-header,
-:root[data-theme='light'] .crt-music-track,
-:root[data-theme='light'] .crt-music-btn.play,
-:root[data-theme='light'] .crt-status.scanning,
-:root[data-theme='light'] .crt-typefilter-label,
-:root[data-theme='light'] .crt-genfilter-label,
-:root[data-theme='light'] .crt-card-particle.heart,
-:root[data-theme='light'] .crt-card-particle.star,
-:root[data-theme='light'] .crt-card-particle.sparkle,
-:root[data-theme='light'] .crt-tab.active,
-:root[data-theme='light'] .crt-gen-chip.active,
-:root[data-theme='light'] .crt-form-chip.active,
-:root[data-theme='light'] .crt-shiny button[aria-pressed='true'] {
-  text-shadow: 0 0 0 transparent;
-}
-:root[data-theme='light'] .crt-cursor {
-  background: var(--primary);
-  color: var(--primary);
-}
-:root[data-theme='light'] body::after {
-  mix-blend-mode: multiply;
-}
-
-/* Type filter chips in light mode: keep type-color identity (border + tinted bg)
-   but force dark sepia text for legibility on the cream background. The default
-   dark scheme uses pastel type colors as text, which is unreadable on cream. */
-:root[data-theme='light'] .crt-tf-chip {
-  background: color-mix(in srgb, var(--type-color) 22%, #ffffff);
-  color: var(--primary);
-  border-color: color-mix(in srgb, var(--type-color) 60%, #3a1f06);
-  text-shadow: none;
-  font-weight: 600;
-}
-:root[data-theme='light'] .crt-tf-chip:hover {
-  filter: none;
-  background: color-mix(in srgb, var(--type-color) 38%, #ffffff);
-}
-:root[data-theme='light'] .crt-tf-chip.active {
-  background: var(--type-color);
-  color: #000;
-  border-color: color-mix(in srgb, var(--type-color) 50%, #000000);
-  text-shadow: none;
-}
-
 /* Lazy-loading placeholder while the PokemonCard chunk downloads */
 .crt-card.crt-card-loading {
   display: flex;
@@ -1985,37 +1841,11 @@ button.crt-type:hover,
   text-shadow: 0 0 4px rgba(0, 255, 159, 0.4);
 }
 .crt-card-vitals-label {
-  color: var(--accent);
   letter-spacing: 1px;
   font-size: 12px;
   margin-right: 4px;
-}
-
-/* Pokédex flavor-text entry block */
-.crt-pokedex-entry {
-  margin-top: 12px;
-  border-top: 1px dashed var(--border);
-  padding-top: 12px;
-}
-.crt-pokedex-entry-label {
-  display: block;
-  color: var(--accent);
-  text-shadow: 0 0 6px rgba(255, 0, 170, 0.4);
-  letter-spacing: 1px;
-  font-size: 18px;
-  margin-bottom: 6px;
-}
-.crt-pokedex-entry p {
-  margin: 0;
-  color: var(--primary);
-  line-height: 1.5;
-  font-size: 18px;
-  font-style: italic;
-  border-left: 2px solid var(--accent);
-  padding-left: 10px;
-  background: rgba(255, 0, 170, 0.04);
-  padding-top: 6px;
-  padding-bottom: 6px;
+  /* HT / WT labels in tertiary so they're a distinct accent */
+  color: var(--tertiary);
 }
 
 /* Alt-forms filter row */
@@ -2101,10 +1931,10 @@ button.crt-type:hover,
   font-style: italic;
 }
 .crt-pokedex-versions {
-  color: var(--accent);
-  font-size: 13px;
   letter-spacing: 1px;
-  opacity: 0.85;
+  color: var(--accent);
+  opacity: 1;
+  font-size: 14px;
 }
 
 /* Share button */
@@ -2362,58 +2192,10 @@ button.crt-type:hover,
    through the play button, status, stat-bars, vitals, and chip counts.
    ──────────────────────────────────────────── */
 
-/* Stat bar gets a tertiary glow so it reads as a different thing than headings */
-.crt-stat-bar {
-  color: var(--tertiary);
-  text-shadow: 0 0 4px rgba(77, 210, 255, 0.4);
-}
-:root[data-theme='light'] .crt-stat-bar {
-  text-shadow: none;
-}
-.crt-stat-value {
-  color: var(--primary);
-}
 .crt-stat > span:first-child {
   color: var(--tertiary);
   font-size: 16px;
   letter-spacing: 1px;
-}
-
-/* HT / WT labels in tertiary so they're a distinct accent */
-.crt-card-vitals-label {
-  color: var(--tertiary);
-}
-.crt-card-gen {
-  color: var(--dim);
-  font-size: 15px;
-  font-weight: 400;
-}
-
-/* Section count: use tertiary instead of low-alpha dim */
-.crt-section-count {
-  color: var(--tertiary);
-  font-size: 16px;
-}
-.crt-tf-clear {
-  color: var(--tertiary);
-  border-color: var(--tertiary);
-}
-
-/* Music play button = tertiary, so it stands apart from prev/next */
-.crt-music-btn.play {
-  border-color: var(--tertiary);
-  color: var(--tertiary);
-  text-shadow: 0 0 4px rgba(77, 210, 255, 0.5);
-}
-
-/* "Loading dex / scanning" status uses tertiary for distinct feedback */
-.crt-status.scanning {
-  color: var(--tertiary);
-  text-shadow: 0 0 6px rgba(77, 210, 255, 0.5);
-}
-:root[data-theme='light'] .crt-status.scanning {
-  color: var(--tertiary);
-  text-shadow: none;
 }
 
 /* Compare panel: BASE pokemon gets tertiary as its 'team color' */
@@ -2427,28 +2209,11 @@ button.crt-type:hover,
   color: var(--tertiary);
   text-shadow: 0 0 6px rgba(77, 210, 255, 0.5);
 }
-:root[data-theme='light'] .crt-compare-stat-row > .crt-compare-stat-num:first-child.win {
-  text-shadow: none;
-}
+
 .crt-compare-stat-num.lose {
   color: var(--dim);
 }
 
-/* Dimmed text legibility bumps */
-.crt-build-source {
-  color: var(--dim);
-  font-size: 15px;
-}
-.crt-pokedex-versions {
-  color: var(--accent);
-  opacity: 1;
-  font-size: 14px;
-}
-.crt-detail-k {
-  color: var(--tertiary);
-  font-size: 15px;
-  letter-spacing: 1px;
-}
 .crt-build-label {
   color: var(--tertiary);
   font-size: 16px;
@@ -2457,142 +2222,12 @@ button.crt-type:hover,
   color: var(--tertiary);
 }
 
-/* Cell name + dex contrast */
-.crt-grid-dex {
-  color: var(--tertiary);
-  text-shadow: 0 0 4px rgba(77, 210, 255, 0.3);
-  font-size: 16px;
-}
-:root[data-theme='light'] .crt-grid-dex {
-  text-shadow: none;
-}
-.crt-grid-name {
-  color: var(--primary);
-}
-
-/* Music counter readability */
-.crt-music-counter {
-  color: var(--tertiary);
-}
-
-/* Shiny / SpriteToggle active buttons use tertiary as a third state distinguisher
-   (instead of all toggles looking magenta) — keeps things alive */
-.crt-shiny button[aria-pressed='true'] {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(255, 0, 170, 0.1);
-}
-:root[data-theme='light'] .crt-shiny button[aria-pressed='true'] {
-  background: rgba(156, 52, 21, 0.12);
-}
-
-/* Light-mode specific contrast fixes */
-:root[data-theme='light'] {
-  --border: rgba(58, 31, 6, 0.55);
-}
-:root[data-theme='light'] .crt-search-row {
-  background: rgba(58, 31, 6, 0.05);
-}
-:root[data-theme='light'] .crt-music {
-  background: rgba(58, 31, 6, 0.04);
-}
-:root[data-theme='light'] .crt-grid-cell {
-  background: rgba(58, 31, 6, 0.04);
-}
-:root[data-theme='light'] .crt-grid-cell:hover {
-  background: rgba(58, 31, 6, 0.1);
-}
-:root[data-theme='light'] .crt-compare {
-  background: rgba(156, 52, 21, 0.06);
-}
-:root[data-theme='light'] .crt-pokedex-entry-item {
-  background: rgba(156, 52, 21, 0.06);
-}
-:root[data-theme='light'] .crt-detail-panel {
-  background: rgba(156, 52, 21, 0.06);
-}
-:root[data-theme='light'] .crt-tab.active,
-:root[data-theme='light'] .crt-gen-chip.active,
-:root[data-theme='light'] .crt-form-chip.active,
-:root[data-theme='light'] .crt-extra-chip.active {
-  background: rgba(156, 52, 21, 0.12);
-}
-
-/* Trainer browser — light theme overrides */
-:root[data-theme='light'] .crt-mode-tab {
-  background: rgba(58, 31, 6, 0.04);
-}
-:root[data-theme='light'] .crt-mode-tab:hover {
-  background: rgba(58, 31, 6, 0.1);
-}
-:root[data-theme='light'] .crt-mode-tab.active {
-  background: var(--primary);
-  color: var(--bg);
-  border-color: var(--primary);
-  text-shadow: none;
-  box-shadow: none;
-}
 :root[data-theme='light'] .crt-trainer-chip,
 :root[data-theme='light'] .crt-trainer-search-input,
 :root[data-theme='light'] .crt-trainer-list-card,
 :root[data-theme='light'] .crt-trainer-member,
 :root[data-theme='light'] .crt-trainer-detail-header {
   background: rgba(58, 31, 6, 0.05);
-}
-:root[data-theme='light'] .crt-trainer-chip:hover,
-:root[data-theme='light'] .crt-trainer-list-card:hover,
-:root[data-theme='light'] .crt-trainer-member:hover {
-  background: rgba(58, 31, 6, 0.12);
-  box-shadow: none;
-}
-:root[data-theme='light'] .crt-trainer-chip.active {
-  background: rgba(156, 52, 21, 0.12);
-  text-shadow: none;
-  box-shadow: none;
-}
-:root[data-theme='light'] .crt-trainer-chip.all.active {
-  background: rgba(156, 52, 21, 0.12);
-  text-shadow: none;
-  box-shadow: none;
-}
-:root[data-theme='light'] .crt-trainer-search-input:focus {
-  box-shadow: none;
-}
-:root[data-theme='light'] .crt-trainer-list-card-name,
-:root[data-theme='light'] .crt-trainer-detail-name,
-:root[data-theme='light'] .crt-trainer-filter-label,
-:root[data-theme='light'] .crt-trainer-list-card-class,
-:root[data-theme='light'] .crt-trainer-detail-class,
-:root[data-theme='light'] .crt-trainer-detail-game,
-:root[data-theme='light'] .crt-trainer-member-level,
-:root[data-theme='light'] .crt-trainer-moves-species,
-:root[data-theme='light'] .crt-trainer-meta-species,
-:root[data-theme='light'] .crt-trainer-section-header:hover {
-  text-shadow: none;
-}
-:root[data-theme='light'] .crt-trainer-section-body {
-  background: rgba(156, 52, 21, 0.05);
-}
-
-/* Active grid cell uses bg-elev in both themes for stronger pop */
-.crt-grid-cell.active {
-  background: rgba(255, 0, 170, 0.12);
-}
-:root[data-theme='light'] .crt-grid-cell.active {
-  background: rgba(156, 52, 21, 0.16);
-}
-
-/* Header & section labels in light mode keep their punch with a subtle paper-shadow */
-:root[data-theme='light'] .crt-card-dex {
-  text-shadow: 1px 1px 0 rgba(58, 31, 6, 0.15);
-}
-:root[data-theme='light'] .crt-header-icon {
-  filter: none;
-}
-:root[data-theme='light'] .crt-card-name,
-:root[data-theme='light'] .crt-section-label,
-:root[data-theme='light'] .crt-header {
-  text-shadow: none;
 }
 
 /* ────────────────────────────────────────────
@@ -3144,12 +2779,6 @@ button.crt-type:hover,
   text-align: center;
   line-height: 1.3;
 }
-:root[data-theme='light'] .crt-trainer-counter:hover {
-  box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
-}
-:root[data-theme='light'] .crt-trainer-counter-name {
-  text-shadow: none;
-}
 
 /* Teams browser — curated playthrough teams per game */
 .crt-teams-page {
@@ -3349,13 +2978,6 @@ button.crt-type:hover,
   text-align: center;
   line-height: 1.35;
 }
-:root[data-theme='light'] .crt-team-card-title,
-:root[data-theme='light'] .crt-team-pick-name {
-  text-shadow: none;
-}
-:root[data-theme='light'] .crt-team-pick:hover {
-  box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
-}
 
 /* Item OBTAIN block — surfaces inside item `Detail` panels */
 .crt-item-obtain {
@@ -3445,9 +3067,6 @@ button.crt-type:hover,
   border-color: var(--primary);
   box-shadow: 0 0 6px rgba(0, 255, 159, 0.35);
 }
-:root[data-theme='light'] .crt-card-back:hover {
-  box-shadow: 0 0 4px rgba(40, 120, 70, 0.3);
-}
 
 /* Body-font overrides — `Pixelify Sans` is the global retro display font,
  * but it gets cramped on dense prose and stat numerals. The selectors below
@@ -3501,10 +3120,6 @@ button.crt-type:hover,
   margin-bottom: 4px;
   filter: drop-shadow(0 0 4px rgba(0, 255, 159, 0.3));
 }
-:root[data-theme='light'] .crt-trainer-list-card-portrait,
-:root[data-theme='light'] .crt-trainer-detail-portrait {
-  filter: none;
-}
 
 /* Footer — tiny version + credit stamp at the bottom of the page */
 .crt-footer {
@@ -3538,4 +3153,201 @@ button.crt-type:hover,
   color: var(--accent);
   text-shadow: 0 0 6px currentColor;
   outline: none;
+}
+
+/* ────────────────────────────────────────────
+   Light theme — vintage warm-amber CRT
+   Same retro structure, swapped palette.
+   ──────────────────────────────────────────── */
+:root[data-theme='light'] {
+  --bg: #f6ecd0; /* aged-paper cream */
+  --bg-elev: #ece1c4; /* slightly darker paper */
+  --primary: #3a1f06; /* deep sepia — high contrast against cream */
+  --accent: #9c3415; /* burnt-orange CRT phosphor */
+  --tertiary: #1f5d83; /* slate blue — cool complement to the warm cream */
+  --dim: rgba(58, 31, 6, 0.8);
+  --error: #8a1f1f;
+  /* Light-mode specific contrast fixes */
+  --border: rgba(58, 31, 6, 0.55);
+}
+:root[data-theme='light'] body::after {
+  /* slightly more visible scanlines on cream so they still read as "CRT" */
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 3px,
+    rgba(90, 50, 16, 0.1) 4px
+  );
+  mix-blend-mode: multiply;
+}
+:root[data-theme='light'] html,
+:root[data-theme='light'] body,
+:root[data-theme='light'] #root {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-card-dex,
+:root[data-theme='light'] .crt-card-name,
+:root[data-theme='light'] .crt-section-label,
+:root[data-theme='light'] .crt-header,
+:root[data-theme='light'] .crt-music-track,
+:root[data-theme='light'] .crt-music-btn.play,
+:root[data-theme='light'] .crt-status.scanning,
+:root[data-theme='light'] .crt-typefilter-label,
+:root[data-theme='light'] .crt-genfilter-label,
+:root[data-theme='light'] .crt-card-particle.heart,
+:root[data-theme='light'] .crt-card-particle.star,
+:root[data-theme='light'] .crt-card-particle.sparkle,
+:root[data-theme='light'] .crt-gen-chip.active,
+:root[data-theme='light'] .crt-form-chip.active,
+:root[data-theme='light'] .crt-shiny button[aria-pressed='true'] {
+  text-shadow: 0 0 0 transparent;
+}
+:root[data-theme='light'] .crt-cursor {
+  background: var(--primary);
+  color: var(--primary);
+}
+/* Type filter chips in light mode: keep type-color identity (border + tinted bg)
+   but force dark sepia text for legibility on the cream background. The default
+   dark scheme uses pastel type colors as text, which is unreadable on cream. */
+:root[data-theme='light'] .crt-tf-chip {
+  background: color-mix(in srgb, var(--type-color) 22%, #ffffff);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--type-color) 60%, #3a1f06);
+  text-shadow: none;
+  font-weight: 600;
+}
+:root[data-theme='light'] .crt-tf-chip:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--type-color) 38%, #ffffff);
+}
+:root[data-theme='light'] .crt-tf-chip.active {
+  background: var(--type-color);
+  color: #000;
+  border-color: color-mix(in srgb, var(--type-color) 50%, #000000);
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-stat-bar {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-status.scanning {
+  color: var(--tertiary);
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-compare-stat-row > .crt-compare-stat-num:first-child.win {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-grid-dex {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-shiny button[aria-pressed='true'] {
+  background: rgba(156, 52, 21, 0.12);
+}
+:root[data-theme='light'] .crt-search-row {
+  background: rgba(58, 31, 6, 0.05);
+}
+:root[data-theme='light'] .crt-music {
+  background: rgba(58, 31, 6, 0.04);
+}
+:root[data-theme='light'] .crt-grid-cell {
+  background: rgba(58, 31, 6, 0.04);
+}
+:root[data-theme='light'] .crt-grid-cell:hover {
+  background: rgba(58, 31, 6, 0.1);
+}
+:root[data-theme='light'] .crt-compare {
+  background: rgba(156, 52, 21, 0.06);
+}
+:root[data-theme='light'] .crt-pokedex-entry-item {
+  background: rgba(156, 52, 21, 0.06);
+}
+:root[data-theme='light'] .crt-detail-panel {
+  background: rgba(156, 52, 21, 0.06);
+}
+:root[data-theme='light'] .crt-gen-chip.active,
+:root[data-theme='light'] .crt-form-chip.active,
+:root[data-theme='light'] .crt-extra-chip.active {
+  background: rgba(156, 52, 21, 0.12);
+}
+/* Trainer browser — light theme overrides */
+:root[data-theme='light'] .crt-mode-tab {
+  background: rgba(58, 31, 6, 0.04);
+}
+:root[data-theme='light'] .crt-mode-tab:hover {
+  background: rgba(58, 31, 6, 0.1);
+}
+:root[data-theme='light'] .crt-mode-tab.active {
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--primary);
+  text-shadow: none;
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-chip:hover,
+:root[data-theme='light'] .crt-trainer-list-card:hover,
+:root[data-theme='light'] .crt-trainer-member:hover {
+  background: rgba(58, 31, 6, 0.12);
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-chip.active {
+  background: rgba(156, 52, 21, 0.12);
+  text-shadow: none;
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-chip.all.active {
+  background: rgba(156, 52, 21, 0.12);
+  text-shadow: none;
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-search-input:focus {
+  box-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-list-card-name,
+:root[data-theme='light'] .crt-trainer-detail-name,
+:root[data-theme='light'] .crt-trainer-filter-label,
+:root[data-theme='light'] .crt-trainer-list-card-class,
+:root[data-theme='light'] .crt-trainer-detail-class,
+:root[data-theme='light'] .crt-trainer-detail-game,
+:root[data-theme='light'] .crt-trainer-member-level,
+:root[data-theme='light'] .crt-trainer-moves-species,
+:root[data-theme='light'] .crt-trainer-meta-species,
+:root[data-theme='light'] .crt-trainer-section-header:hover {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-section-body {
+  background: rgba(156, 52, 21, 0.05);
+}
+:root[data-theme='light'] .crt-grid-cell.active {
+  background: rgba(156, 52, 21, 0.16);
+}
+/* Header & section labels in light mode keep their punch with a subtle paper-shadow */
+:root[data-theme='light'] .crt-card-dex {
+  text-shadow: 1px 1px 0 rgba(58, 31, 6, 0.15);
+}
+:root[data-theme='light'] .crt-header-icon {
+  filter: none;
+}
+:root[data-theme='light'] .crt-card-name,
+:root[data-theme='light'] .crt-section-label,
+:root[data-theme='light'] .crt-header {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-trainer-counter:hover {
+  box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
+}
+:root[data-theme='light'] .crt-trainer-counter-name {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-team-card-title,
+:root[data-theme='light'] .crt-team-pick-name {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-team-pick:hover {
+  box-shadow: 0 0 8px rgba(40, 120, 70, 0.3);
+}
+:root[data-theme='light'] .crt-card-back:hover {
+  box-shadow: 0 0 4px rgba(40, 120, 70, 0.3);
+}
+:root[data-theme='light'] .crt-trainer-list-card-portrait,
+:root[data-theme='light'] .crt-trainer-detail-portrait {
+  filter: none;
 }

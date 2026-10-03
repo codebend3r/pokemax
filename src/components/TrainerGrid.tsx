@@ -1,36 +1,27 @@
 import { useMemo, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
-import {
-  GAME_LABELS,
-  GAME_ORDER,
-  GAMES_BY_REGION,
-  trainerPortraitUrl,
-  type GameId,
-  type Trainer,
-} from '@/trainers';
-import { showdownSpriteUrl } from '@/showdownSprite';
+import { GAMES, GAME_ORDER, REGIONS, type GameId } from '@/games';
+import { trainerPortraitUrl, type Trainer } from '@/trainers';
+import { showdownSpriteUrl } from '@/sprites';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
+import { useToggleSet } from '@/hooks/useToggleSet';
 
 interface Props {
   trainers: Trainer[];
   onSelect: (trainer: Trainer) => void;
 }
 
-const ALL_REGIONS: readonly string[] = GAMES_BY_REGION.map((r) => r.region);
-
-// Stale key from the brief collapsed-by-default version — its mount write
-// froze `[]` into storage, which would override the expanded default below.
-if (typeof window !== 'undefined') {
-  window.localStorage.removeItem('pokemax.trainersExpanded');
-}
+const ALL_REGIONS: readonly string[] = REGIONS.map((r) => r.name);
 
 function normalize(s: string): string {
   return s.toLowerCase().replace(/[-_]/g, ' ');
 }
 
 export default function TrainerGrid({ trainers, onSelect }: Props) {
-  const [selectedGames, setSelectedGames] = useState<Set<GameId>>(new Set());
-  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
+  const games = useToggleSet<GameId>();
+  const classes = useToggleSet<string>();
+  const selectedGames = games.set;
+  const selectedClasses = classes.set;
   const [nameQuery, setNameQuery] = useState('');
   const [pokemonQuery, setPokemonQuery] = useState('');
   // Trainers default to everything expanded (unlike TEAMS, which starts collapsed).
@@ -70,7 +61,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
 
   const regionGroups = useMemo(
     () =>
-      GAMES_BY_REGION.map(({ region, note, games }) => ({
+      REGIONS.map(({ name: region, note, games }) => ({
         region,
         note,
         trainers: games.flatMap((g) => filtered.filter((t) => t.game === g)),
@@ -87,24 +78,10 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
         pokemonQuery={pokemonQuery}
         allGames={allGames}
         allClasses={allClasses}
-        onToggleGame={(g) =>
-          setSelectedGames((prev) => {
-            const next = new Set(prev);
-            if (next.has(g)) next.delete(g);
-            else next.add(g);
-            return next;
-          })
-        }
-        onToggleClass={(c) =>
-          setSelectedClasses((prev) => {
-            const next = new Set(prev);
-            if (next.has(c)) next.delete(c);
-            else next.add(c);
-            return next;
-          })
-        }
-        onClearGames={() => setSelectedGames(new Set())}
-        onClearClasses={() => setSelectedClasses(new Set())}
+        onToggleGame={games.toggle}
+        onToggleClass={classes.toggle}
+        onClearGames={games.clear}
+        onClearClasses={classes.clear}
         onNameChange={setNameQuery}
         onPokemonChange={setPokemonQuery}
       />
@@ -159,7 +136,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                     <div className="crt-trainer-list-card-class">
                       {t.trainerClass.toUpperCase()}
                     </div>
-                    <div className="crt-trainer-list-card-game">{GAME_LABELS[t.game]}</div>
+                    <div className="crt-trainer-list-card-game">{GAMES[t.game].label}</div>
                     <div className="crt-trainer-list-card-roster-mini">
                       {t.team.map((m, i) => (
                         <img

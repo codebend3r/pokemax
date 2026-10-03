@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import type { Gen8Species } from '@/types';
+import { useFallbackSrc } from '@/hooks/useFallbackSrc';
+import { gridAnimations, gridStills } from '@/sprites';
+import type { DexEntry } from '@/types';
 import type { PokeType } from '@/typeChart';
 import type { ViewMode } from '@/hooks/useViewMode';
 import type { PageSize } from '@/hooks/usePageSize';
@@ -7,9 +9,10 @@ import TypeFilter from '@/components/TypeFilter';
 import ViewModeToggle from '@/components/ViewModeToggle';
 import PageSizeSelector from '@/components/PageSizeSelector';
 import Pagination from '@/components/Pagination';
+import { spaced } from '@/textUtil';
 
 interface Props {
-  species: Gen8Species[];
+  species: DexEntry[];
   query: string;
   selected: string | null;
   onSelect: (name: string) => void;
@@ -23,23 +26,8 @@ interface Props {
   onClearTypes: () => void;
 }
 
-const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
-const BW_ANIM_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
-const SHOWDOWN_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
-
-const MAX_BW_ID = 649;
-
-function pretty(name: string): string {
-  return name.replace(/-/g, ' ');
-}
-
-function cellLabel(s: Gen8Species): string {
-  if (s.formLabel && s.speciesName) {
-    return `${pretty(s.speciesName)} · ${s.formLabel}`;
-  }
-  return pretty(s.name);
+function cellLabel(s: DexEntry): string {
+  return s.kind === 'form' ? `${spaced(s.speciesName)} · ${s.formLabel}` : spaced(s.name);
 }
 
 function GridCell({
@@ -48,56 +36,44 @@ function GridCell({
   selected,
   onSelect,
 }: {
-  s: Gen8Species;
+  s: DexEntry;
   /** Base species' national-dex ID — used as the sprite fallback if this form has none */
   parentId?: number;
   selected: boolean;
   onSelect: (name: string) => void;
 }) {
-  const [stillOk, setStillOk] = useState(true);
-  const [animOk, setAnimOk] = useState(true);
-  const stillSrc = stillOk
-    ? `${PIXEL_BASE}/${s.id}.png`
-    : parentId
-      ? `${PIXEL_BASE}/${parentId}.png`
-      : null;
-  const animSrc = animOk
-    ? s.id <= MAX_BW_ID
-      ? `${BW_ANIM_BASE}/${s.id}.gif`
-      : `${SHOWDOWN_BASE}/${s.id}.gif`
-    : parentId
-      ? `${SHOWDOWN_BASE}/${parentId}.gif`
-      : null;
+  const still = useFallbackSrc(gridStills(s.id, parentId));
+  const anim = useFallbackSrc(gridAnimations(s.id, parentId));
 
   return (
     <button
       type="button"
       className={
-        'crt-grid-cell' + (selected ? ' active' : '') + (animSrc ? ' has-anim' : ' no-anim')
+        'crt-grid-cell' + (selected ? ' active' : '') + (anim.src ? ' has-anim' : ' no-anim')
       }
       onClick={() => onSelect(s.name)}
     >
       <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>
       <span className="crt-grid-sprite">
-        {stillSrc && (
+        {still.src && (
           <img
             className="grid-still"
-            src={stillSrc}
+            src={still.src}
             alt={s.name}
             loading="lazy"
             decoding="async"
-            onError={() => setStillOk(false)}
+            onError={still.next}
           />
         )}
-        {animSrc && (
+        {anim.src && (
           <img
             className="grid-anim"
-            src={animSrc}
+            src={anim.src}
             alt=""
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            onError={() => setAnimOk(false)}
+            onError={anim.next}
           />
         )}
       </span>
@@ -121,12 +97,6 @@ export default function PokemonGrid({
   onClearTypes,
 }: Props) {
   const [page, setPage] = useState(0);
-  // Lookup parent species's national-dex ID so alt forms whose own sprite is missing
-  // fall back to their parent's sprite instead of showing a broken image.
-  const parentIdByName = new Map<string, number>();
-  for (const s of species) {
-    if (!s.speciesName) parentIdByName.set(s.name, s.id);
-  }
 
   const q = query.trim().toLowerCase();
   const visible = species.filter((s) => {
@@ -182,7 +152,7 @@ export default function PokemonGrid({
               <GridCell
                 key={s.id}
                 s={s}
-                parentId={s.speciesName ? parentIdByName.get(s.speciesName) : undefined}
+                parentId={s.kind === 'form' ? s.speciesId : undefined}
                 selected={s.name === selected}
                 onSelect={onSelect}
               />

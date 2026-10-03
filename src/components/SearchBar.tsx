@@ -1,5 +1,4 @@
 interface Props {
-  names: string[];
   value: string;
   onValueChange: (v: string) => void;
   onSearch: (name: string) => void;

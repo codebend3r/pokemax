@@ -1,4 +1,5 @@
 import type { ChainLink, EvolutionDetail } from '@/types';
+import { spaced } from '@/textUtil';
 
 interface Props {
   chain: ChainLink;
@@ -9,20 +10,16 @@ interface Props {
 function describeCondition(d: EvolutionDetail): string {
   const parts: string[] = [];
   if (d.min_level != null) parts.push(`Lv ${d.min_level}`);
-  if (d.item) parts.push(`use ${d.item.name.replace(/-/g, ' ')}`);
-  if (d.held_item) parts.push(`hold ${d.held_item.name.replace(/-/g, ' ')}`);
-  if (d.known_move) parts.push(`knows ${d.known_move.name.replace(/-/g, ' ')}`);
+  if (d.item) parts.push(`use ${spaced(d.item.name)}`);
+  if (d.held_item) parts.push(`hold ${spaced(d.held_item.name)}`);
+  if (d.known_move) parts.push(`knows ${spaced(d.known_move.name)}`);
   if (d.min_happiness != null) parts.push(`happiness ${d.min_happiness}`);
   if (d.time_of_day) parts.push(d.time_of_day);
   if (d.needs_overworld_rain) parts.push('in rain');
-  if (d.location) parts.push(`at ${d.location.name.replace(/-/g, ' ')}`);
+  if (d.location) parts.push(`at ${spaced(d.location.name)}`);
   if (d.trigger.name === 'trade' && parts.length === 0) parts.push('trade');
   if (parts.length === 0) parts.push(d.trigger.name);
   return parts.join(' · ');
-}
-
-function pretty(name: string) {
-  return name.replace(/-/g, ' ').toUpperCase();
 }
 
 function Node({
@@ -35,7 +32,7 @@ function Node({
   onSelect?: (name: string) => void;
 }) {
   const isActive = link.species.name === active;
-  const label = pretty(link.species.name);
+  const label = spaced(link.species.name).toUpperCase();
   if (onSelect && !isActive) {
     return (
       <button

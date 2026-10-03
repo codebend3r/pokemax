@@ -4,11 +4,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SearchBar from '@/components/SearchBar';
 
-const NAMES = ['scorbunny', 'cinderace', 'dragapult', 'grookey'];
-
 function Harness({ onSearch }: { onSearch: (name: string) => void }) {
   const [v, setV] = useState('');
-  return <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={onSearch} />;
+  return <SearchBar value={v} onValueChange={setV} onSearch={onSearch} />;
 }
 
 describe('SearchBar', () => {
@@ -17,7 +15,7 @@ describe('SearchBar', () => {
       const [v, setV] = useState('');
       return (
         <>
-          <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={() => {}} />
+          <SearchBar value={v} onValueChange={setV} onSearch={() => {}} />
           <output data-testid="value">{v}</output>
         </>
       );
@@ -41,7 +39,7 @@ describe('SearchBar', () => {
       const [v, setV] = useState('cinderace');
       return (
         <>
-          <SearchBar names={NAMES} value={v} onValueChange={setV} onSearch={() => {}} />
+          <SearchBar value={v} onValueChange={setV} onSearch={() => {}} />
           <output data-testid="value">{v}</output>
         </>
       );

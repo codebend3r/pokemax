@@ -1,6 +1,7 @@
 import { groupMoves } from '@/moves';
 import type { PokemonResponse } from '@/types';
 import Detail from '@/components/Detail';
+import { spaced } from '@/textUtil';
 
 const ORDER: Array<{ key: string; label: string; openByDefault?: boolean }> = [
   { key: 'level-up', label: 'LEVEL-UP', openByDefault: true },
@@ -12,10 +13,6 @@ const ORDER: Array<{ key: string; label: string; openByDefault?: boolean }> = [
 interface Props {
   moves: PokemonResponse['moves'];
   versionGroup: string;
-}
-
-function pretty(name: string) {
-  return name.replace(/-/g, ' ');
 }
 
 export default function MoveList({ moves, versionGroup }: Props) {
@@ -45,7 +42,7 @@ export default function MoveList({ moves, versionGroup }: Props) {
                 return (
                   <li key={m.name}>
                     <span className="crt-move-prefix">{prefix}</span>
-                    <Detail kind="move" name={m.name} label={pretty(m.name)} />
+                    <Detail kind="move" name={m.name} label={spaced(m.name)} />
                   </li>
                 );
               })}

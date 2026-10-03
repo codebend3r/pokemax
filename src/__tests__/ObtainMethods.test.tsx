@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import ObtainMethods from '@/components/ObtainMethods';
-import type { ObtainState } from '@/hooks/useObtainData';
+import type { AsyncState } from '@/async';
 import type { ObtainFile } from '@/obtain/types';
 
-const ready = (file: ObtainFile): ObtainState => ({ status: 'ready', file });
+const ready = (file: ObtainFile): AsyncState<ObtainFile> => ({ status: 'ready', data: file });
 
 const FILE: ObtainFile = {
   pokemonId: 25,
@@ -214,7 +214,10 @@ describe('ObtainMethods', () => {
 
   it('renders the unavailable state on error', () => {
     render(
-      <ObtainMethods state={{ status: 'error', message: 'No obtain data (404)' }} currentGen={1} />,
+      <ObtainMethods
+        state={{ status: 'error', message: 'No obtain data (404)', retry: () => {} }}
+        currentGen={1}
+      />,
     );
     expect(screen.getByText('OBTAIN DATA UNAVAILABLE')).toBeInTheDocument();
   });

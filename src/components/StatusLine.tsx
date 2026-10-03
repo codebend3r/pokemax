@@ -5,7 +5,7 @@ interface Props {
 const TEXT: Record<Props['state'], string> = {
   ready: '[ READY ]',
   scanning: '[ SCANNING... ]',
-  'err-not-found': '[ ERR: NOT FOUND IN GEN VIII ]',
+  'err-not-found': '[ ERR: NOT FOUND ]',
   'err-api': '[ ERR: TRANSMISSION LOST ]',
   'loading-dex': '[ LOADING DEX... ]',
 };

@@ -1,250 +1,67 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useRoute, useSearch } from 'wouter';
-import SearchBar from '@/components/SearchBar';
-import StatusLine from '@/components/StatusLine';
-import PokemonGrid from '@/components/PokemonGrid';
-import GenFilter from '@/components/GenFilter';
-import ThemeToggle from '@/components/ThemeToggle';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Redirect, Route, Switch, useLocation, useRoute, useSearch } from 'wouter';
+import LoadingCard from '@/components/LoadingCard';
+import PokedexPage from '@/components/PokedexPage';
 import ShareButton from '@/components/ShareButton';
-import { useAllSpecies } from '@/hooks/useAllSpecies';
-import { usePokemon } from '@/hooks/usePokemon';
-import { useTypeIndex } from '@/hooks/useTypeIndex';
+import ThemeToggle from '@/components/ThemeToggle';
+import { cryUrlById, primeCry, setCryVolume } from '@/cry';
+import { formIndex, resolveDexRoute, speciesIndex } from '@/dex';
+import type { GameId } from '@/games';
 import { useTheme } from '@/hooks/useTheme';
-import { useViewMode } from '@/hooks/useViewMode';
-import { usePageSize } from '@/hooks/usePageSize';
 import { useVolume } from '@/hooks/useVolume';
-import { useExtraForms } from '@/hooks/useExtraForms';
-import type { FormCategory } from '@/types';
-import {
-  pokedexPath,
-  trainersPath,
-  trainerPath,
-  teamsPath,
-  parsePokedexSearch,
-  formFromVariety,
-} from '@/routes';
-
-const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
-  { key: 'mega', label: 'MEGA / PRIMAL' },
-  { key: 'gmax', label: 'GIGANTAMAX' },
-  { key: 'regional', label: 'REGIONAL' },
-  { key: 'other', label: 'BATTLE FORMS' },
-];
-import type { PokeType } from '@/typeChart';
-import { CRY_VOLUME_SCALE } from '@/textUtil';
-import { cryOverrideFor } from '@/cryOverrides';
-import { TRAINERS, type GameId, type Trainer } from '@/trainers';
+import { pokedexPath, teamsPath, trainersPath } from '@/routes';
 
 // Lazy-loaded — only fetched when first needed
-const PokemonCard = lazy(() => import('@/components/PokemonCard'));
 const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
-const TrainerGrid = lazy(() => import('@/components/TrainerGrid'));
-const TrainerCard = lazy(() => import('@/components/TrainerCard'));
+const TrainersPage = lazy(() => import('@/components/TrainersPage'));
 const TeamsBrowser = lazy(() => import('@/components/TeamsBrowser'));
 
+const MODES = [
+  { label: 'POKÉDEX', path: pokedexPath() },
+  { label: 'TRAINERS', path: trainersPath() },
+  { label: 'TEAMS', path: teamsPath() },
+];
+
+/** `/` and unknown paths land on the Pokédex; pre-routing links were `/?p=charizard`. */
+function HomeRedirect() {
+  const legacy = new URLSearchParams(useSearch()).get('p')?.trim().toLowerCase();
+  return <Redirect to={pokedexPath(legacy || undefined)} replace />;
+}
+
 export default function App() {
-  const list = useAllSpecies();
   const { theme, toggle: toggleTheme } = useTheme();
-  const { view, toggle: toggleView } = useViewMode();
-  const { pageSize, setPageSize } = usePageSize();
-  const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
+  const [cryVolume, saveCryVolume] = useVolume('pokemax.cry.volume', 0.25);
+  useEffect(() => setCryVolume(cryVolume), [cryVolume]);
   const [query, setQuery] = useState('');
+  // A fresh object per pick, so re-picking the shown Pokémon still scrolls to
+  // it and replays its cry. `buildGame` is the game a TEAMS / trainer pick
+  // came from — it preselects the competitive build.
+  const [pick, setPick] = useState<{ buildGame: GameId | null } | null>(null);
 
-  const [, navigate] = useLocation();
-  const search = useSearch(); // reactive — re-renders when ?query changes
-  const pokedexSearch = useMemo(() => parsePokedexSearch(search), [search]);
+  const [location, navigate] = useLocation();
+  const [, pokedexParams] = useRoute('/pokedex/:name');
 
-  const [matchPokemonDetail, pokemonDetailParams] = useRoute('/pokedex/:name');
-  const [matchTrainers] = useRoute('/trainers');
-  const [matchTrainerDetail, trainerDetailParams] = useRoute('/trainers/:id');
-  const [matchTeams] = useRoute('/teams');
-  const [matchRoot] = useRoute('/');
-
-  const appMode: 'pokedex' | 'trainers' | 'teams' =
-    matchTrainers || matchTrainerDetail ? 'trainers' : matchTeams ? 'teams' : 'pokedex';
-
-  const selected: string | null = matchPokemonDetail
-    ? (pokemonDetailParams?.name?.toLowerCase() ?? null)
-    : null;
-
-  const selectedTrainer: Trainer | null = matchTrainerDetail
-    ? (TRAINERS.find((t) => t.id === trainerDetailParams?.id) ?? null)
-    : null;
-
-  // Legacy back-compat: ?p=charizard → /pokedex/charizard (one-shot on mount)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new globalThis.URLSearchParams(window.location.search);
-    const legacy = params.get('p');
-    if (legacy && legacy.trim() && !matchPokemonDetail) {
-      navigate(pokedexPath(legacy.trim().toLowerCase()), { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Redirect bare `/` to `/pokedex`
-  useEffect(() => {
-    if (matchRoot) navigate(pokedexPath(), { replace: true });
-  }, [matchRoot, navigate]);
-
-  const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
-  const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
-  const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
-  const typeIndex = useTypeIndex(typeIndexEnabled);
-  const [activeFormCats, setActiveFormCats] = useState<Set<FormCategory>>(new Set());
-  const extraForms = useExtraForms(list.species, activeFormCats.size > 0);
-  const shiny = pokedexSearch.variant === 'shiny';
-  const dimension = pokedexSearch.dimension;
-  const formKey = pokedexSearch.form;
-  const [attempt, setAttempt] = useState(0);
-  // Game a TEAMS pick was clicked from — preselects the competitive build.
-  const [pendingBuildGame, setPendingBuildGame] = useState<GameId | null>(null);
-  const fullSpeciesIndex = useMemo(
-    () => [...list.species, ...extraForms.forms],
-    [list.species, extraForms.forms],
-  );
-  const result = usePokemon(selected, fullSpeciesIndex, attempt);
-  const setShiny = (v: boolean) => {
-    if (!result.data) return;
-    const baseName = result.data.species.name;
-    navigate(
-      pokedexPath(baseName, {
-        ...pokedexSearch,
-        variant: v ? 'shiny' : 'normal',
-      }),
-      { replace: true },
-    );
-  };
-  const setDimension = (next: '2d' | '3d') => {
-    if (!result.data) return;
-    const baseName = result.data.species.name;
-    navigate(pokedexPath(baseName, { ...pokedexSearch, dimension: next }), { replace: true });
-  };
-  const setFormKey = (next: string) => {
-    if (!result.data) return;
-    const baseName = result.data.species.name;
-    navigate(pokedexPath(baseName, { ...pokedexSearch, form: next }), { replace: true });
-  };
-  const cardRef = useRef<HTMLDivElement>(null);
-  const cryAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  // With no form chips on, show every base species. With form chips on, show only the
-  // base species that have at least one matching form plus those forms — interleaved
-  // by base species ID so each form sits next to its parent.
-  const filteredSpecies = useMemo(() => {
-    let merged: typeof list.species;
-    if (activeFormCats.size === 0) {
-      merged = list.species;
-    } else {
-      const matchingForms = extraForms.forms.filter(
-        (f) => f.formCategory && activeFormCats.has(f.formCategory),
-      );
-      const parentIdByName = new Map(list.species.map((s) => [s.name, s.id]));
-      const baseNames = new Set(
-        matchingForms.map((f) => f.speciesName).filter(Boolean) as string[],
-      );
-      const matchingBases = list.species.filter((s) => baseNames.has(s.name));
-      merged = [...matchingBases, ...matchingForms].sort((a, b) => {
-        const baseIdA = a.speciesName ? (parentIdByName.get(a.speciesName) ?? a.id) : a.id;
-        const baseIdB = b.speciesName ? (parentIdByName.get(b.speciesName) ?? b.id) : b.id;
-        if (baseIdA !== baseIdB) return baseIdA - baseIdB;
-        return a.id - b.id; // base before its forms
-      });
-    }
-    if (selectedGens.size === 0) return merged;
-    return merged.filter((s) => selectedGens.has(s.gen));
-  }, [list, extraForms.forms, selectedGens, activeFormCats]);
-
-  const selectedEntry = selected
-    ? (fullSpeciesIndex.find((s) => s.name === selected) ?? null)
-    : null;
-  const selectedGen = selectedEntry?.gen ?? 8;
-
-  let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
-  if (list.loading) status = 'loading-dex';
-  else if (list.error) status = 'err-api';
-  else if (result.loading) status = 'scanning';
-  else if (result.error?.kind === 'not-in-gen-8') status = 'err-not-found';
-  else if (result.error?.kind === 'transmission') status = 'err-api';
-
-  useEffect(() => {
-    // A TEAMS pick scrolls to the competitive-build section instead (PokemonCard).
-    if (result.data && cardRef.current && !pendingBuildGame) {
-      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [result.data, pendingBuildGame]);
-
-  // Keep document.title in sync with the selected Pokemon. URL is owned by the router.
-  useEffect(() => {
-    const base = 'Pokemax';
-    if (result.data) {
-      const raw = result.data.pokemon.name;
-      const pretty = raw
-        .split('-')
-        .map((p) => (p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p))
-        .join(' ');
-      document.title = `${base} | ${pretty}`;
-    } else {
-      document.title = base;
-    }
-  }, [result.data]);
-
-  // Canonicalize alt-form path slugs to base-species + ?form=<suffix>.
-  // `/pokedex/charizard-mega-x` → `/pokedex/charizard?form=mega-x`
-  useEffect(() => {
-    if (!result.data || !selected) return;
-    const baseName = result.data.species.name;
-    if (selected !== baseName) {
-      const suffix = formFromVariety(baseName, selected);
-      if (suffix !== 'base') {
-        navigate(pokedexPath(baseName, { ...pokedexSearch, form: suffix }), { replace: true });
-      }
-    }
-  }, [result.data, selected, pokedexSearch, navigate]);
-
-  const handleSelect = (name: string, buildGame: GameId | null = null) => {
-    setAttempt((n) => n + 1);
+  const select = (name: string, buildGame: GameId | null = null) => {
     setQuery('');
-    setPendingBuildGame(buildGame);
-
-    // Pre-warm the cry audio while the pokemon data is still being fetched.
-    // The cry URL is predictable from the species ID, so we don't need to wait.
-    const sp = fullSpeciesIndex.find((s) => s.name === name);
-    if (sp) {
-      const url =
-        cryOverrideFor(sp.name) ??
-        `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
-      if (cryAudioRef.current) {
-        cryAudioRef.current.pause();
-        cryAudioRef.current.src = '';
-      }
-      const audio = new Audio();
-      audio.preload = 'auto';
-      audio.src = url;
-      audio.volume = cryVolume * CRY_VOLUME_SCALE;
-      cryAudioRef.current = audio;
-    }
-
-    navigate(pokedexPath(name));
+    setPick({ buildGame });
+    const index = speciesIndex.peek() ?? [];
+    // Pre-warm the cry while the Pokémon's data is still being fetched —
+    // the URL is predictable from the variety id.
+    const entry = [...index, ...(formIndex.peek() ?? [])].find((s) => s.name === name);
+    if (entry) primeCry(cryUrlById(entry.name, entry.id));
+    // Picks land on the canonical URL — a form opens as its species + `?form=`.
+    const picked = resolveDexRoute(name, 'base', index);
+    navigate(
+      picked.status === 'found' && !picked.canonical
+        ? pokedexPath(picked.species, { form: picked.form })
+        : pokedexPath(name),
+    );
   };
 
   const goHome = () => {
     setQuery('');
     navigate(pokedexPath());
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handleSubmit = (typed: string) => {
-    const q = typed.trim().toLowerCase();
-    if (!q) return;
-    if (list.names.includes(q)) {
-      handleSelect(q);
-      return;
-    }
-    const visible = filteredSpecies.filter((s) => s.name.includes(q));
-    if (visible.length > 0) handleSelect(visible[0].name);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -272,38 +89,26 @@ export default function App() {
           POKEMAX
         </button>
         <div className="crt-topbar-controls">
-          <ShareButton selected={selected} />
+          <ShareButton selected={pokedexParams?.name.toLowerCase() ?? null} />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </div>
       <div className="crt-mode-toggle" role="tablist" aria-label="App mode">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={appMode === 'pokedex'}
-          className={'crt-mode-tab' + (appMode === 'pokedex' ? ' active' : '')}
-          onClick={() => navigate(pokedexPath())}
-        >
-          POKÉDEX
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={appMode === 'trainers'}
-          className={'crt-mode-tab' + (appMode === 'trainers' ? ' active' : '')}
-          onClick={() => navigate(trainersPath())}
-        >
-          TRAINERS
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={appMode === 'teams'}
-          className={'crt-mode-tab' + (appMode === 'teams' ? ' active' : '')}
-          onClick={() => navigate(teamsPath())}
-        >
-          TEAMS
-        </button>
+        {MODES.map(({ label, path }) => {
+          const active = location === path || location.startsWith(`${path}/`);
+          return (
+            <button
+              key={path}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              className={'crt-mode-tab' + (active ? ' active' : '')}
+              onClick={() => navigate(path)}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
       <Suspense
@@ -317,197 +122,39 @@ export default function App() {
       >
         <MusicPlayer />
       </Suspense>
-      <StatusLine state={status} />
-      {appMode === 'pokedex' && (
-        <>
-          <SearchBar
-            names={list.names}
-            value={query}
-            onValueChange={setQuery}
-            onSearch={handleSubmit}
-            disabled={list.loading}
-          />
 
-          {list.error && (
-            <div className="crt-error">
-              ERR: COULD NOT LOAD POKéDEX INDEX
-              <button type="button" onClick={() => window.location.reload()}>
-                [ reload ]
-              </button>
-            </div>
-          )}
-
-          {result.error?.kind === 'not-in-gen-8' && (
-            <div className="crt-error">ERR: "{selected}" NOT FOUND</div>
-          )}
-
-          {result.error?.kind === 'transmission' && (
-            <div className="crt-error">
-              ERR: TRANSMISSION LOST
-              <button type="button" onClick={() => setAttempt((n) => n + 1)}>
-                [ retry ]
-              </button>
-            </div>
-          )}
-
-          {result.data && (
-            <div ref={cardRef}>
-              <Suspense
-                fallback={
-                  <div className="crt-card crt-card-loading">
-                    ▶ LOADING CARD<span className="crt-cursor">&nbsp;</span>
-                  </div>
-                }
-              >
-                <PokemonCard
-                  pokemon={result.data.pokemon}
-                  species={result.data.species}
-                  chain={result.data.chain}
-                  shiny={shiny}
-                  onShinyChange={setShiny}
-                  view={dimension}
-                  onViewChange={setDimension}
-                  form={formKey}
-                  onFormChange={setFormKey}
-                  onSelectEvolution={handleSelect}
-                  onBack={goHome}
-                  gen={selectedGen}
-                  cryAudioRef={cryAudioRef}
-                  cryVolume={cryVolume}
-                  onCryVolumeChange={setCryVolume}
-                  speciesPool={fullSpeciesIndex}
-                  initialBuildGame={pendingBuildGame}
-                />
-              </Suspense>
-            </div>
-          )}
-
-          <GenFilter
-            selected={selectedGens}
-            onToggle={(g) =>
-              setSelectedGens((prev) => {
-                const next = new Set(prev);
-                if (next.has(g)) next.delete(g);
-                else next.add(g);
-                return next;
-              })
-            }
-            onClear={() => setSelectedGens(new Set())}
-          />
-
-          <div className="crt-extra-toggle">
-            <div className="crt-extra-title">▶ INCLUDE ALT FORMS</div>
-            <div className="crt-extra-chips">
-              {FORM_CATEGORIES.map(({ key, label }) => {
-                const active = activeFormCats.has(key);
-                const count = extraForms.forms.filter((f) => f.formCategory === key).length;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={'crt-extra-chip' + (active ? ' active' : '')}
-                    aria-pressed={active}
-                    onClick={() => {
-                      setActiveFormCats((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(key)) next.delete(key);
-                        else next.add(key);
-                        return next;
-                      });
-                    }}
-                  >
-                    {label}
-                    {count > 0 && <span className="crt-extra-chip-count"> · {count}</span>}
-                  </button>
-                );
-              })}
-              {activeFormCats.size > 0 && (
-                <button
-                  type="button"
-                  className="crt-extra-chip clear"
-                  onClick={() => setActiveFormCats(new Set())}
-                  title="Clear all"
-                >
-                  [ clear ]
-                </button>
-              )}
-            </div>
-            {extraForms.loading && (
-              <span className="crt-extra-status">
-                ▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span>
-              </span>
-            )}
-          </div>
-
-          <PokemonGrid
-            species={filteredSpecies}
-            query={query}
-            selected={selected}
-            onSelect={handleSelect}
-            view={view}
-            onToggleView={toggleView}
-            pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            typeIndex={typeIndex.index}
-            selectedTypes={selectedTypes}
-            onToggleType={(t) => {
-              setTypeIndexEnabled(true);
-              setSelectedTypes((prev) => {
-                const next = new Set(prev);
-                if (next.has(t)) next.delete(t);
-                else next.add(t);
-                return next;
-              });
-            }}
-            onClearTypes={() => setSelectedTypes(new Set())}
-          />
-        </>
-      )}
-
-      {appMode === 'trainers' && (
-        <Suspense
-          fallback={
-            <div className="crt-card crt-card-loading">
-              ▶ LOADING TRAINERS<span className="crt-cursor">&nbsp;</span>
-            </div>
-          }
-        >
-          {matchTrainerDetail && !selectedTrainer && (
-            <div className="crt-error">ERR: TRAINER "{trainerDetailParams?.id}" NOT FOUND</div>
-          )}
-          {selectedTrainer ? (
-            <TrainerCard
-              trainer={selectedTrainer}
-              onBack={() => navigate(trainersPath())}
-              onSelectPokemon={(name) => {
-                // Roster AND counter picks preselect this trainer's game.
-                handleSelect(name, selectedTrainer.game);
-              }}
-              speciesIndex={fullSpeciesIndex}
+      <Switch>
+        <Route path="/pokedex/:name?">
+          {(params) => (
+            <PokedexPage
+              name={params.name?.toLowerCase() ?? null}
+              query={query}
+              onQueryChange={setQuery}
+              pick={pick}
+              onSelect={select}
+              onHome={goHome}
+              cryVolume={cryVolume}
+              onCryVolumeChange={saveCryVolume}
             />
-          ) : (
-            !matchTrainerDetail && (
-              <TrainerGrid trainers={TRAINERS} onSelect={(t) => navigate(trainerPath(t.id))} />
-            )
           )}
-        </Suspense>
-      )}
+        </Route>
+        <Route path="/trainers/:id?">
+          {(params) => (
+            <Suspense fallback={<LoadingCard what="TRAINERS" />}>
+              <TrainersPage trainerId={params.id ?? null} onSelectPokemon={select} />
+            </Suspense>
+          )}
+        </Route>
+        <Route path="/teams">
+          <Suspense fallback={<LoadingCard what="TEAMS" />}>
+            <TeamsBrowser onSelectPokemon={select} />
+          </Suspense>
+        </Route>
+        <Route>
+          <HomeRedirect />
+        </Route>
+      </Switch>
 
-      {appMode === 'teams' && (
-        <Suspense
-          fallback={
-            <div className="crt-card crt-card-loading">
-              ▶ LOADING TEAMS<span className="crt-cursor">&nbsp;</span>
-            </div>
-          }
-        >
-          <TeamsBrowser
-            onSelectPokemon={(name, game) => {
-              handleSelect(name, game);
-            }}
-          />
-        </Suspense>
-      )}
       <footer className="crt-footer">
         <span>v{__APP_VERSION__}</span>
         <span className="crt-footer-sep" aria-hidden="true">

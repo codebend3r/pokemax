@@ -1,49 +1,20 @@
-import { useEffect, useState } from 'react';
-import { findBestBuild, findBuildForGen, type ResolvedBuild } from '@/competitive';
-
-export interface CompetitiveState {
-  build: ResolvedBuild | null;
-  loading: boolean;
-  error: string | null;
-}
+import { useAsync, type AsyncState } from '@/async';
+import { bestBuilds, pickBuild, smogonSets, type ResolvedBuild } from '@/competitive';
 
 /**
  * `gen` pins the lookup to one Smogon gen (the game the user is playing);
  * `null` walks latest → oldest for the richest modern build. Older gens for
  * old Pokémon (e.g. Gen 1 Mewtwo) lack abilities/items/natures/EVs because
  * those mechanics didn't exist yet, so the walk is the better default.
+ * Ready with `null` means Smogon has no set.
  */
-export function useCompetitiveSet(name: string | null, gen: number | null): CompetitiveState {
-  const [state, setState] = useState<{ build: ResolvedBuild | null; error: string | null }>({
-    build: null,
-    error: null,
-  });
-
-  // A new name/gen invalidates whatever build we last resolved — clear it synchronously
-  // so the previous Pokémon's set can't flash while the new one loads.
-  const [prevKey, setPrevKey] = useState({ name, gen });
-  if (prevKey.name !== name || prevKey.gen !== gen) {
-    setPrevKey({ name, gen });
-    setState({ build: null, error: null });
-  }
-
-  useEffect(() => {
-    if (!name) return;
-    let active = true;
-    (gen === null ? findBestBuild(name) : findBuildForGen(name, gen))
-      .then((build) => {
-        if (active) setState({ build, error: null });
-      })
-      .catch((e: Error) => {
-        if (active) setState({ build: null, error: e.message });
-      });
-    return () => {
-      active = false;
-    };
-  }, [name, gen]);
-
-  if (!name) {
-    return { build: null, loading: false, error: null };
-  }
-  return { build: state.build, loading: !state.build && !state.error, error: state.error };
+export function useCompetitiveSet(
+  name: string,
+  gen: number | null,
+): AsyncState<ResolvedBuild | null> {
+  const best = useAsync(bestBuilds, gen === null, name);
+  const sets = useAsync(smogonSets, gen !== null, gen ?? 0);
+  if (gen === null) return best;
+  if (sets.status !== 'ready') return sets;
+  return { status: 'ready', data: pickBuild(sets.data, name, gen) };
 }

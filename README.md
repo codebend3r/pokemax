@@ -128,55 +128,37 @@ bun run build    # production bundle to dist/
 
 ```
 src/
-├── App.tsx                    # top-level orchestration
-├── api.ts                     # PokeAPI fetch helpers
-├── competitive.ts             # Smogon set fetcher, picks the best build per gen
-├── moves.ts                   # group & sort moves by learn method
+├── App.tsx                    # shell: chrome, mode tabs, routes, the pick event
+├── games.ts                   # the game catalog — every per-game table derives from it
+├── generations.ts             # Gen I–IX metadata
+├── api.ts                     # PokeAPI fetchers, each checked by a guard in types.ts
+├── types.ts / guards.ts       # API response shapes and their runtime guards
+├── async.ts                   # memoAsync + useAsync — the one cache and loading model
+├── dex.ts                     # dex indexes, route resolution, grid filtering
+├── sprites.ts                 # every sprite URL, as ordered fallback lists
+├── cry.ts                     # the one cry player (+ cryOverrides.ts, gmaxAudio.ts)
+├── competitive.ts             # Smogon sets, best build per gen
+├── counters.ts                # counter-team picking for trainer fights
+├── typeChart.ts               # 18-type effectiveness matrix and type colors
+├── forms.ts / stats.ts        # form labels and categories; stat order and labels
+├── textUtil.ts / units.ts     # flavor text and slug formatting; height and weight
+├── trainers.ts / teams.ts     # curated trainer rosters and playthrough teams
+├── itemSources.ts             # curated item acquisition data
 ├── music.ts                   # Web Audio chiptune player
-├── typeChart.ts               # static 18-type effectiveness matrix
-├── generations.ts             # Gen I–IX metadata (region, version groups)
-├── types.ts                   # API response types
-├── textUtil.ts                # flavor-text + audio scaling helpers
-├── hooks/
-│   ├── useAllSpecies.ts       # full dex index (cached)
-│   ├── useExtraForms.ts       # lazy fetch for mega/gmax/regional/etc.
-│   ├── usePokemon.ts          # parallel pokemon + species + chain fetch
-│   ├── useCompetitiveSet.ts   # Smogon set lookup
-│   ├── useApiDetail.ts        # generic /endpoint/{name} cache for click-to-detail
-│   ├── useTypeIndex.ts        # type-by-id index (lazy)
-│   ├── useTheme.ts            # dark/light theme persistence
-│   ├── useViewMode.ts         # grid/list persistence
-│   ├── usePageSize.ts         # page-size persistence
-│   └── useVolume.ts           # music + cry volume persistence
+├── obtain/                    # how-to-obtain dataset: types, builders, loader
+├── hooks/                     # usePokemonView, usePersistentState, useFallbackSrc, …
 ├── components/
-│   ├── PokemonGrid.tsx        # browseable, paginated, type-filtered grid
-│   ├── SearchBar.tsx          # controlled input with Enter/Escape
-│   ├── PokemonCard.tsx        # composes every card section
-│   ├── ComparePanel.tsx       # stat-vs-stat comparison
-│   ├── FormSwitcher.tsx       # in-card variety picker
-│   ├── GenFilter.tsx          # Gen I–IX chips
-│   ├── TypeFilter.tsx         # 18-type chip row
-│   ├── ViewModeToggle.tsx     # grid ⇄ list
-│   ├── PageSizeSelector.tsx
-│   ├── Pagination.tsx
-│   ├── ThemeToggle.tsx
-│   ├── ShareButton.tsx        # copies deeplink URL
-│   ├── MusicPlayer.tsx        # chiptune transport
-│   ├── StatBar.tsx
-│   ├── AbilityList.tsx
-│   ├── EvolutionChain.tsx     # recursive renderer, supports branches
-│   ├── MoveList.tsx
-│   ├── CompetitiveBuild.tsx   # Smogon set renderer
-│   ├── Detail.tsx             # generic click-for-detail expander
-│   ├── TypeMatchup.tsx        # offensive + defensive matchup grid
-│   ├── ShinyToggle.tsx
-│   ├── SpriteToggle.tsx       # 2D ⇄ 3D
-│   ├── StatusLine.tsx         # [READY] / [SCANNING…] / [ERR …]
-│   └── Section.tsx            # collapsible <details>-based wrapper
+│   ├── PokedexPage.tsx        # search, filters, grid, and the Pokémon card
+│   ├── PokemonCard.tsx        # composes the card (CardArt, CompetitiveSection, …)
+│   ├── TrainersPage.tsx       # trainer list and detail (lazy, owns the roster)
+│   ├── TeamsBrowser.tsx       # curated teams per game (lazy)
+│   ├── Detail.tsx             # click-for-detail panels for moves, items, types, …
+│   └── …                      # filters, toggles, and the card's sections
 ├── styles/crt.css             # the entire retro theme (both light + dark)
 └── __tests__/                 # Vitest tests
 docs/screenshots/              # the screenshots embedded in this README
 scripts/screenshot.mjs         # Playwright script that produced them
+scripts/build-obtain-data.mts  # builds public/obtain/{id}.json
 ```
 
 ## Re-generating the screenshots

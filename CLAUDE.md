@@ -1,4 +1,4 @@
-# CLAUDE.md — guardrails for this repo
+# Guardrails for this repo (CLAUDE.md, AGENTS.md)
 
 Short, opinionated rules. When something here conflicts with a default behavior, **this file wins**.
 
@@ -24,7 +24,7 @@ Short, opinionated rules. When something here conflicts with a default behavior,
 
 ### Do
 - Use the `@/` alias for anything under `src/` (e.g. `import { useTheme } from '@/hooks/useTheme'`).
-- Configured in `tsconfig.json`, `tsconfig.app.json`, `vite.config.ts`, and `vitest.config.ts` — all four must stay in sync if the alias changes.
+- Configured in `tsconfig.json`, `tsconfig.app.json`, and `vite.config.ts` (which Vitest also reads) — all three must stay in sync if the alias changes.
 
 ### Don't
 - Don't use `../`-style relative imports across directories. Use `@/...` instead.

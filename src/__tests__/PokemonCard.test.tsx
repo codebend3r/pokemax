@@ -92,6 +92,7 @@ const chainLink: ChainLink = {
 
 const species: SpeciesResponse = {
   name: 'dragapult',
+  generation: { name: 'generation-viii', url: 'https://pokeapi.co/api/v2/generation/8/' },
   evolution_chain: { url: 'X' },
   varieties: [{ is_default: true, pokemon: { name: 'dragapult', url: '' } }],
   flavor_text_entries: [
@@ -110,6 +111,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -118,7 +120,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByText('88')).toBeInTheDocument();
@@ -130,6 +131,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -138,7 +140,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     const item = screen.getByText(/cursed body/i).closest('li');
@@ -150,6 +151,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -158,7 +160,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getAllByText('dragon').length).toBeGreaterThan(0);
@@ -169,11 +170,12 @@ describe('PokemonCard', () => {
   // GIF (constructed from id), not the fixture's `front_default`. These two
   // assertions still describe the original sprite ladder, so they stay in the
   // file as a pointer for whoever updates the sprite spec — they just don't run
-  // until then. See pickSprite() in components/PokemonCard.tsx.
+  // until then. See `cardSprites` in `sprites.ts`.
   it.skip('renders the static flat pixel sprite by default (2D, Gen 6+)', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -182,7 +184,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'normal.png');
@@ -192,6 +193,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={true}
@@ -200,7 +202,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'shiny.png');
@@ -210,6 +211,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -218,7 +220,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByText('DREEPY')).toBeInTheDocument();
@@ -230,6 +231,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -238,7 +240,6 @@ describe('PokemonCard', () => {
         onViewChange={() => {}}
         form="base"
         onFormChange={() => {}}
-        gen={8}
       />,
     );
     expect(screen.getByText(/dragon darts/i)).toBeInTheDocument();

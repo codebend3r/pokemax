@@ -1,335 +1,60 @@
 import { useEffect, useRef, useState } from 'react';
-import type {
-  EvolutionChainResponse,
-  Gen8Species,
-  PokemonResponse,
-  SpeciesResponse,
-} from '@/types';
+import type { EvolutionChainResponse, DexEntry, PokemonResponse, SpeciesResponse } from '@/types';
 import { groupMoves } from '@/moves';
 import { getGen } from '@/generations';
-import { fetchPokemon } from '@/api';
-import { CRY_VOLUME_SCALE, cleanFlavorText } from '@/textUtil';
+import { idFromUrl } from '@/api';
 import StatBar from '@/components/StatBar';
 import AbilityList from '@/components/AbilityList';
+import CardArt from '@/components/CardArt';
 import EvolutionChain from '@/components/EvolutionChain';
 import MoveList from '@/components/MoveList';
-import ShinyToggle from '@/components/ShinyToggle';
-import SpriteToggle, { type SpriteView } from '@/components/SpriteToggle';
 import FormSwitcher from '@/components/FormSwitcher';
 import Section from '@/components/Section';
 import ComparePanel from '@/components/ComparePanel';
-import CompetitiveBuild from '@/components/CompetitiveBuild';
+import CompetitiveSection from '@/components/CompetitiveSection';
 import Detail from '@/components/Detail';
 import ObtainMethods from '@/components/ObtainMethods';
-import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
-import { useObtainData } from '@/hooks/useObtainData';
-import { GAME_GENS, GAME_ORDER, type GameId } from '@/trainers';
-import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
-import { varietyFromForm, formFromVariety } from '@/routes';
-import { localAnimUrl, pokeapiToShowdownSlug } from '@/showdownSprite';
-import { cryOverrideFor } from '@/cryOverrides';
-import { playGmaxCryWithEffects } from '@/gmaxAudio';
+import PokedexEntries from '@/components/PokedexEntries';
+import { useAsync } from '@/async';
+import { obtainFiles } from '@/obtain/files';
+import type { GameId } from '@/games';
+import { tintStyle, typeColor } from '@/typeChart';
+import { varietyFromForm, formFromVariety, type Dimension } from '@/routes';
+import { STAT_ORDER } from '@/stats';
+import { formatHeight, formatWeight } from '@/units';
+import { cryUrlById, cryUrlOf, playCry } from '@/cry';
 
 interface Props {
+  /** The variety on screen. */
   pokemon: PokemonResponse;
+  /** The species' default variety. */
+  base: PokemonResponse;
   species: SpeciesResponse;
   chain: EvolutionChainResponse;
   shiny: boolean;
   onShinyChange: (v: boolean) => void;
-  view: SpriteView;
-  onViewChange: (view: SpriteView) => void;
+  view: Dimension;
+  onViewChange: (view: Dimension) => void;
   /** `base` or a variety-slug suffix (`mega-x`, `gmax`, `alola`, etc.). */
   form: string;
   onFormChange: (form: string) => void;
   onSelectEvolution?: (name: string) => void;
   /** Navigates back to the Pokédex grid. */
   onBack?: () => void;
-  gen: number;
-  cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume?: number;
   onCryVolumeChange?: (v: number) => void;
   /** Pool of species the compare picker can choose from */
-  speciesPool?: Gen8Species[];
-  /** Preselects the competitive-build game and scrolls to the section (TEAMS picks). */
-  initialBuildGame?: GameId | null;
-}
-
-const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
-const BW_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
-const SHOWDOWN_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
-// Frame-animated fan sprites in 5th-gen BW pixel-art style, mirrored by
-// Pokémon Showdown. `ani/` is the main Smogon Sprite Project set; `gen5ani/`
-// is an older alternate set that covers some newer DLC/legendary additions
-// (e.g. Terapagos, Miraidon) that `ani/` doesn't have yet.
-const SD_ANI = 'https://play.pokemonshowdown.com/sprites/ani';
-const SD_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/ani-shiny';
-const SD_GEN5_ANI = 'https://play.pokemonshowdown.com/sprites/gen5ani';
-const SD_GEN5_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5ani-shiny';
-const MAX_BW_ID = 649;
-
-function isGmaxVariety(name: string): boolean {
-  return /-(g|eterna)max$/.test(name);
-}
-
-/**
- * Plays a Pokémon cry.
- * - Non-Gmax: direct `<audio>` play.
- * - Gmax with override (every Gmax form has one): the override clip already
- *   contains the Dynamax jingle + per-form cry baked together — play as-is.
- * - Gmax without override (fallback only): route through
- *   `playGmaxCryWithEffects` for the Web Audio pitch/reverb/bass chain.
- */
-function playCryWithIntro(cryAudio: HTMLAudioElement, pokemonName: string, volume: number): void {
-  const playDirect = () => {
-    cryAudio.currentTime = 0;
-    cryAudio.volume = volume * CRY_VOLUME_SCALE;
-    cryAudio.play().catch(() => {});
-  };
-  if (!isGmaxVariety(pokemonName) || cryOverrideFor(pokemonName) !== null) {
-    playDirect();
-    return;
-  }
-  if (cryAudio.src) {
-    playGmaxCryWithEffects(cryAudio.src, volume * CRY_VOLUME_SCALE).then((ok) => {
-      if (!ok) playDirect();
-    });
-  } else {
-    playDirect();
-  }
-}
-
-interface SpritePick {
-  url: string;
-  /** true when the rendered image is a real frame-animated GIF */
-  animated: boolean;
-}
-
-function spriteCandidates(p: PokemonResponse, shiny: boolean, view: SpriteView): SpritePick[] {
-  const sdSlug = pokeapiToShowdownSlug(p.name);
-  // Locally-shipped 2D GIF (no shiny variants — only offer for regular).
-  const local = shiny ? null : localAnimUrl(p.name);
-  const list: SpritePick[] = [];
-  if (view === '2d') {
-    // 2D shows ONLY frame-animated pixel art; the parent probes and hides the
-    // 2D toggle entirely if none resolves, so there's no static fallback here.
-    if (local) list.push({ url: local, animated: true });
-    if (p.id <= MAX_BW_ID) {
-      // Gen 1-5 base species: BW animated pixel art — iconic 2D experience.
-      list.push({
-        url: shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`,
-        animated: true,
-      });
-    } else {
-      // Gen 6+ official: PokeAPI's Showdown mirror, indexed by id.
-      list.push({
-        url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
-        animated: true,
-      });
-    }
-    // Smogon Sprite Project fan animation — covers most Gen 6-9 forms
-    // including Gmax / Eternamax that the PokeAPI mirror is missing.
-    list.push({ url: `${shiny ? SD_ANI_SHINY : SD_ANI}/${sdSlug}.gif`, animated: true });
-    // Showdown's older `gen5ani/` set — has fan animations for newer DLC
-    // additions that the main `ani/` directory hasn't picked up yet.
-    list.push({
-      url: `${shiny ? SD_GEN5_ANI_SHINY : SD_GEN5_ANI}/${sdSlug}.gif`,
-      animated: true,
-    });
-    return list;
-  }
-  // 3D mode: a frame-animated Showdown GIF whenever one exists.
-  list.push({
-    url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
-    animated: true,
-  });
-  // PokeAPI mirror missing — try Showdown's direct ani as another animated source.
-  list.push({ url: `${shiny ? SD_ANI_SHINY : SD_ANI}/${sdSlug}.gif`, animated: true });
-  // Locally-shipped GIF beats a static image even in 3D mode.
-  if (local) list.push({ url: local, animated: true });
-  // Last resort — official artwork. Stays truly static (no CSS bob); should
-  // only ever appear for the handful of forms with no animated source at all.
-  const art = p.sprites.other['official-artwork'];
-  list.push({
-    url: shiny
-      ? (art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? '')
-      : (art.front_default ?? p.sprites.front_default ?? ''),
-    animated: false,
-  });
-  return list;
-}
-
-interface Particle {
-  id: number;
-  type: 'heart' | 'star' | 'sparkle';
-  x: number;
-  delay: number;
-  rotate: number;
-}
-
-function CardSprite({
-  pokemon,
-  shiny,
-  view,
-  preloadedAudio,
-  cryVolume,
-  onCryVolumeChange,
-  expectedVariety,
-}: {
-  pokemon: PokemonResponse;
-  shiny: boolean;
-  view: SpriteView;
-  preloadedAudio: React.MutableRefObject<HTMLAudioElement | null>;
-  cryVolume: number;
-  onCryVolumeChange?: (v: number) => void;
-  /** The variety the URL says should be displayed. We're mid-transition when
-   * `pokemon.name !== expectedVariety`; auto-play should sit out those frames
-   * to avoid playing the base cry over a Mega/Gmax/regional pre-warm. */
-  expectedVariety: string;
-}) {
-  const [fallbacks, setFallbacks] = useState<Record<SpriteView, number>>({ '2d': 0, '3d': 0 });
-  const [reacting, setReacting] = useState(false);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const fallback = fallbacks[view];
-  const candidates = spriteCandidates(pokemon, shiny, view);
-  const bumpFallback = () =>
-    setFallbacks((prev) => ({
-      ...prev,
-      [view]: Math.min(candidates.length - 1, prev[view] + 1),
-    }));
-  const sprite = candidates[Math.min(fallback, candidates.length - 1)];
-
-  // Reset the per-view fallback ladder whenever the Pokemon or shiny state
-  // changes — the candidate list differs (local GIFs have no shiny variant).
-  useEffect(() => {
-    setFallbacks({ '2d': 0, '3d': 0 });
-  }, [pokemon.id, shiny]);
-  const cryUrl =
-    cryOverrideFor(pokemon.name) ?? pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
-
-  // Keep the live audio element in sync with the volume slider
-  useEffect(() => {
-    if (preloadedAudio.current) preloadedAudio.current.volume = cryVolume * CRY_VOLUME_SCALE;
-  }, [cryVolume, preloadedAudio]);
-
-  // Auto-play cry once on mount. The audio was pre-warmed when the user clicked
-  // the grid cell, so this should fire near-instantly. When switching to an
-  // alternate form whose `cries` URL differs from the preloaded source (e.g. a
-  // form with its own unique cry), swap the cached audio to the form's cry.
-  useEffect(() => {
-    // Stay silent while React is still resolving the form. Without this, the
-    // base species's cry plays during the brief window between URL canonicalize
-    // and the variety fetch landing — and clobbers the pre-warmed Mega/Gmax/
-    // regional audio with a fresh base-cry `Audio()` instance.
-    if (pokemon.name !== expectedVariety) return;
-    const a = preloadedAudio.current;
-    if (a && a.src && (!cryUrl || a.src === cryUrl)) {
-      playCryWithIntro(a, pokemon.name, cryVolume);
-      return;
-    }
-    if (cryUrl) {
-      const fallbackAudio = new Audio(cryUrl);
-      preloadedAudio.current = fallbackAudio;
-      playCryWithIntro(fallbackAudio, pokemon.name, cryVolume);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pokemon.id, pokemon.name, cryUrl, expectedVariety]);
-
-  const playCry = () => {
-    const a = preloadedAudio.current;
-    if (a && a.src && (!cryUrl || a.src === cryUrl)) {
-      playCryWithIntro(a, pokemon.name, cryVolume);
-      return;
-    }
-    if (cryUrl) {
-      const fresh = new Audio(cryUrl);
-      preloadedAudio.current = fresh;
-      playCryWithIntro(fresh, pokemon.name, cryVolume);
-    }
-  };
-
-  const handleSpriteClick = () => {
-    playCry();
-    setReacting(true);
-    const types: Particle['type'][] = ['heart', 'star', 'sparkle', 'heart', 'sparkle'];
-    const newParticles: Particle[] = Array.from({ length: 5 }, (_, i) => ({
-      id: Date.now() + i,
-      type: types[i] ?? 'heart',
-      x: (Math.random() - 0.5) * 120, // -60 to +60 px
-      delay: Math.random() * 180, // staggered launch
-      rotate: (Math.random() - 0.5) * 120,
-    }));
-    setParticles((p) => [...p, ...newParticles]);
-    window.setTimeout(() => setReacting(false), 720);
-    window.setTimeout(() => {
-      setParticles((p) => p.filter((x) => !newParticles.includes(x)));
-    }, 1300);
-  };
-
-  const className =
-    'crt-sprite-' +
-    view +
-    (sprite.animated ? ' is-anim' : ' is-static') +
-    (reacting ? ' reacting' : '');
-
-  return (
-    <div className="crt-card-sprite-wrap">
-      <img
-        key={`${view}-${shiny}-${pokemon.name}-${fallback}`}
-        className={className}
-        src={sprite.url}
-        alt={pokemon.name}
-        onClick={handleSpriteClick}
-        onError={bumpFallback}
-        title="click to play cry"
-      />
-      {particles.map((p) => (
-        <span
-          key={p.id}
-          className={`crt-card-particle ${p.type}`}
-          aria-hidden="true"
-          style={{
-            ['--x' as string]: `${p.x}px`,
-            ['--rotate' as string]: `${p.rotate}deg`,
-            animationDelay: `${p.delay}ms`,
-          }}
-        >
-          {p.type === 'heart' ? '♥' : p.type === 'star' ? '★' : '✦'}
-        </span>
-      ))}
-      {cryUrl && (
-        <div className="crt-cry-row">
-          <button
-            type="button"
-            className="crt-cry-button"
-            onClick={playCry}
-            aria-label={`play ${pokemon.name} cry`}
-            title="play cry"
-          >
-            ♪ CRY
-          </button>
-          {onCryVolumeChange && (
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.02}
-              value={cryVolume}
-              aria-label="Cry volume"
-              title="Cry volume"
-              onChange={(e) => onCryVolumeChange(parseFloat(e.target.value))}
-              className="crt-volume-slider crt-cry-slider"
-            />
-          )}
-        </div>
-      )}
-    </div>
-  );
+  speciesPool?: DexEntry[];
+  /**
+   * The pick that opened the card — a fresh object per pick. A `buildGame`
+   * (TEAMS / trainer picks) preselects that game's build and scrolls to it.
+   */
+  pick?: { buildGame: GameId | null } | null;
 }
 
 export default function PokemonCard({
-  pokemon: defaultPokemon,
+  pokemon,
+  base,
   species,
   chain,
   shiny,
@@ -340,179 +65,58 @@ export default function PokemonCard({
   onFormChange,
   onSelectEvolution,
   onBack,
-  gen,
-  cryAudioRef,
   cryVolume = 0.25,
   onCryVolumeChange,
   speciesPool,
-  initialBuildGame,
+  pick,
 }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
-  const [activeVariety, setActiveVariety] = useState<string>(() =>
-    varietyFromForm(species.name, form),
-  );
-  const [varietyData, setVarietyData] = useState<PokemonResponse | null>(null);
-  const localCryRef = useRef<HTMLAudioElement | null>(null);
-  const audioRef = cryAudioRef ?? localCryRef;
+  // The variety the URL names — `pokemon` until that variety's data lands.
+  const activeVariety = form === 'base' ? base.name : varietyFromForm(species.name, form);
 
-  // On species (route) change, snap the active variety to whatever the URL says.
-  const [prevSpeciesForm, setPrevSpeciesForm] = useState({ name: species.name, form });
-  if (prevSpeciesForm.name !== species.name || prevSpeciesForm.form !== form) {
-    setPrevSpeciesForm({ name: species.name, form });
-    setActiveVariety(varietyFromForm(species.name, form));
-    setVarietyData(null);
-  }
-
-  // Fetch alternate variety data when user picks a different form
+  // Auto-play once per species shown — and again on every fresh pick — after
+  // the URL's variety has loaded. A form switch plays from its own click, so
+  // the form's data landing must not play it a second time.
+  const autoplayed = useRef<{ species: string; pick: Props['pick'] } | null>(null);
   useEffect(() => {
-    if (activeVariety === defaultPokemon.name) return;
-    let active = true;
-    fetchPokemon(activeVariety)
-      .then((p) => {
-        if (active) setVarietyData(p);
-      })
-      .catch(() => {
-        /* leave defaults */
-      });
-    return () => {
-      active = false;
-    };
-  }, [activeVariety, defaultPokemon.name]);
+    if (pokemon.name !== activeVariety) return;
+    const last = autoplayed.current;
+    if (last && last.species === species.name && last.pick === pick) return;
+    autoplayed.current = { species: species.name, pick };
+    const url = cryUrlOf(pokemon);
+    if (url) playCry(pokemon.name, url);
+  }, [pokemon, activeVariety, species.name, pick]);
 
-  const pokemon = varietyData ?? defaultPokemon;
   // Cosmetic variants (Gigantamax / Mega / regional) often ship empty `moves`
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
   // so the MOVES section isn't blank when viewing those forms.
-  const movesPokemon = pokemon.moves.length > 0 ? pokemon : defaultPokemon;
-  // 2D shows only frame-animated pixel art. Gen 1-5 base species always have
-  // a BW animation. For everything else, probe in priority order: PokeAPI's
-  // Showdown mirror by id → Smogon's fan animation by slug. If neither URL
-  // resolves, hide the 2D toggle and force the view to 3D. 3D always has
-  // something — its static fallback gets a CSS bob, which 2D does not.
-  // Known-good 2D sources don't need probing; everything else is probed async below.
-  const has2DKnownGood = pokemon.id <= MAX_BW_ID || Boolean(localAnimUrl(pokemon.name));
-  const [has2DProbed, setHas2DProbed] = useState(true);
-  const [prevProbeTarget, setPrevProbeTarget] = useState(pokemon.name);
-  if (prevProbeTarget !== pokemon.name) {
-    setPrevProbeTarget(pokemon.name);
-    setHas2DProbed(true);
-  }
-  useEffect(() => {
-    if (has2DKnownGood) return;
-    let cancelled = false;
-    const probe = (url: string) =>
-      new Promise<boolean>((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = url;
-      });
-    (async () => {
-      const slug = pokeapiToShowdownSlug(pokemon.name);
-      const found =
-        (await probe(`${SHOWDOWN_BASE}/${pokemon.id}.gif`)) ||
-        (await probe(`${SD_ANI}/${slug}.gif`)) ||
-        (await probe(`${SD_GEN5_ANI}/${slug}.gif`));
-      if (!cancelled) setHas2DProbed(found);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [pokemon.id, pokemon.name, has2DKnownGood]);
-  const has2D = has2DKnownGood || has2DProbed;
-  useEffect(() => {
-    if (!has2D && view === '2d') onViewChange('3d');
-  }, [has2D, view, onViewChange]);
+  const movesPokemon = pokemon.moves.length > 0 ? pokemon : base;
+  const gen = idFromUrl(species.generation.url);
   const meta = getGen(gen);
+  const statRank = (name: string) => STAT_ORDER.findIndex((s) => s === name);
   const sortedStats = [...pokemon.stats].sort(
-    (a, b) => STAT_ORDER.indexOf(a.stat.name) - STAT_ORDER.indexOf(b.stat.name),
+    (a, b) => statRank(a.stat.name) - statRank(b.stat.name),
   );
   const moveCount = Object.values(groupMoves(movesPokemon.moves, meta.primaryVersionGroup)).reduce(
     (n, g) => n + g.length,
     0,
   );
-  // Games this Pokémon can appear in — everything from its home gen onward.
-  const buildGames = GAME_ORDER.filter((g) => GAME_GENS[g] >= gen);
-  const [buildGame, setBuildGame] = useState<GameId | null>(initialBuildGame ?? null);
   const [obtainOpen, setObtainOpen] = useState(false);
-  const obtain = useObtainData(pokemon.id, obtainOpen);
-  const buildSectionRef = useRef<HTMLDivElement | null>(null);
-  const [prevBuildTarget, setPrevBuildTarget] = useState({
-    name: pokemon.name,
-    initialBuildGame,
-  });
-  if (
-    prevBuildTarget.name !== pokemon.name ||
-    prevBuildTarget.initialBuildGame !== initialBuildGame
-  ) {
-    setPrevBuildTarget({ name: pokemon.name, initialBuildGame });
-    setBuildGame(initialBuildGame ?? null);
-  }
-  useEffect(() => {
-    // Arriving from a TEAMS pick — jump straight to the build for that game.
-    if (initialBuildGame) {
-      buildSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [pokemon.name, initialBuildGame]);
-  const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAME_GENS[buildGame] : null);
+  const obtain = useAsync(obtainFiles, obtainOpen, pokemon.id);
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
-
-  // Height (decimetres → m + ft′in″)
-  const meters = pokemon.height / 10;
-  const totalInches = meters * 39.3701;
-  const ft = Math.floor(totalInches / 12);
-  const inches = Math.round(totalInches - ft * 12);
-  const heightStr = `${meters.toFixed(1)} m  (${ft}'${String(inches).padStart(2, '0')}")`;
-
-  // Weight (hectograms → kg + lbs)
-  const kg = pokemon.weight / 10;
-  const lbs = (kg * 2.20462).toFixed(1);
-  const weightStr = `${kg.toFixed(1)} kg  (${lbs} lbs)`;
 
   // Genus ("Mouse Pokémon", "Lizard Pokémon", etc.)
   const genus = species.genera.find((g) => g.language.name === 'en')?.genus ?? '';
 
-  // All unique English Pokédex entries, with the version groups that share each text.
-  const dedupedEntries: { text: string; versions: string[] }[] = (() => {
-    const cleaned = species.flavor_text_entries
-      .filter((e) => e.language.name === 'en')
-      .map((e) => ({
-        text: cleanFlavorText(e.flavor_text),
-        version: e.version.name,
-      }));
-    const byText = new Map<string, string[]>();
-    for (const e of cleaned) {
-      const existing = byText.get(e.text);
-      if (existing) existing.push(e.version);
-      else byText.set(e.text, [e.version]);
-    }
-    return Array.from(byText, ([text, versions]) => ({ text, versions }));
-  })();
-
   const handleVarietyChange = (varietyName: string) => {
-    setActiveVariety(varietyName);
-    setVarietyData(null);
-    onFormChange(formFromVariety(species.name, varietyName));
-    // Pre-warm + play the new variety's cry synchronously inside this
-    // user-gesture handler. The variety data fetch is async — by the
-    // time `CardSprite`'s auto-play effect would run, browsers no
-    // longer count the click as a user gesture and `play()` rejects.
+    onFormChange(varietyName === base.name ? 'base' : formFromVariety(species.name, varietyName));
+    // Play the new variety's cry synchronously inside this user-gesture
+    // handler. Its data loads async — by the time it lands, browsers no
+    // longer count the click as a gesture and `play()` can reject.
     const v = species.varieties.find((x) => x.pokemon.name === varietyName);
-    const idMatch = v?.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
-    if (idMatch) {
-      const id = parseInt(idMatch[1], 10);
-      const cryUrl =
-        cryOverrideFor(varietyName) ??
-        `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-      const audio = new Audio(cryUrl);
-      audioRef.current = audio;
-      playCryWithIntro(audio, varietyName, cryVolume);
-    }
+    const id = v ? idFromUrl(v.pokemon.url) : 0;
+    if (id) playCry(varietyName, cryUrlById(varietyName, id));
   };
 
   return (
@@ -523,19 +127,15 @@ export default function PokemonCard({
         </button>
       )}
       <div className="crt-card-top">
-        <div className="crt-card-art">
-          <CardSprite
-            pokemon={pokemon}
-            shiny={shiny}
-            view={view}
-            preloadedAudio={audioRef}
-            cryVolume={cryVolume}
-            onCryVolumeChange={onCryVolumeChange}
-            expectedVariety={activeVariety}
-          />
-          <SpriteToggle value={view} onChange={onViewChange} has2D={has2D} />
-          <ShinyToggle value={shiny} onChange={onShinyChange} />
-        </div>
+        <CardArt
+          pokemon={pokemon}
+          shiny={shiny}
+          onShinyChange={onShinyChange}
+          view={view}
+          onViewChange={onViewChange}
+          cryVolume={cryVolume}
+          onCryVolumeChange={onCryVolumeChange}
+        />
         <div className="crt-card-meta">
           <div className="crt-card-dex">#{String(pokemon.id).padStart(3, '0')}</div>
           <div className="crt-card-name">{pokemon.name.toUpperCase()}</div>
@@ -544,27 +144,23 @@ export default function PokemonCard({
             {genus ? ` · ${genus.toUpperCase()}` : ''}
           </div>
           <div className="crt-types">
-            {pokemon.types.map((t) => {
-              const isPoke = (TYPES as readonly string[]).includes(t.type.name);
-              const color = isPoke ? TYPE_COLORS[t.type.name as PokeType] : 'var(--primary)';
-              return (
-                <Detail
-                  key={t.type.name}
-                  kind="type"
-                  name={t.type.name}
-                  label={t.type.name}
-                  triggerClassName="crt-type"
-                  triggerStyle={{ color, borderColor: color, textShadow: `0 0 4px ${color}66` }}
-                />
-              );
-            })}
+            {pokemon.types.map((t) => (
+              <Detail
+                key={t.type.name}
+                kind="type"
+                name={t.type.name}
+                label={t.type.name}
+                triggerClassName="crt-type"
+                triggerStyle={tintStyle(typeColor(t.type.name))}
+              />
+            ))}
           </div>
           <div className="crt-card-vitals">
             <span>
-              <span className="crt-card-vitals-label">HT</span> {heightStr}
+              <span className="crt-card-vitals-label">HT</span> {formatHeight(pokemon.height)}
             </span>
             <span>
-              <span className="crt-card-vitals-label">WT</span> {weightStr}
+              <span className="crt-card-vitals-label">WT</span> {formatWeight(pokemon.weight)}
             </span>
           </div>
           <button
@@ -589,20 +185,7 @@ export default function PokemonCard({
         <ComparePanel base={pokemon} species={speciesPool} onClose={() => setCompareOpen(false)} />
       )}
 
-      {dedupedEntries.length > 0 && (
-        <Section label="POKéDEX ENTRIES" count={dedupedEntries.length} defaultOpen={false}>
-          <div className="crt-pokedex-entries">
-            {dedupedEntries.map((entry, i) => (
-              <div key={i} className="crt-pokedex-entry-item">
-                <div className="crt-pokedex-versions">
-                  {entry.versions.map((v) => v.toUpperCase().replace(/-/g, '/')).join(' · ')}
-                </div>
-                <p>{entry.text}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
+      <PokedexEntries species={species} />
 
       <Section label="BASE STATS">
         {sortedStats.map((s) => (
@@ -620,7 +203,7 @@ export default function PokemonCard({
 
       <Section
         label="HOW TO OBTAIN"
-        count={obtain.status === 'ready' ? obtain.file.games.length : undefined}
+        count={obtain.status === 'ready' ? obtain.data.games.length : undefined}
         defaultOpen={false}
         onToggle={setObtainOpen}
       >
@@ -631,26 +214,7 @@ export default function PokemonCard({
         <MoveList moves={movesPokemon.moves} versionGroup={meta.primaryVersionGroup} />
       </Section>
 
-      <div ref={buildSectionRef}>
-        <Section
-          label="COMPETITIVE BUILD"
-          count={
-            competitive.build
-              ? `GEN ${competitive.build.sourceGen ?? '?'} · ${competitive.build.tier.toUpperCase()}`
-              : undefined
-          }
-        >
-          <CompetitiveBuild
-            build={competitive.build}
-            loading={competitive.loading}
-            error={competitive.error}
-            pokemon={pokemon}
-            games={buildGames}
-            selectedGame={buildGame}
-            onSelectGame={setBuildGame}
-          />
-        </Section>
-      </div>
+      <CompetitiveSection pokemon={pokemon} gen={gen} pick={pick} />
     </div>
   );
 }

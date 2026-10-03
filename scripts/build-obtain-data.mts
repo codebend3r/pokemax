@@ -6,6 +6,8 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { idFromUrl } from '../src/api';
+import { spaced } from '../src/textUtil';
 import { assembleObtainFile } from '../src/obtain/assemble';
 import { parseTradeLists, type NpcTrade } from '../src/obtain/bulbapedia';
 import { encountersToEntries, type ApiEncounterArea } from '../src/obtain/pokeapi';
@@ -66,13 +68,6 @@ function num(v: unknown): number {
 function arr(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
 }
-function idFromUrl(url: string): number {
-  const m = url.match(/\/(\d+)\/?$/);
-  return m ? parseInt(m[1], 10) : 0;
-}
-function pretty(slug: string): string {
-  return slug.replace(/-/g, ' ');
-}
 
 function readEncounterAreas(json: unknown): ApiEncounterArea[] {
   const out: ApiEncounterArea[] = [];
@@ -109,12 +104,12 @@ function humanizeTrigger(detail: Record<string, unknown>): string {
     if (typeof detail.min_happiness === 'number') return 'friendship';
     return 'level up';
   }
-  if (trigger === 'use-item') return `use ${pretty(str(rec(detail.item).name))}`;
+  if (trigger === 'use-item') return `use ${spaced(str(rec(detail.item).name))}`;
   if (trigger === 'trade') {
     const held = str(rec(detail.held_item).name);
-    return held ? `trade holding ${pretty(held)}` : 'link trade';
+    return held ? `trade holding ${spaced(held)}` : 'link trade';
   }
-  return trigger ? pretty(trigger) : 'evolve';
+  return trigger ? spaced(trigger) : 'evolve';
 }
 
 function findTrigger(chainNode: unknown, speciesName: string): string {

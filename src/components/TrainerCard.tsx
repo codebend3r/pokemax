@@ -1,20 +1,25 @@
 import { useMemo, useState } from 'react';
-import { GAME_LABELS, trainerPortraitUrl, type Trainer } from '@/trainers';
-import { GAME_MAX_GEN, pickCounterTeam } from '@/counters';
+import { GAMES } from '@/games';
+import { trainerPortraitUrl, type Trainer } from '@/trainers';
+import { counterTeamFor, minLevels } from '@/counters';
 import Detail from '@/components/Detail';
-import { useTypeIndex } from '@/hooks/useTypeIndex';
-import { useMinLevels } from '@/hooks/useMinLevels';
+import { useAsync } from '@/async';
+import { typeIndex } from '@/dex';
 import { TYPE_COLORS } from '@/typeChart';
-import type { Gen8Species } from '@/types';
-import { showdownSpriteUrl } from '@/showdownSprite';
+import type { DexEntry } from '@/types';
+import { showdownSpriteUrl } from '@/sprites';
+import { spaced } from '@/textUtil';
 
 interface Props {
   trainer: Trainer;
   onBack: () => void;
   onSelectPokemon: (speciesSlug: string) => void;
   /** Full species index (base + alt forms). Used to map slug ↔ id and apply a gen cap. */
-  speciesIndex: Gen8Species[];
+  speciesIndex: DexEntry[];
 }
+
+// A failed level fetch turns the level gate off rather than blocking counters.
+const NO_LEVEL_GATE = new Map<number, number>();
 
 function Section({
   title,
@@ -47,52 +52,19 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
   const [openMeta, setOpenMeta] = useState(false);
   const [openLoc, setOpenLoc] = useState(false);
   const [openCounters, setOpenCounters] = useState(false);
-  const typeIndex = useTypeIndex(openCounters);
-  const minLevels = useMinLevels(openCounters);
+  const types = useAsync(typeIndex, openCounters, undefined);
+  const levels = useAsync(minLevels, openCounters, undefined);
+  const typeMap = types.status === 'ready' ? types.data : null;
+  const levelMap =
+    levels.status === 'ready' ? levels.data : levels.status === 'error' ? NO_LEVEL_GATE : null;
 
-  const counterTeam = useMemo(() => {
-    if (!openCounters || !typeIndex.index || !minLevels) return null;
-    const nameToId = new Map<string, number>();
-    const idToName = new Map<number, string>();
-    const allowed = new Set<number>();
-    const maxGen = GAME_MAX_GEN[trainer.game];
-    // A counter must be able to EXIST at this fight: at or below the
-    // trainer's strongest level, given how its evolution line works.
-    const maxLevel = Math.max(...trainer.team.map((m) => m.level));
-    for (const s of speciesIndex) {
-      nameToId.set(s.name, s.id);
-      idToName.set(s.id, s.name);
-      if (s.gen <= maxGen && (minLevels.get(s.id) ?? 0) <= maxLevel) allowed.add(s.id);
-    }
-    // Early-game trainers additionally pin the pool to what's catchable so far.
-    if (trainer.availableBefore) {
-      const pool = new Set<number>();
-      for (const slug of trainer.availableBefore) {
-        const id = nameToId.get(slug);
-        if (id != null && allowed.has(id)) pool.add(id);
-      }
-      return pickCounterTeam(trainer.team, {
-        typeIndex: typeIndex.index,
-        nameToId,
-        idToName,
-        candidateFilter: (id) => pool.has(id),
-      });
-    }
-    return pickCounterTeam(trainer.team, {
-      typeIndex: typeIndex.index,
-      nameToId,
-      idToName,
-      candidateFilter: (id) => allowed.has(id),
-    });
-  }, [
-    openCounters,
-    typeIndex.index,
-    minLevels,
-    speciesIndex,
-    trainer.team,
-    trainer.game,
-    trainer.availableBefore,
-  ]);
+  const counterTeam = useMemo(
+    () =>
+      openCounters && typeMap && levelMap
+        ? counterTeamFor(trainer, speciesIndex, typeMap, levelMap)
+        : null,
+    [openCounters, typeMap, levelMap, trainer, speciesIndex],
+  );
 
   return (
     <div className="crt-trainer-detail">
@@ -111,7 +83,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         <div className="crt-trainer-detail-header-text">
           <div className="crt-trainer-detail-name">{trainer.name.toUpperCase()}</div>
           <div className="crt-trainer-detail-class">{trainer.trainerClass.toUpperCase()}</div>
-          <div className="crt-trainer-detail-game">{GAME_LABELS[trainer.game]}</div>
+          <div className="crt-trainer-detail-game">{GAMES[trainer.game].label}</div>
           {trainer.location && (
             <div className="crt-trainer-detail-location">{trainer.location}</div>
           )}
@@ -132,9 +104,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
               src={showdownSpriteUrl(m.species)}
               alt={m.species}
             />
-            <div className="crt-trainer-member-name">
-              {m.species.replace(/-/g, ' ').toUpperCase()}
-            </div>
+            <div className="crt-trainer-member-name">{spaced(m.species).toUpperCase()}</div>
             <div className="crt-trainer-member-level">Lv {m.level}</div>
           </button>
         ))}
@@ -144,9 +114,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         <div className="crt-trainer-moves-grid">
           {trainer.team.map((m, i) => (
             <div key={`${m.species}-${i}`} className="crt-trainer-moves-row">
-              <div className="crt-trainer-moves-species">
-                {m.species.replace(/-/g, ' ').toUpperCase()}
-              </div>
+              <div className="crt-trainer-moves-species">{spaced(m.species).toUpperCase()}</div>
               <div className="crt-trainer-moves-list">
                 {m.moves && m.moves.length > 0 ? (
                   m.moves.map((mv) => <Detail key={mv} kind="move" name={mv} />)
@@ -168,9 +136,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
           <div className="crt-trainer-meta-grid">
             {trainer.team.map((m, i) => (
               <div key={`${m.species}-${i}`} className="crt-trainer-meta-row">
-                <div className="crt-trainer-meta-species">
-                  {m.species.replace(/-/g, ' ').toUpperCase()}
-                </div>
+                <div className="crt-trainer-meta-species">{spaced(m.species).toUpperCase()}</div>
                 <div className="crt-trainer-meta-cell">
                   <span className="crt-trainer-meta-label">ABILITY</span>
                   {m.ability ? (
@@ -205,18 +171,18 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         title={
           trainer.availableBefore
             ? 'BEST COUNTER TEAM (OBTAINABLE BY THIS FIGHT)'
-            : `BEST COUNTER TEAM (Gen ≤ ${GAME_MAX_GEN[trainer.game]})`
+            : `BEST COUNTER TEAM (Gen ≤ ${GAMES[trainer.game].dexGen})`
         }
         open={openCounters}
         onToggle={() => setOpenCounters((v) => !v)}
       >
-        {typeIndex.loading && (
+        {types.status === 'loading' && (
           <div className="crt-trainer-counters-status">
             ▶ INDEXING TYPES<span className="crt-cursor">&nbsp;</span>
           </div>
         )}
-        {typeIndex.error && (
-          <div className="crt-trainer-counters-status crt-error">ERR: {typeIndex.error}</div>
+        {types.status === 'error' && (
+          <div className="crt-trainer-counters-status crt-error">ERR: {types.message}</div>
         )}
         {counterTeam && counterTeam.length === 0 && (
           <div className="crt-trainer-counters-status">▶ NO COUNTERS FOUND</div>
@@ -236,9 +202,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
                   src={showdownSpriteUrl(pick.name)}
                   alt={pick.name}
                 />
-                <div className="crt-trainer-counter-name">
-                  {pick.name.replace(/-/g, ' ').toUpperCase()}
-                </div>
+                <div className="crt-trainer-counter-name">{spaced(pick.name).toUpperCase()}</div>
                 <div className="crt-trainer-counter-types">
                   {pick.types.map((t) => (
                     <span
@@ -250,9 +214,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
                     </span>
                   ))}
                 </div>
-                <div className="crt-trainer-counter-vs">
-                  vs {pick.countersSpecies.replace(/-/g, ' ')}
-                </div>
+                <div className="crt-trainer-counter-vs">vs {spaced(pick.countersSpecies)}</div>
                 <div className="crt-trainer-counter-why">{pick.rationale}</div>
               </button>
             ))}
@@ -262,7 +224,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
 
       <Section title="LOCATION" open={openLoc} onToggle={() => setOpenLoc((v) => !v)}>
         <div>{trainer.location ?? '—'}</div>
-        <div>{GAME_LABELS[trainer.game]}</div>
+        <div>{GAMES[trainer.game].label}</div>
       </Section>
     </div>
   );

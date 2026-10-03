@@ -1,22 +1,12 @@
-import { useEffect, useState } from 'react';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
-/**
- * Slider-friendly volume state, persisted to localStorage so the user's choice
- * survives reloads. Returns a [value, setter] tuple.
- */
+function decode(raw: string): number | null {
+  const n = parseFloat(raw);
+  return Number.isNaN(n) ? null : Math.max(0, Math.min(1, n));
+}
+const encode = String;
+
+/** Slider-friendly 0-1 volume, persisted so the user's choice survives reloads. */
 export function useVolume(key: string, defaultValue: number): [number, (v: number) => void] {
-  const [value, setValue] = useState<number>(() => {
-    if (typeof window === 'undefined') return defaultValue;
-    const raw = window.localStorage.getItem(key);
-    if (raw == null) return defaultValue;
-    const n = parseFloat(raw);
-    if (Number.isNaN(n)) return defaultValue;
-    return Math.max(0, Math.min(1, n));
-  });
-
-  useEffect(() => {
-    window.localStorage.setItem(key, String(value));
-  }, [key, value]);
-
-  return [value, setValue];
+  return usePersistentState(key, decode, encode, () => defaultValue);
 }

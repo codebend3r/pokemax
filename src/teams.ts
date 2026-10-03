@@ -1,4 +1,4 @@
-import { GAMES_BY_REGION, type GameId } from '@/trainers';
+import { REGIONS, type GameId, type Region } from '@/games';
 
 export interface TeamPick {
   /** PokeAPI species slug. */
@@ -675,7 +675,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
       },
     ],
   },
-  'lets-go': {
+  'lets-go-pikachu-lets-go-eevee': {
     title: 'Partner-bonus picks',
     note: 'Dex capped at 151 + Meltan; anime-style picks with partner bonuses.',
     team: [
@@ -786,9 +786,7 @@ export const TEAM_BUILDS: Partial<Record<GameId, TeamBuild>> = {
 };
 
 /** Games that have a curated team, grouped by region and ordered by release date. */
-export const TEAM_REGIONS: { region: string; note?: string; games: GameId[] }[] =
-  GAMES_BY_REGION.map(({ region, note, games }) => ({
-    region,
-    note,
-    games: games.filter((g) => TEAM_BUILDS[g]),
-  })).filter(({ games }) => games.length > 0);
+export const TEAM_REGIONS: Region[] = REGIONS.map((r) => ({
+  ...r,
+  games: r.games.filter((g) => TEAM_BUILDS[g]),
+})).filter(({ games }) => games.length > 0);

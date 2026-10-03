@@ -1,0 +1,162 @@
+// The Pokédex indexes — everything the grid, search, filters, and the
+// Pokémon card read — each fetched once per session behind a `memoAsync`.
+import { memoAsync } from '@/async';
+import {
+  fetchEvolutionChain,
+  fetchGenerationList,
+  fetchPokemon,
+  fetchPokemonList,
+  fetchSpecies,
+  fetchTypeMembers,
+} from '@/api';
+import { GENERATIONS } from '@/generations';
+import { TYPES, type PokeType } from '@/typeChart';
+import { categorizeForm, formLabel } from '@/forms';
+import type { Form } from '@/routes';
+import type { AltForm, BaseSpecies, DexEntry, FormCategory } from '@/types';
+
+/**
+ * Splits a variety slug into its base species and form suffix by the longest
+ * dash-separated prefix that names a species: `charizard-mega-x` tries
+ * `charizard-mega`, then `charizard`; `mr-mime-galar` finds `mr-mime`.
+ */
+function parentOf(
+  name: string,
+  byName: Map<string, BaseSpecies>,
+): { base: BaseSpecies; suffix: string } | null {
+  const parts = name.split('-');
+  for (let i = parts.length - 1; i >= 1; i--) {
+    const base = byName.get(parts.slice(0, i).join('-'));
+    if (base) return { base, suffix: name.slice(base.name.length + 1) };
+  }
+  return null;
+}
+
+export type DexRoute =
+  | { status: 'none' }
+  | { status: 'not-found' }
+  | {
+      status: 'found';
+      species: string;
+      form: Form;
+      /** National dex number, once the index has loaded. */
+      baseId: number | null;
+      /** False for a form slug (`/pokedex/charizard-mega-x`) the URL should be rewritten from. */
+      canonical: boolean;
+    };
+
+/**
+ * Resolves `/pokedex/:name?form=` to a species and form BEFORE anything is
+ * fetched. Until the index loads, the name is taken as a species — the
+ * canonical shape of every link the app writes.
+ */
+export function resolveDexRoute(name: string | null, form: Form, index: BaseSpecies[]): DexRoute {
+  if (name === null) return { status: 'none' };
+  if (index.length === 0) {
+    return { status: 'found', species: name, form, baseId: null, canonical: true };
+  }
+  const byName = new Map(index.map((s) => [s.name, s]));
+  const exact = byName.get(name);
+  if (exact) return { status: 'found', species: name, form, baseId: exact.id, canonical: true };
+  const parent = parentOf(name, byName);
+  if (!parent) return { status: 'not-found' };
+  return {
+    status: 'found',
+    species: parent.base.name,
+    form: parent.suffix,
+    baseId: parent.base.id,
+    canonical: false,
+  };
+}
+
+/** Every base species across all generations, national-dex order. */
+export const speciesIndex = memoAsync(async (): Promise<BaseSpecies[]> => {
+  const lists = await Promise.all(GENERATIONS.map((g) => fetchGenerationList(g.num)));
+  return lists.flat().sort((a, b) => a.id - b.id);
+});
+
+/** Alternate forms (Mega, Gmax, regional, battle forms), matched to their base species. */
+export const formIndex = memoAsync(async (): Promise<AltForm[]> => {
+  const [species, varieties] = await Promise.all([speciesIndex.get(), fetchPokemonList()]);
+  const byName = new Map(species.map((s) => [s.name, s]));
+
+  const forms: AltForm[] = [];
+  for (const { name, id } of varieties) {
+    if (id < 10000) continue; // skip base species (already in main list)
+
+    const parent = parentOf(name, byName);
+    if (!parent) continue;
+    const { base, suffix } = parent;
+
+    forms.push({
+      kind: 'form',
+      name,
+      id,
+      gen: base.gen,
+      speciesName: base.name,
+      speciesId: base.id,
+      formLabel: formLabel(suffix),
+      formCategory: categorizeForm(suffix),
+    });
+  }
+  return forms.sort((a, b) => a.id - b.id);
+});
+
+async function fetchTypeIndex(): Promise<Map<number, PokeType[]>> {
+  const members = await Promise.all(TYPES.map(fetchTypeMembers));
+  const map = new Map<number, PokeType[]>();
+  TYPES.forEach((type, i) => {
+    for (const { id, slot } of members[i]) {
+      const list = map.get(id) ?? [];
+      list[slot - 1] = type;
+      map.set(id, list);
+    }
+  });
+  for (const [k, v] of map) {
+    map.set(
+      k,
+      v.filter((t): t is PokeType => Boolean(t)),
+    );
+  }
+  return map;
+}
+
+/** Pokémon id → its types, built from the 18 type endpoints fetched in parallel. */
+export const typeIndex = memoAsync(fetchTypeIndex);
+
+/**
+ * `/pokemon/{id}` or `/pokemon/{name}`. Base species are fetched by id: a
+ * species name is not always a Pokémon name (`deoxys` vs `deoxys-normal`).
+ */
+export const pokemonData = memoAsync(fetchPokemon);
+
+/** A species plus its evolution chain — the chain URL only comes from the species. */
+export const speciesDetails = memoAsync(async (name: string) => {
+  const species = await fetchSpecies(name);
+  const chain = await fetchEvolutionChain(species.evolution_chain.url);
+  return { species, chain };
+});
+
+/**
+ * The grid's entries. With no form category on: every base species. With
+ * some on: only the species that have a matching form, each followed by
+ * those forms. Then the generation filter applies to both.
+ */
+export function filterDex(
+  species: BaseSpecies[],
+  forms: AltForm[],
+  formCategories: ReadonlySet<FormCategory>,
+  gens: ReadonlySet<number>,
+): DexEntry[] {
+  let entries: DexEntry[] = species;
+  if (formCategories.size > 0) {
+    const matching = forms.filter((f) => formCategories.has(f.formCategory));
+    const parents = new Set(matching.map((f) => f.speciesName));
+    const baseId = (e: DexEntry) => (e.kind === 'form' ? e.speciesId : e.id);
+    entries = [...species.filter((s) => parents.has(s.name)), ...matching].sort(
+      // Base before its forms: a form's own id is always in the 10000s.
+      (a, b) => baseId(a) - baseId(b) || a.id - b.id,
+    );
+  }
+  return gens.size === 0 ? entries : entries.filter((e) => gens.has(e.gen));
+}

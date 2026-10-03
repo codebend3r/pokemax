@@ -1,4 +1,4 @@
-import { REGIONS } from '@/generations';
+import type { GameId } from '@/games';
 
 // Trainer browser data — types + curated fixture set.
 //
@@ -6,117 +6,11 @@ import { REGIONS } from '@/generations';
 // `TrainerCard`, etc.) import from here. Pokémon / move / item slugs match
 // PokeAPI conventions so they round-trip into the existing detail components.
 
-export type GameId =
-  | 'red-blue'
-  | 'yellow'
-  | 'gold-silver'
-  | 'crystal'
-  | 'ruby-sapphire'
-  | 'emerald'
-  | 'firered-leafgreen'
-  | 'diamond-pearl'
-  | 'platinum'
-  | 'heartgold-soulsilver'
-  | 'black-white'
-  | 'black-2-white-2'
-  | 'x-y'
-  | 'omega-ruby-alpha-sapphire'
-  | 'sun-moon'
-  | 'ultra-sun-ultra-moon'
-  | 'lets-go'
-  | 'sword-shield'
-  | 'brilliant-diamond-shining-pearl'
-  | 'legends-arceus'
-  | 'scarlet-violet';
-
-export const GAME_LABELS: Record<GameId, string> = {
-  'red-blue': 'Red / Blue',
-  yellow: 'Yellow',
-  'gold-silver': 'Gold / Silver',
-  crystal: 'Crystal',
-  'ruby-sapphire': 'Ruby / Sapphire',
-  emerald: 'Emerald',
-  'firered-leafgreen': 'FireRed / LeafGreen',
-  'diamond-pearl': 'Diamond / Pearl',
-  platinum: 'Platinum',
-  'heartgold-soulsilver': 'HeartGold / SoulSilver',
-  'black-white': 'Black / White',
-  'black-2-white-2': 'Black 2 / White 2',
-  'x-y': 'X / Y',
-  'omega-ruby-alpha-sapphire': 'Omega Ruby / Alpha Sapphire',
-  'sun-moon': 'Sun / Moon',
-  'ultra-sun-ultra-moon': 'Ultra Sun / Ultra Moon',
-  'lets-go': "Let's Go Pikachu / Eevee",
-  'sword-shield': 'Sword / Shield',
-  'brilliant-diamond-shining-pearl': 'Brilliant Diamond / Shining Pearl',
-  'legends-arceus': 'Legends: Arceus',
-  'scarlet-violet': 'Scarlet / Violet',
-};
-
-const GAME_IDS: ReadonlySet<string> = new Set(Object.keys(GAME_LABELS));
-
-function isGameId(v: string): v is GameId {
-  return GAME_IDS.has(v);
-}
-
-// Every `GameId` is already its PokéAPI version-group slug except the Let's Go
-// pair, which the trainer browser shortened before the obtain dataset existed.
-const VERSION_GROUP_GAME: Record<string, GameId> = {
-  'lets-go-pikachu-lets-go-eevee': 'lets-go',
-};
-
-function gameIdForVersionGroup(vg: string): GameId | null {
-  const aliased = VERSION_GROUP_GAME[vg];
-  if (aliased) return aliased;
-  return isGameId(vg) ? vg : null;
-}
-
-/**
- * Games grouped by the region they take place in. Derived from the canonical
- * `REGIONS` model in `generations.ts` so the trainer browser, the teams
- * browser, and the obtain panel can never disagree on region order.
- */
-export const GAMES_BY_REGION: { region: string; note?: string; games: GameId[] }[] = REGIONS.map(
-  ({ name, note, versionGroups }) => ({
-    region: name,
-    note,
-    games: versionGroups.map(gameIdForVersionGroup).filter((g): g is GameId => g !== null),
-  }),
-).filter(({ games }) => games.length > 0);
-
 /** Best available portrait — animated APNG when the trainer has one, else the static VS sprite. */
 export function trainerPortraitUrl(t: Trainer): string | undefined {
   if (t.animSprite) return `${import.meta.env.BASE_URL}sprites/trainers/${t.animSprite}`;
   return t.spriteUrl;
 }
-
-/** Region-grouped chronological game order (regions first-appearance, releases within). */
-export const GAME_ORDER: GameId[] = GAMES_BY_REGION.flatMap((r) => r.games);
-
-/** Core-series generation each game belongs to — used for Smogon set lookups. */
-export const GAME_GENS: Record<GameId, number> = {
-  'red-blue': 1,
-  yellow: 1,
-  'gold-silver': 2,
-  crystal: 2,
-  'ruby-sapphire': 3,
-  emerald: 3,
-  'firered-leafgreen': 3,
-  'diamond-pearl': 4,
-  platinum: 4,
-  'heartgold-soulsilver': 4,
-  'black-white': 5,
-  'black-2-white-2': 5,
-  'x-y': 6,
-  'omega-ruby-alpha-sapphire': 6,
-  'sun-moon': 7,
-  'ultra-sun-ultra-moon': 7,
-  'lets-go': 7,
-  'sword-shield': 8,
-  'brilliant-diamond-shining-pearl': 8,
-  'legends-arceus': 8,
-  'scarlet-violet': 9,
-};
 
 export interface TrainerPokemon {
   /** PokeAPI species slug, e.g. `pikachu`. */

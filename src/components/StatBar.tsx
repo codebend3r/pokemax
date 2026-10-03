@@ -1,11 +1,5 @@
-const LABELS: Record<string, string> = {
-  hp: 'HP',
-  attack: 'ATK',
-  defense: 'DEF',
-  'special-attack': 'SP.ATK',
-  'special-defense': 'SP.DEF',
-  speed: 'SPD',
-};
+import { statLabel } from '@/stats';
+
 const BAR_WIDTH = 16;
 const BAR_MAX = 200;
 
@@ -19,7 +13,7 @@ export default function StatBar({ name, value }: Props) {
   const empty = BAR_WIDTH - filled;
   return (
     <div className="crt-stat">
-      <span>{LABELS[name] ?? name.toUpperCase()}</span>
+      <span>{statLabel(name)}</span>
       <span className="crt-stat-bar">
         {'█'.repeat(filled)}
         {'░'.repeat(empty)}

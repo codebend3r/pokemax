@@ -1,34 +1,9 @@
-import { defensiveMatchups, type PokeType } from '@/typeChart';
-import type { GameId } from '@/trainers';
-
-/**
- * Maps a `GameId` to the latest generation whose Pokédex was canonically
- * available in that game. Used to cap the candidate pool when picking a
- * counter team — recommending a Gen 9 Fairy against Brock would be silly.
- */
-export const GAME_MAX_GEN: Record<GameId, number> = {
-  'red-blue': 1,
-  yellow: 1,
-  'gold-silver': 2,
-  crystal: 2,
-  'ruby-sapphire': 3,
-  emerald: 3,
-  'firered-leafgreen': 3,
-  'diamond-pearl': 4,
-  platinum: 4,
-  'heartgold-soulsilver': 4,
-  'black-white': 5,
-  'black-2-white-2': 5,
-  'x-y': 6,
-  'omega-ruby-alpha-sapphire': 6,
-  'sun-moon': 7,
-  'ultra-sun-ultra-moon': 7,
-  'lets-go': 1,
-  'sword-shield': 8,
-  'brilliant-diamond-shining-pearl': 4,
-  'legends-arceus': 8,
-  'scarlet-violet': 9,
-};
+import { memoAsync } from '@/async';
+import { GAMES } from '@/games';
+import type { Trainer } from '@/trainers';
+import type { DexEntry } from '@/types';
+import { isRecord } from '@/guards';
+import { effectiveness, type PokeType } from '@/typeChart';
 
 interface PSDexEntry {
   num: number;
@@ -84,25 +59,14 @@ export function buildMinLevelMap(dex: Record<string, unknown>): Map<number, numb
   return byNum;
 }
 
-let minLevelsCache: Map<number, number> | null = null;
-let minLevelsInflight: Promise<Map<number, number>> | null = null;
-
-export async function fetchMinLevels(): Promise<Map<number, number>> {
-  if (minLevelsCache) return minLevelsCache;
-  if (!minLevelsInflight) {
-    minLevelsInflight = fetch('https://play.pokemonshowdown.com/data/pokedex.json')
-      .then((r) => {
-        if (!r.ok) throw new Error('pokedex data unavailable');
-        return r.json() as Promise<Record<string, unknown>>;
-      })
-      .then((dex) => {
-        minLevelsCache = buildMinLevelMap(dex);
-        minLevelsInflight = null;
-        return minLevelsCache;
-      });
-  }
-  return minLevelsInflight;
-}
+/** Dex num → earliest level the species can exist at, from Showdown's dex. */
+export const minLevels = memoAsync(async (): Promise<Map<number, number>> => {
+  const r = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
+  if (!r.ok) throw new Error('pokedex data unavailable');
+  const dex: unknown = await r.json();
+  if (!isRecord(dex)) throw new Error('Malformed pokedex data');
+  return buildMinLevelMap(dex);
+});
 
 export interface CounterPick {
   /** PokeAPI numeric id. */
@@ -121,7 +85,7 @@ export interface CounterPick {
 }
 
 export interface CounterContext {
-  /** From `useTypeIndex` — Pokémon id → its types. */
+  /** From `typeIndex` (`dex.ts`) — Pokémon id → its types. */
   typeIndex: Map<number, PokeType[]>;
   /** Species slug → numeric id. */
   nameToId: Map<string, number>;
@@ -141,11 +105,10 @@ function scoreMatchup(
 
   // Defensive: average multiplier the candidate *takes* from opp's STAB.
   // Lower is better.
-  const candidateDef = defensiveMatchups(candidateTypes);
   let defSum = 0;
   let defMin = Infinity;
   for (const oppType of oppTypes) {
-    const m = candidateDef.find((d) => d.type === oppType)?.multiplier ?? 1;
+    const m = effectiveness(oppType, candidateTypes);
     defSum += m;
     if (m < defMin) defMin = m;
   }
@@ -153,11 +116,10 @@ function scoreMatchup(
 
   // Offensive: average multiplier candidate's STAB deals to opp.
   // Higher is better.
-  const oppDef = defensiveMatchups(oppTypes);
   let offSum = 0;
   let offMax = 0;
   for (const candType of candidateTypes) {
-    const m = oppDef.find((d) => d.type === candType)?.multiplier ?? 1;
+    const m = effectiveness(candType, oppTypes);
     offSum += m;
     if (m > offMax) offMax = m;
   }
@@ -171,21 +133,12 @@ function scoreMatchup(
 }
 
 function rationale(candidateTypes: PokeType[], oppTypes: PokeType[]): string {
-  const candidateDef = defensiveMatchups(candidateTypes);
-  const oppDef = defensiveMatchups(oppTypes);
-
-  const immune: PokeType[] = [];
-  const resists: PokeType[] = [];
-  for (const t of oppTypes) {
-    const m = candidateDef.find((d) => d.type === t)?.multiplier ?? 1;
-    if (m === 0) immune.push(t);
-    else if (m < 1) resists.push(t);
-  }
-  const se: PokeType[] = [];
-  for (const t of candidateTypes) {
-    const m = oppDef.find((d) => d.type === t)?.multiplier ?? 1;
-    if (m >= 2) se.push(t);
-  }
+  const immune = oppTypes.filter((t) => effectiveness(t, candidateTypes) === 0);
+  const resists = oppTypes.filter((t) => {
+    const m = effectiveness(t, candidateTypes);
+    return m > 0 && m < 1;
+  });
+  const se = candidateTypes.filter((t) => effectiveness(t, oppTypes) >= 2);
 
   const parts: string[] = [];
   if (immune.length) parts.push(`immune to ${immune.join('/')}`);
@@ -247,4 +200,34 @@ export function pickCounterTeam(
   });
 
   return team;
+}
+
+/**
+ * The counter team for `trainer`, drawn only from Pokémon a player could
+ * realistically field there: in a dex the game holds, able to EXIST at the
+ * trainer's strongest level given how their line evolves, and — for
+ * early-game trainers with `availableBefore` — catchable by that fight.
+ */
+export function counterTeamFor(
+  trainer: Trainer,
+  index: DexEntry[],
+  typeIndex: Map<number, PokeType[]>,
+  minLevels: Map<number, number>,
+): CounterPick[] {
+  const nameToId = new Map(index.map((s) => [s.name, s.id]));
+  const idToName = new Map(index.map((s) => [s.id, s.name]));
+  const dexGen = GAMES[trainer.game].dexGen;
+  const maxLevel = Math.max(...trainer.team.map((m) => m.level));
+  const fieldable = new Set(
+    index.filter((s) => s.gen <= dexGen && (minLevels.get(s.id) ?? 0) <= maxLevel).map((s) => s.id),
+  );
+  const catchable = trainer.availableBefore
+    ? new Set(trainer.availableBefore.map((slug) => nameToId.get(slug)))
+    : null;
+  return pickCounterTeam(trainer.team, {
+    typeIndex,
+    nameToId,
+    idToName,
+    candidateFilter: (id) => fieldable.has(id) && (!catchable || catchable.has(id)),
+  });
 }

@@ -13,12 +13,6 @@ interface Props {
 
 const ALL_REGIONS: readonly string[] = REGIONS.map((r) => r.name);
 
-// Stale key from the brief collapsed-by-default version — its mount write
-// froze `[]` into storage, which would override the expanded default below.
-if (typeof window !== 'undefined') {
-  window.localStorage.removeItem('pokemax.trainersExpanded');
-}
-
 function normalize(s: string): string {
   return s.toLowerCase().replace(/[-_]/g, ' ');
 }

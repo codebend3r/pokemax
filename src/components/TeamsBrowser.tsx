@@ -10,12 +10,6 @@ interface Props {
   onSelectPokemon: (speciesSlug: string, game: GameId) => void;
 }
 
-// Stale key from the short-lived collapsed-list format — remove so the
-// all-collapsed default holds for visitors who saw that version.
-if (typeof window !== 'undefined') {
-  window.localStorage.removeItem('pokemax.teamsCollapsed');
-}
-
 export default function TeamsBrowser({ onSelectPokemon }: Props) {
   const [filter, setFilter] = useState('');
   const { expanded, toggle, expandAll, collapseAll } = useExpandedRegions('pokemax.teamsExpanded');

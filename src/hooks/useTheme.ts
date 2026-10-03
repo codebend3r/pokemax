@@ -1,28 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export type Theme = 'dark' | 'light';
 
-const KEY = 'pokemax.theme';
+const decode = (raw: string): Theme | null => (raw === 'light' || raw === 'dark' ? raw : null);
+const encode = (theme: Theme) => theme;
+const systemTheme = (): Theme =>
+  window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
-function detectInitial(): Theme {
-  if (typeof window === 'undefined') return 'dark';
-  const stored = window.localStorage.getItem(KEY);
-  if (stored === 'light' || stored === 'dark') return stored;
-  if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-  return 'dark';
-}
-
-export function useTheme(): { theme: Theme; toggle: () => void; set: (t: Theme) => void } {
-  const [theme, setTheme] = useState<Theme>(detectInitial);
+export function useTheme(): { theme: Theme; toggle: () => void } {
+  const [theme, setTheme] = usePersistentState('pokemax.theme', decode, encode, systemTheme);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(KEY, theme);
   }, [theme]);
 
-  return {
-    theme,
-    set: setTheme,
-    toggle: () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')),
-  };
+  return { theme, toggle: () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')) };
 }

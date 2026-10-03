@@ -1,0 +1,5 @@
+# File-based settings override the Netlify UI, so the build command lives here
+# next to the `package.json` scripts it calls instead of drifting out of sync.
+[build]
+command = "bun run build"
+publish = "dist"

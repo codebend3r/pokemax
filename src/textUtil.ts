@@ -1,3 +1,5 @@
+import type { SpeciesResponse } from '@/types';
+
 /**
  * PokeAPI flavor text and item descriptions are stored with hard line breaks from
  * the game's text boxes — \n (Enter), \x0c (form feed), ­ (soft hyphen) inside
@@ -21,4 +23,17 @@ export function cleanFlavorText(raw: string): string {
       .replace(/\s+/g, ' ')
       .trim()
   );
+}
+
+/** Every distinct English entry, with the versions that share its text. */
+export function dedupeEntries(species: SpeciesResponse): { text: string; versions: string[] }[] {
+  const byText = new Map<string, string[]>();
+  for (const e of species.flavor_text_entries) {
+    if (e.language.name !== 'en') continue;
+    const text = cleanFlavorText(e.flavor_text);
+    const versions = byText.get(text);
+    if (versions) versions.push(e.version.name);
+    else byText.set(text, [e.version.name]);
+  }
+  return Array.from(byText, ([text, versions]) => ({ text, versions }));
 }

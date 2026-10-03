@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAsync } from '@/async';
 import { pokemonData } from '@/dex';
 import type { DexEntry, PokemonResponse } from '@/types';
+import { pokeapiShowdownGif } from '@/sprites';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 
 interface Props {
@@ -26,9 +27,6 @@ const STAT_LABELS: Record<string, string> = {
   'special-defense': 'SP.DEF',
   speed: 'SPD',
 };
-
-const SHOWDOWN_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
 
 function pretty(name: string): string {
   return name
@@ -147,11 +145,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
 
       <div className="crt-compare-row crt-compare-names">
         <div className="crt-compare-col">
-          <img
-            src={`${SHOWDOWN_BASE}/${base.id}.gif`}
-            alt={base.name}
-            className="crt-compare-sprite"
-          />
+          <img src={pokeapiShowdownGif(base.id)} alt={base.name} className="crt-compare-sprite" />
           <div className="crt-compare-name">{pretty(base.name).toUpperCase()}</div>
           <div className="crt-compare-types">
             {base.types.map((t) => (
@@ -162,7 +156,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
         <div className="crt-compare-vs">VS</div>
         <div className="crt-compare-col">
           <img
-            src={`${SHOWDOWN_BASE}/${targetData.id}.gif`}
+            src={pokeapiShowdownGif(targetData.id)}
             alt={targetData.name}
             className="crt-compare-sprite"
           />

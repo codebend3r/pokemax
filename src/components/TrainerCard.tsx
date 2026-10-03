@@ -7,7 +7,7 @@ import { useAsync } from '@/async';
 import { typeIndex } from '@/dex';
 import { TYPE_COLORS } from '@/typeChart';
 import type { DexEntry } from '@/types';
-import { showdownSpriteUrl } from '@/showdownSprite';
+import { showdownSpriteUrl } from '@/sprites';
 
 interface Props {
   trainer: Trainer;

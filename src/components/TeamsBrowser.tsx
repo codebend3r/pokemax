@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { TEAM_BUILDS, TEAM_REGIONS, type TeamPick } from '@/teams';
 import { GAMES, type GameId } from '@/games';
-import { localAnimUrl, showdownAnimSpriteUrl, showdownSpriteUrl } from '@/showdownSprite';
+import { useFallbackSrc } from '@/hooks/useFallbackSrc';
+import { showdownSpriteUrl, teamPickAnimations } from '@/sprites';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
 interface Props {
@@ -131,23 +132,13 @@ function GameTeamCard({
   );
 }
 
-/** Animated-GIF sources in preference order: local 2D → gen5ani → ani (3D-style). */
-function animSources(species: string): string[] {
-  const sources: string[] = [];
-  const local = localAnimUrl(species);
-  if (local) sources.push(local);
-  sources.push(showdownAnimSpriteUrl(species), showdownAnimSpriteUrl(species, 'ani'));
-  return sources;
-}
-
 function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: string) => void }) {
-  // Walk the source chain on load errors; past the end, CSS bounce takes over.
-  const [animLevel, setAnimLevel] = useState(0);
-  const animSrc = animSources(pick.species)[animLevel] ?? null;
+  // Past the end of the chain, CSS bounce on the still takes over.
+  const anim = useFallbackSrc(teamPickAnimations(pick.species));
   return (
     <button
       type="button"
-      className={'crt-team-pick' + (animSrc ? ' has-anim' : ' no-anim')}
+      className={'crt-team-pick' + (anim.src ? ' has-anim' : ' no-anim')}
       onClick={() => onSelect(pick.species)}
       title={`View ${pick.species}`}
     >
@@ -159,15 +150,15 @@ function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: s
           loading="lazy"
           decoding="async"
         />
-        {animSrc && (
+        {anim.src && (
           <img
             className="team-pick-anim"
-            src={animSrc}
+            src={anim.src}
             alt=""
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            onError={() => setAnimLevel((l) => l + 1)}
+            onError={anim.next}
           />
         )}
       </span>

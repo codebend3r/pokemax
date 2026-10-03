@@ -170,7 +170,7 @@ describe('PokemonCard', () => {
   // GIF (constructed from id), not the fixture's `front_default`. These two
   // assertions still describe the original sprite ladder, so they stay in the
   // file as a pointer for whoever updates the sprite spec — they just don't run
-  // until then. See pickSprite() in components/PokemonCard.tsx.
+  // until then. See `cardSprites` in `sprites.ts`.
   it.skip('renders the static flat pixel sprite by default (2D, Gen 6+)', () => {
     render(
       <PokemonCard

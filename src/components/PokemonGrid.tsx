@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useFallbackSrc } from '@/hooks/useFallbackSrc';
+import { gridAnimations, gridStills } from '@/sprites';
 import type { DexEntry } from '@/types';
 import type { PokeType } from '@/typeChart';
 import type { ViewMode } from '@/hooks/useViewMode';
@@ -23,14 +25,6 @@ interface Props {
   onClearTypes: () => void;
 }
 
-const PIXEL_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
-const BW_ANIM_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
-const SHOWDOWN_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
-
-const MAX_BW_ID = 649;
-
 function pretty(name: string): string {
   return name.replace(/-/g, ' ');
 }
@@ -51,50 +45,38 @@ function GridCell({
   selected: boolean;
   onSelect: (name: string) => void;
 }) {
-  const [stillOk, setStillOk] = useState(true);
-  const [animOk, setAnimOk] = useState(true);
-  const stillSrc = stillOk
-    ? `${PIXEL_BASE}/${s.id}.png`
-    : parentId
-      ? `${PIXEL_BASE}/${parentId}.png`
-      : null;
-  const animSrc = animOk
-    ? s.id <= MAX_BW_ID
-      ? `${BW_ANIM_BASE}/${s.id}.gif`
-      : `${SHOWDOWN_BASE}/${s.id}.gif`
-    : parentId
-      ? `${SHOWDOWN_BASE}/${parentId}.gif`
-      : null;
+  const still = useFallbackSrc(gridStills(s.id, parentId));
+  const anim = useFallbackSrc(gridAnimations(s.id, parentId));
 
   return (
     <button
       type="button"
       className={
-        'crt-grid-cell' + (selected ? ' active' : '') + (animSrc ? ' has-anim' : ' no-anim')
+        'crt-grid-cell' + (selected ? ' active' : '') + (anim.src ? ' has-anim' : ' no-anim')
       }
       onClick={() => onSelect(s.name)}
     >
       <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>
       <span className="crt-grid-sprite">
-        {stillSrc && (
+        {still.src && (
           <img
             className="grid-still"
-            src={stillSrc}
+            src={still.src}
             alt={s.name}
             loading="lazy"
             decoding="async"
-            onError={() => setStillOk(false)}
+            onError={still.next}
           />
         )}
-        {animSrc && (
+        {anim.src && (
           <img
             className="grid-anim"
-            src={animSrc}
+            src={anim.src}
             alt=""
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            onError={() => setAnimOk(false)}
+            onError={anim.next}
           />
         )}
       </span>

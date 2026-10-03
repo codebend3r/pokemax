@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
 import { GAMES, GAME_ORDER, REGIONS, type GameId } from '@/games';
 import { trainerPortraitUrl, type Trainer } from '@/trainers';
-import { showdownSpriteUrl } from '@/showdownSprite';
+import { showdownSpriteUrl } from '@/sprites';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
 
 interface Props {

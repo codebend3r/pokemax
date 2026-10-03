@@ -9,7 +9,7 @@ import AbilityList from '@/components/AbilityList';
 import EvolutionChain from '@/components/EvolutionChain';
 import MoveList from '@/components/MoveList';
 import ShinyToggle from '@/components/ShinyToggle';
-import SpriteToggle, { type SpriteView } from '@/components/SpriteToggle';
+import SpriteToggle from '@/components/SpriteToggle';
 import FormSwitcher from '@/components/FormSwitcher';
 import Section from '@/components/Section';
 import ComparePanel from '@/components/ComparePanel';
@@ -21,8 +21,9 @@ import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 import { obtainFiles } from '@/obtain/files';
 import { GAMES, GAME_ORDER, type GameId } from '@/games';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
-import { varietyFromForm, formFromVariety } from '@/routes';
-import { localAnimUrl, pokeapiToShowdownSlug } from '@/showdownSprite';
+import { varietyFromForm, formFromVariety, type Dimension } from '@/routes';
+import { cardSprites } from '@/sprites';
+import { useAnyLoads, useFallbackSrc } from '@/hooks/useFallbackSrc';
 import { cryUrlById, cryUrlOf, playCry } from '@/cry';
 
 interface Props {
@@ -34,8 +35,8 @@ interface Props {
   chain: EvolutionChainResponse;
   shiny: boolean;
   onShinyChange: (v: boolean) => void;
-  view: SpriteView;
-  onViewChange: (view: SpriteView) => void;
+  view: Dimension;
+  onViewChange: (view: Dimension) => void;
   /** `base` or a variety-slug suffix (`mega-x`, `gmax`, `alola`, etc.). */
   form: string;
   onFormChange: (form: string) => void;
@@ -54,80 +55,6 @@ interface Props {
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
-const BW_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
-const SHOWDOWN_BASE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown';
-// Frame-animated fan sprites in 5th-gen BW pixel-art style, mirrored by
-// Pokémon Showdown. `ani/` is the main Smogon Sprite Project set; `gen5ani/`
-// is an older alternate set that covers some newer DLC/legendary additions
-// (e.g. Terapagos, Miraidon) that `ani/` doesn't have yet.
-const SD_ANI = 'https://play.pokemonshowdown.com/sprites/ani';
-const SD_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/ani-shiny';
-const SD_GEN5_ANI = 'https://play.pokemonshowdown.com/sprites/gen5ani';
-const SD_GEN5_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5ani-shiny';
-const MAX_BW_ID = 649;
-
-interface SpritePick {
-  url: string;
-  /** true when the rendered image is a real frame-animated GIF */
-  animated: boolean;
-}
-
-function spriteCandidates(p: PokemonResponse, shiny: boolean, view: SpriteView): SpritePick[] {
-  const sdSlug = pokeapiToShowdownSlug(p.name);
-  // Locally-shipped 2D GIF (no shiny variants — only offer for regular).
-  const local = shiny ? null : localAnimUrl(p.name);
-  const list: SpritePick[] = [];
-  if (view === '2d') {
-    // 2D shows ONLY frame-animated pixel art; the parent probes and hides the
-    // 2D toggle entirely if none resolves, so there's no static fallback here.
-    if (local) list.push({ url: local, animated: true });
-    if (p.id <= MAX_BW_ID) {
-      // Gen 1-5 base species: BW animated pixel art — iconic 2D experience.
-      list.push({
-        url: shiny ? `${BW_BASE}/shiny/${p.id}.gif` : `${BW_BASE}/${p.id}.gif`,
-        animated: true,
-      });
-    } else {
-      // Gen 6+ official: PokeAPI's Showdown mirror, indexed by id.
-      list.push({
-        url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
-        animated: true,
-      });
-    }
-    // Smogon Sprite Project fan animation — covers most Gen 6-9 forms
-    // including Gmax / Eternamax that the PokeAPI mirror is missing.
-    list.push({ url: `${shiny ? SD_ANI_SHINY : SD_ANI}/${sdSlug}.gif`, animated: true });
-    // Showdown's older `gen5ani/` set — has fan animations for newer DLC
-    // additions that the main `ani/` directory hasn't picked up yet.
-    list.push({
-      url: `${shiny ? SD_GEN5_ANI_SHINY : SD_GEN5_ANI}/${sdSlug}.gif`,
-      animated: true,
-    });
-    return list;
-  }
-  // 3D mode: a frame-animated Showdown GIF whenever one exists.
-  list.push({
-    url: shiny ? `${SHOWDOWN_BASE}/shiny/${p.id}.gif` : `${SHOWDOWN_BASE}/${p.id}.gif`,
-    animated: true,
-  });
-  // PokeAPI mirror missing — try Showdown's direct ani as another animated source.
-  list.push({ url: `${shiny ? SD_ANI_SHINY : SD_ANI}/${sdSlug}.gif`, animated: true });
-  // Locally-shipped GIF beats a static image even in 3D mode.
-  if (local) list.push({ url: local, animated: true });
-  // Last resort — official artwork. Stays truly static (no CSS bob); should
-  // only ever appear for the handful of forms with no animated source at all.
-  const art = p.sprites.other['official-artwork'];
-  list.push({
-    url: shiny
-      ? (art.front_shiny ?? p.sprites.front_shiny ?? p.sprites.front_default ?? '')
-      : (art.front_default ?? p.sprites.front_default ?? ''),
-    animated: false,
-  });
-  return list;
-}
-
 interface Particle {
   id: number;
   type: 'heart' | 'star' | 'sparkle';
@@ -145,27 +72,16 @@ function CardSprite({
 }: {
   pokemon: PokemonResponse;
   shiny: boolean;
-  view: SpriteView;
+  view: Dimension;
   cryVolume: number;
   onCryVolumeChange?: (v: number) => void;
 }) {
-  const [fallbacks, setFallbacks] = useState<Record<SpriteView, number>>({ '2d': 0, '3d': 0 });
   const [reacting, setReacting] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
-  const fallback = fallbacks[view];
-  const candidates = spriteCandidates(pokemon, shiny, view);
-  const bumpFallback = () =>
-    setFallbacks((prev) => ({
-      ...prev,
-      [view]: Math.min(candidates.length - 1, prev[view] + 1),
-    }));
-  const sprite = candidates[Math.min(fallback, candidates.length - 1)];
-
-  // Reset the per-view fallback ladder whenever the Pokemon or shiny state
-  // changes — the candidate list differs (local GIFs have no shiny variant).
-  useEffect(() => {
-    setFallbacks({ '2d': 0, '3d': 0 });
-  }, [pokemon.id, shiny]);
+  const candidates = cardSprites(pokemon, shiny, view);
+  const { src, next } = useFallbackSrc(candidates.map((c) => c.url));
+  // Past the last candidate, keep showing it rather than an empty frame.
+  const sprite = candidates.find((c) => c.url === src) ?? candidates[candidates.length - 1];
   const cryUrl = cryUrlOf(pokemon);
   const replayCry = () => {
     if (cryUrl) playCry(pokemon.name, cryUrl);
@@ -198,12 +114,12 @@ function CardSprite({
   return (
     <div className="crt-card-sprite-wrap">
       <img
-        key={`${view}-${shiny}-${pokemon.name}-${fallback}`}
+        key={sprite.url}
         className={className}
         src={sprite.url}
         alt={pokemon.name}
         onClick={handleSpriteClick}
-        onError={bumpFallback}
+        onError={next}
         title="click to play cry"
       />
       {particles.map((p) => (
@@ -289,42 +205,9 @@ export default function PokemonCard({
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
   // so the MOVES section isn't blank when viewing those forms.
   const movesPokemon = pokemon.moves.length > 0 ? pokemon : base;
-  // 2D shows only frame-animated pixel art. Gen 1-5 base species always have
-  // a BW animation. For everything else, probe in priority order: PokeAPI's
-  // Showdown mirror by id → Smogon's fan animation by slug. If neither URL
-  // resolves, hide the 2D toggle and force the view to 3D. 3D always has
-  // something — its static fallback gets a CSS bob, which 2D does not.
-  // Known-good 2D sources don't need probing; everything else is probed async below.
-  const has2DKnownGood = pokemon.id <= MAX_BW_ID || Boolean(localAnimUrl(pokemon.name));
-  const [has2DProbed, setHas2DProbed] = useState(true);
-  const [prevProbeTarget, setPrevProbeTarget] = useState(pokemon.name);
-  if (prevProbeTarget !== pokemon.name) {
-    setPrevProbeTarget(pokemon.name);
-    setHas2DProbed(true);
-  }
-  useEffect(() => {
-    if (has2DKnownGood) return;
-    let cancelled = false;
-    const probe = (url: string) =>
-      new Promise<boolean>((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = url;
-      });
-    (async () => {
-      const slug = pokeapiToShowdownSlug(pokemon.name);
-      const found =
-        (await probe(`${SHOWDOWN_BASE}/${pokemon.id}.gif`)) ||
-        (await probe(`${SD_ANI}/${slug}.gif`)) ||
-        (await probe(`${SD_GEN5_ANI}/${slug}.gif`));
-      if (!cancelled) setHas2DProbed(found);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [pokemon.id, pokemon.name, has2DKnownGood]);
-  const has2D = has2DKnownGood || has2DProbed;
+  // 2D shows only frame-animated pixel art. When none of the 2D candidates
+  // loads, hide the 2D toggle and force 3D — 3D always has something.
+  const has2D = useAnyLoads(cardSprites(pokemon, false, '2d').map((c) => c.url));
   useEffect(() => {
     if (!has2D && view === '2d') onViewChange('3d');
   }, [has2D, view, onViewChange]);

@@ -24,7 +24,6 @@ Pokemax is a retro CRT-styled Pokédex: a Vite + React 19 + TypeScript single-pa
 - Tests live in `src/__tests__/<name>.test.{ts,tsx}`. New components and hooks get a minimal test for their default state and main interactions.
 - Use `@testing-library/react` patterns: query by role or label, drive with `userEvent`. Don't assert on CSS class names or DOM structure when a role or label query works.
 - Don't mock `localStorage` per test. `src/__tests__/setup.ts` installs an in-memory shim, because Node 22+ ships an empty experimental `localStorage` that shadows jsdom's.
-- Don't un-skip the two quarantined `PokemonCard` sprite tests (`it.skip`) unless that's the task. They describe the old static sprite ladder and need a sprite-spec update.
 
 ## TypeScript
 

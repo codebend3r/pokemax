@@ -19,7 +19,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "system-check": "bun run --sequential format:check typecheck lint test build",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install --reset-hooks-path"
   },
   "dependencies": {
     "react": "19.2.7",

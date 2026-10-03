@@ -1,4 +1,4 @@
-# CLAUDE.md — guardrails for this repo
+# Guardrails for this repo (CLAUDE.md, AGENTS.md)
 
 Short, opinionated rules. When something here conflicts with a default behavior, **this file wins**.
 

@@ -3,7 +3,7 @@ import type { EvolutionChainResponse, DexEntry, PokemonResponse, SpeciesResponse
 import { groupMoves } from '@/moves';
 import { getGen } from '@/generations';
 import { idFromUrl } from '@/api';
-import { CRY_VOLUME_SCALE, cleanFlavorText } from '@/textUtil';
+import { cleanFlavorText } from '@/textUtil';
 import StatBar from '@/components/StatBar';
 import AbilityList from '@/components/AbilityList';
 import EvolutionChain from '@/components/EvolutionChain';
@@ -23,8 +23,7 @@ import { GAMES, GAME_ORDER, type GameId } from '@/games';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
 import { localAnimUrl, pokeapiToShowdownSlug } from '@/showdownSprite';
-import { cryOverrideFor } from '@/cryOverrides';
-import { playGmaxCryWithEffects } from '@/gmaxAudio';
+import { cryUrlById, cryUrlOf, playCry } from '@/cry';
 
 interface Props {
   /** The variety on screen. */
@@ -43,13 +42,15 @@ interface Props {
   onSelectEvolution?: (name: string) => void;
   /** Navigates back to the Pokédex grid. */
   onBack?: () => void;
-  cryAudioRef?: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume?: number;
   onCryVolumeChange?: (v: number) => void;
   /** Pool of species the compare picker can choose from */
   speciesPool?: DexEntry[];
-  /** Preselects the competitive-build game and scrolls to the section (TEAMS picks). */
-  initialBuildGame?: GameId | null;
+  /**
+   * The pick that opened the card — a fresh object per pick. A `buildGame`
+   * (TEAMS / trainer picks) preselects that game's build and scrolls to it.
+   */
+  pick?: { buildGame: GameId | null } | null;
 }
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
@@ -66,37 +67,6 @@ const SD_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/ani-shiny';
 const SD_GEN5_ANI = 'https://play.pokemonshowdown.com/sprites/gen5ani';
 const SD_GEN5_ANI_SHINY = 'https://play.pokemonshowdown.com/sprites/gen5ani-shiny';
 const MAX_BW_ID = 649;
-
-function isGmaxVariety(name: string): boolean {
-  return /-(g|eterna)max$/.test(name);
-}
-
-/**
- * Plays a Pokémon cry.
- * - Non-Gmax: direct `<audio>` play.
- * - Gmax with override (every Gmax form has one): the override clip already
- *   contains the Dynamax jingle + per-form cry baked together — play as-is.
- * - Gmax without override (fallback only): route through
- *   `playGmaxCryWithEffects` for the Web Audio pitch/reverb/bass chain.
- */
-function playCryWithIntro(cryAudio: HTMLAudioElement, pokemonName: string, volume: number): void {
-  const playDirect = () => {
-    cryAudio.currentTime = 0;
-    cryAudio.volume = volume * CRY_VOLUME_SCALE;
-    cryAudio.play().catch(() => {});
-  };
-  if (!isGmaxVariety(pokemonName) || cryOverrideFor(pokemonName) !== null) {
-    playDirect();
-    return;
-  }
-  if (cryAudio.src) {
-    playGmaxCryWithEffects(cryAudio.src, volume * CRY_VOLUME_SCALE).then((ok) => {
-      if (!ok) playDirect();
-    });
-  } else {
-    playDirect();
-  }
-}
 
 interface SpritePick {
   url: string;
@@ -170,21 +140,14 @@ function CardSprite({
   pokemon,
   shiny,
   view,
-  preloadedAudio,
   cryVolume,
   onCryVolumeChange,
-  expectedVariety,
 }: {
   pokemon: PokemonResponse;
   shiny: boolean;
   view: SpriteView;
-  preloadedAudio: React.MutableRefObject<HTMLAudioElement | null>;
   cryVolume: number;
   onCryVolumeChange?: (v: number) => void;
-  /** The variety the URL says should be displayed. We're mid-transition when
-   * `pokemon.name !== expectedVariety`; auto-play should sit out those frames
-   * to avoid playing the base cry over a Mega/Gmax/regional pre-warm. */
-  expectedVariety: string;
 }) {
   const [fallbacks, setFallbacks] = useState<Record<SpriteView, number>>({ '2d': 0, '3d': 0 });
   const [reacting, setReacting] = useState(false);
@@ -203,52 +166,13 @@ function CardSprite({
   useEffect(() => {
     setFallbacks({ '2d': 0, '3d': 0 });
   }, [pokemon.id, shiny]);
-  const cryUrl =
-    cryOverrideFor(pokemon.name) ?? pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null;
-
-  // Keep the live audio element in sync with the volume slider
-  useEffect(() => {
-    if (preloadedAudio.current) preloadedAudio.current.volume = cryVolume * CRY_VOLUME_SCALE;
-  }, [cryVolume, preloadedAudio]);
-
-  // Auto-play cry once on mount. The audio was pre-warmed when the user clicked
-  // the grid cell, so this should fire near-instantly. When switching to an
-  // alternate form whose `cries` URL differs from the preloaded source (e.g. a
-  // form with its own unique cry), swap the cached audio to the form's cry.
-  useEffect(() => {
-    // Stay silent while React is still resolving the form. Without this, the
-    // base species's cry plays during the brief window between URL canonicalize
-    // and the variety fetch landing — and clobbers the pre-warmed Mega/Gmax/
-    // regional audio with a fresh base-cry `Audio()` instance.
-    if (pokemon.name !== expectedVariety) return;
-    const a = preloadedAudio.current;
-    if (a && a.src && (!cryUrl || a.src === cryUrl)) {
-      playCryWithIntro(a, pokemon.name, cryVolume);
-      return;
-    }
-    if (cryUrl) {
-      const fallbackAudio = new Audio(cryUrl);
-      preloadedAudio.current = fallbackAudio;
-      playCryWithIntro(fallbackAudio, pokemon.name, cryVolume);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pokemon.id, pokemon.name, cryUrl, expectedVariety]);
-
-  const playCry = () => {
-    const a = preloadedAudio.current;
-    if (a && a.src && (!cryUrl || a.src === cryUrl)) {
-      playCryWithIntro(a, pokemon.name, cryVolume);
-      return;
-    }
-    if (cryUrl) {
-      const fresh = new Audio(cryUrl);
-      preloadedAudio.current = fresh;
-      playCryWithIntro(fresh, pokemon.name, cryVolume);
-    }
+  const cryUrl = cryUrlOf(pokemon);
+  const replayCry = () => {
+    if (cryUrl) playCry(pokemon.name, cryUrl);
   };
 
   const handleSpriteClick = () => {
-    playCry();
+    replayCry();
     setReacting(true);
     const types: Particle['type'][] = ['heart', 'star', 'sparkle', 'heart', 'sparkle'];
     const newParticles: Particle[] = Array.from({ length: 5 }, (_, i) => ({
@@ -301,7 +225,7 @@ function CardSprite({
           <button
             type="button"
             className="crt-cry-button"
-            onClick={playCry}
+            onClick={replayCry}
             aria-label={`play ${pokemon.name} cry`}
             title="play cry"
           >
@@ -339,17 +263,27 @@ export default function PokemonCard({
   onFormChange,
   onSelectEvolution,
   onBack,
-  cryAudioRef,
   cryVolume = 0.25,
   onCryVolumeChange,
   speciesPool,
-  initialBuildGame,
+  pick,
 }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
   // The variety the URL names — `pokemon` until that variety's data lands.
   const activeVariety = form === 'base' ? base.name : varietyFromForm(species.name, form);
-  const localCryRef = useRef<HTMLAudioElement | null>(null);
-  const audioRef = cryAudioRef ?? localCryRef;
+
+  // Auto-play once per species shown — and again on every fresh pick — after
+  // the URL's variety has loaded. A form switch plays from its own click, so
+  // the form's data landing must not play it a second time.
+  const autoplayed = useRef<{ species: string; pick: Props['pick'] } | null>(null);
+  useEffect(() => {
+    if (pokemon.name !== activeVariety) return;
+    const last = autoplayed.current;
+    if (last && last.species === species.name && last.pick === pick) return;
+    autoplayed.current = { species: species.name, pick };
+    const url = cryUrlOf(pokemon);
+    if (url) playCry(pokemon.name, url);
+  }, [pokemon, activeVariety, species.name, pick]);
 
   // Cosmetic variants (Gigantamax / Mega / regional) often ship empty `moves`
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
@@ -405,27 +339,21 @@ export default function PokemonCard({
   );
   // Games this Pokémon can appear in — everything from its home gen onward.
   const buildGames = GAME_ORDER.filter((g) => GAMES[g].gen >= gen);
-  const [buildGame, setBuildGame] = useState<GameId | null>(initialBuildGame ?? null);
+  const [buildGame, setBuildGame] = useState<GameId | null>(pick?.buildGame ?? null);
   const [obtainOpen, setObtainOpen] = useState(false);
   const obtain = useAsync(obtainFiles, obtainOpen, pokemon.id);
   const buildSectionRef = useRef<HTMLDivElement | null>(null);
-  const [prevBuildTarget, setPrevBuildTarget] = useState({
-    name: pokemon.name,
-    initialBuildGame,
-  });
-  if (
-    prevBuildTarget.name !== pokemon.name ||
-    prevBuildTarget.initialBuildGame !== initialBuildGame
-  ) {
-    setPrevBuildTarget({ name: pokemon.name, initialBuildGame });
-    setBuildGame(initialBuildGame ?? null);
+  const [prevBuildTarget, setPrevBuildTarget] = useState({ name: pokemon.name, pick });
+  if (prevBuildTarget.name !== pokemon.name || prevBuildTarget.pick !== pick) {
+    setPrevBuildTarget({ name: pokemon.name, pick });
+    setBuildGame(pick?.buildGame ?? null);
   }
   useEffect(() => {
     // Arriving from a TEAMS pick — jump straight to the build for that game.
-    if (initialBuildGame) {
+    if (pick?.buildGame) {
       buildSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [pokemon.name, initialBuildGame]);
+  }, [pokemon.name, pick]);
   const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAMES[buildGame].gen : null);
 
   const movesLabel = meta.primaryVersionGroup.toUpperCase().replace(/-/g, '/');
@@ -470,18 +398,7 @@ export default function PokemonCard({
     // longer count the click as a user gesture and `play()` rejects.
     const v = species.varieties.find((x) => x.pokemon.name === varietyName);
     const id = v ? idFromUrl(v.pokemon.url) : 0;
-    if (id) {
-      const cryUrl =
-        cryOverrideFor(varietyName) ??
-        `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-      const audio = new Audio(cryUrl);
-      audioRef.current = audio;
-      playCryWithIntro(audio, varietyName, cryVolume);
-    }
+    if (id) playCry(varietyName, cryUrlById(varietyName, id));
   };
 
   return (
@@ -497,10 +414,8 @@ export default function PokemonCard({
             pokemon={pokemon}
             shiny={shiny}
             view={view}
-            preloadedAudio={audioRef}
             cryVolume={cryVolume}
             onCryVolumeChange={onCryVolumeChange}
-            expectedVariety={activeVariety}
           />
           <SpriteToggle value={view} onChange={onViewChange} has2D={has2D} />
           <ShinyToggle value={shiny} onChange={onShinyChange} />

@@ -23,8 +23,7 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
   { key: 'other', label: 'BATTLE FORMS' },
 ];
 import type { PokeType } from '@/typeChart';
-import { CRY_VOLUME_SCALE } from '@/textUtil';
-import { cryOverrideFor } from '@/cryOverrides';
+import { cryUrlById, primeCry, setCryVolume } from '@/cry';
 import type { GameId } from '@/games';
 
 // Lazy-loaded — only fetched when first needed
@@ -43,7 +42,8 @@ export default function App() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { view, toggle: toggleView } = useViewMode();
   const { pageSize, setPageSize } = usePageSize();
-  const [cryVolume, setCryVolume] = useVolume('pokemax.cry.volume', 0.25);
+  const [cryVolume, saveCryVolume] = useVolume('pokemax.cry.volume', 0.25);
+  useEffect(() => setCryVolume(cryVolume), [cryVolume]);
   const [query, setQuery] = useState('');
 
   const [, navigate] = useLocation();
@@ -92,7 +92,6 @@ export default function App() {
   // it. `buildGame` is the game a TEAMS / trainer pick came from — it
   // preselects the competitive build.
   const [selection, setSelection] = useState<{ buildGame: GameId | null } | null>(null);
-  const pendingBuildGame = selection?.buildGame ?? null;
   const fullSpeciesIndex = useMemo((): DexEntry[] => [...species, ...forms], [species, forms]);
   const route = useMemo(
     () => resolveDexRoute(selected, pokedexSearch.form, species),
@@ -125,7 +124,6 @@ export default function App() {
     navigate(pokedexPath(baseName, { ...pokedexSearch, form: next }), { replace: true });
   };
   const cardRef = useRef<HTMLDivElement>(null);
-  const cryAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // With no form chips on, show every base species. With form chips on, show only the
   // base species that have at least one matching form plus those forms — interleaved
@@ -190,23 +188,10 @@ export default function App() {
     setQuery('');
     setSelection({ buildGame });
 
-    // Pre-warm the cry audio while the pokemon data is still being fetched.
-    // The cry URL is predictable from the species ID, so we don't need to wait.
+    // Pre-warm the cry while the Pokémon's data is still being fetched —
+    // the URL is predictable from the variety id.
     const sp = fullSpeciesIndex.find((s) => s.name === name);
-    if (sp) {
-      const url =
-        cryOverrideFor(sp.name) ??
-        `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${sp.id}.ogg`;
-      if (cryAudioRef.current) {
-        cryAudioRef.current.pause();
-        cryAudioRef.current.src = '';
-      }
-      const audio = new Audio();
-      audio.preload = 'auto';
-      audio.src = url;
-      audio.volume = cryVolume * CRY_VOLUME_SCALE;
-      cryAudioRef.current = audio;
-    }
+    if (sp) primeCry(cryUrlById(sp.name, sp.id));
 
     // Picks land on the canonical URL — a form opens as its species + `?form=`.
     const picked = resolveDexRoute(name, 'base', species);
@@ -361,11 +346,10 @@ export default function App() {
                   onFormChange={setFormKey}
                   onSelectEvolution={handleSelect}
                   onBack={goHome}
-                  cryAudioRef={cryAudioRef}
                   cryVolume={cryVolume}
-                  onCryVolumeChange={setCryVolume}
+                  onCryVolumeChange={saveCryVolume}
                   speciesPool={fullSpeciesIndex}
-                  initialBuildGame={pendingBuildGame}
+                  pick={selection}
                 />
               </Suspense>
             </div>

@@ -4,6 +4,7 @@ import { formatEVs, SMOGON_DEX_SLUGS } from '@/competitive';
 import type { PokemonResponse } from '@/types';
 import { GAMES, isGameId, type GameId } from '@/games';
 import Detail from '@/components/Detail';
+import { titleCase } from '@/textUtil';
 
 interface Props {
   /** Ready with `null` means Smogon has no set. */
@@ -65,10 +66,7 @@ function defaultAbility(p: PokemonResponse | undefined): string | undefined {
   const visible = p.abilities.filter((a) => !a.is_hidden).sort((a, b) => a.slot - b.slot);
   const a = visible[0] ?? p.abilities[0];
   if (!a) return undefined;
-  return a.ability.name
-    .split('-')
-    .map((s) => (s ? s[0].toUpperCase() + s.slice(1) : ''))
-    .join(' ');
+  return titleCase(a.ability.name);
 }
 
 export default function CompetitiveBuild({

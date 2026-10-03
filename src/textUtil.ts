@@ -37,3 +37,16 @@ export function dedupeEntries(species: SpeciesResponse): { text: string; version
   }
   return Array.from(byText, ([text, versions]) => ({ text, versions }));
 }
+
+/** `mr-mime` → `mr mime`. */
+export function spaced(slug: string): string {
+  return slug.replace(/-/g, ' ');
+}
+
+/** `mr-mime` → `Mr Mime`. */
+export function titleCase(slug: string): string {
+  return slug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { memoAsync, useAsync, type AsyncState } from '@/async';
 import { fetchAbility, fetchItem, fetchMove, fetchNature } from '@/api';
-import { cleanFlavorText } from '@/textUtil';
+import { cleanFlavorText, spaced } from '@/textUtil';
 import {
   defensiveMatchups,
   effectiveness,
@@ -27,10 +27,6 @@ interface Props {
   label?: ReactNode;
   triggerStyle?: React.CSSProperties;
   triggerClassName?: string;
-}
-
-function pretty(name: string) {
-  return name.replace(/-/g, ' ');
 }
 
 function pickEffect(entries: EffectEntry[]): string {
@@ -113,7 +109,7 @@ function CraftingRecipe({ recipe }: { recipe: NonNullable<ItemSource['crafting']
       <ul className="crt-item-craft-mats">
         {recipe.materials.map((m, i) => (
           <li key={i}>
-            <span className="crt-item-craft-mat-count">×{m.count}</span> {m.item.replace(/-/g, ' ')}
+            <span className="crt-item-craft-mat-count">×{m.count}</span> {spaced(m.item)}
           </li>
         ))}
       </ul>
@@ -128,9 +124,9 @@ function NatureBody({ data }: { data: NatureResponse }) {
     return <div className="crt-detail-effect">Neutral nature — no stat changes.</div>;
   return (
     <div className="crt-detail-effect">
-      <span style={{ color: 'var(--accent)' }}>+10% {pretty(inc ?? '')}</span>
+      <span style={{ color: 'var(--accent)' }}>+10% {spaced(inc ?? '')}</span>
       {' · '}
-      <span style={{ color: 'var(--error)' }}>−10% {pretty(dec ?? '')}</span>
+      <span style={{ color: 'var(--error)' }}>−10% {spaced(dec ?? '')}</span>
     </div>
   );
 }
@@ -233,7 +229,7 @@ function ItemPanel({ name }: { name: string }) {
       <Loaded state={item}>
         {(data) => (
           <div className="crt-detail-effect">
-            <span style={{ color: 'var(--dim)' }}>{data.category.name.replace(/-/g, ' ')}</span>
+            <span style={{ color: 'var(--dim)' }}>{spaced(data.category.name)}</span>
             {': '}
             {pickItemText(data) || 'no description.'}
           </div>
@@ -271,7 +267,7 @@ export default function Detail({ kind, name, label, triggerStyle, triggerClassNa
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        {label ?? pretty(name)}
+        {label ?? spaced(name)}
       </button>
       {open && (
         <span className="crt-detail-panel">

@@ -16,6 +16,7 @@ import { useViewMode } from '@/hooks/useViewMode';
 import { parsePokedexSearch, pokedexPath, type PokedexSearch } from '@/routes';
 import type { PokeType } from '@/typeChart';
 import type { AltForm, BaseSpecies, DexEntry, FormCategory } from '@/types';
+import { titleCase } from '@/textUtil';
 
 const PokemonCard = lazy(() => import('@/components/PokemonCard'));
 
@@ -106,11 +107,7 @@ export default function PokedexPage({
   useEffect(() => {
     const base = 'Pokemax';
     if (shownName) {
-      const pretty = shownName
-        .split('-')
-        .map((p) => (p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p))
-        .join(' ');
-      document.title = `${base} | ${pretty}`;
+      document.title = `${base} | ${titleCase(shownName)}`;
     } else {
       document.title = base;
     }

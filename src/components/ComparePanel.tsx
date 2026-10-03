@@ -4,6 +4,7 @@ import { pokemonData } from '@/dex';
 import type { DexEntry, PokemonResponse } from '@/types';
 import { pokeapiShowdownGif } from '@/sprites';
 import { tintStyle, typeColor } from '@/typeChart';
+import { titleCase } from '@/textUtil';
 
 interface Props {
   base: PokemonResponse;
@@ -27,13 +28,6 @@ const STAT_LABELS: Record<string, string> = {
   'special-defense': 'SP.DEF',
   speed: 'SPD',
 };
-
-function pretty(name: string): string {
-  return name
-    .split('-')
-    .map((p) => (p ? p[0].toUpperCase() + p.slice(1) : ''))
-    .join(' ');
-}
 
 function statByName(p: PokemonResponse, key: string): number {
   return p.stats.find((s) => s.stat.name === key)?.base_stat ?? 0;
@@ -84,7 +78,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
             {suggestions.map((s) => (
               <li key={s.name}>
                 <button type="button" onClick={() => pick(s)}>
-                  #{String(s.id).padStart(3, '0')} {pretty(s.name)}
+                  #{String(s.id).padStart(3, '0')} {titleCase(s.name)}
                 </button>
               </li>
             ))}
@@ -99,7 +93,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
       <div className="crt-compare">
         <div className="crt-compare-header">
           <span className="crt-compare-label">
-            ▶ ERR LOADING {pretty(target.name).toUpperCase()}
+            ▶ ERR LOADING {titleCase(target.name).toUpperCase()}
           </span>
           <button type="button" className="crt-compare-close" onClick={onClose}>
             [ × ]
@@ -113,7 +107,9 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     return (
       <div className="crt-compare">
         <div className="crt-compare-header">
-          <span className="crt-compare-label">▶ FETCHING {pretty(target.name).toUpperCase()}…</span>
+          <span className="crt-compare-label">
+            ▶ FETCHING {titleCase(target.name).toUpperCase()}…
+          </span>
           <button type="button" className="crt-compare-close" onClick={onClose}>
             [ × ]
           </button>
@@ -141,7 +137,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
       <div className="crt-compare-row crt-compare-names">
         <div className="crt-compare-col">
           <img src={pokeapiShowdownGif(base.id)} alt={base.name} className="crt-compare-sprite" />
-          <div className="crt-compare-name">{pretty(base.name).toUpperCase()}</div>
+          <div className="crt-compare-name">{titleCase(base.name).toUpperCase()}</div>
           <div className="crt-compare-types">
             {base.types.map((t) => (
               <TypeChip key={t.type.name} name={t.type.name} />
@@ -155,7 +151,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
             alt={targetData.name}
             className="crt-compare-sprite"
           />
-          <div className="crt-compare-name">{pretty(targetData.name).toUpperCase()}</div>
+          <div className="crt-compare-name">{titleCase(targetData.name).toUpperCase()}</div>
           <div className="crt-compare-types">
             {targetData.types.map((t) => (
               <TypeChip key={t.type.name} name={t.type.name} />

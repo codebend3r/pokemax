@@ -4,6 +4,7 @@ import { GAMES, type GameId } from '@/games';
 import { useFallbackSrc } from '@/hooks/useFallbackSrc';
 import { showdownSpriteUrl, teamPickAnimations } from '@/sprites';
 import { useExpandedRegions } from '@/hooks/useExpandedRegions';
+import { spaced } from '@/textUtil';
 
 interface Props {
   /** `game` is the team card the pick came from — used to preselect the competitive build. */
@@ -156,7 +157,7 @@ function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: s
           />
         )}
       </span>
-      <div className="crt-team-pick-name">{pick.species.replace(/-/g, ' ').toUpperCase()}</div>
+      <div className="crt-team-pick-name">{spaced(pick.species).toUpperCase()}</div>
       <div className="crt-team-pick-role">{pick.role.toUpperCase()}</div>
       <div className="crt-team-pick-why">{pick.why}</div>
     </button>

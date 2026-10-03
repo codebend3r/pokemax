@@ -8,6 +8,7 @@ import { typeIndex } from '@/dex';
 import { TYPE_COLORS } from '@/typeChart';
 import type { DexEntry } from '@/types';
 import { showdownSpriteUrl } from '@/sprites';
+import { spaced } from '@/textUtil';
 
 interface Props {
   trainer: Trainer;
@@ -103,9 +104,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
               src={showdownSpriteUrl(m.species)}
               alt={m.species}
             />
-            <div className="crt-trainer-member-name">
-              {m.species.replace(/-/g, ' ').toUpperCase()}
-            </div>
+            <div className="crt-trainer-member-name">{spaced(m.species).toUpperCase()}</div>
             <div className="crt-trainer-member-level">Lv {m.level}</div>
           </button>
         ))}
@@ -115,9 +114,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         <div className="crt-trainer-moves-grid">
           {trainer.team.map((m, i) => (
             <div key={`${m.species}-${i}`} className="crt-trainer-moves-row">
-              <div className="crt-trainer-moves-species">
-                {m.species.replace(/-/g, ' ').toUpperCase()}
-              </div>
+              <div className="crt-trainer-moves-species">{spaced(m.species).toUpperCase()}</div>
               <div className="crt-trainer-moves-list">
                 {m.moves && m.moves.length > 0 ? (
                   m.moves.map((mv) => <Detail key={mv} kind="move" name={mv} />)
@@ -139,9 +136,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
           <div className="crt-trainer-meta-grid">
             {trainer.team.map((m, i) => (
               <div key={`${m.species}-${i}`} className="crt-trainer-meta-row">
-                <div className="crt-trainer-meta-species">
-                  {m.species.replace(/-/g, ' ').toUpperCase()}
-                </div>
+                <div className="crt-trainer-meta-species">{spaced(m.species).toUpperCase()}</div>
                 <div className="crt-trainer-meta-cell">
                   <span className="crt-trainer-meta-label">ABILITY</span>
                   {m.ability ? (
@@ -207,9 +202,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
                   src={showdownSpriteUrl(pick.name)}
                   alt={pick.name}
                 />
-                <div className="crt-trainer-counter-name">
-                  {pick.name.replace(/-/g, ' ').toUpperCase()}
-                </div>
+                <div className="crt-trainer-counter-name">{spaced(pick.name).toUpperCase()}</div>
                 <div className="crt-trainer-counter-types">
                   {pick.types.map((t) => (
                     <span
@@ -221,9 +214,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
                     </span>
                   ))}
                 </div>
-                <div className="crt-trainer-counter-vs">
-                  vs {pick.countersSpecies.replace(/-/g, ' ')}
-                </div>
+                <div className="crt-trainer-counter-vs">vs {spaced(pick.countersSpecies)}</div>
                 <div className="crt-trainer-counter-why">{pick.rationale}</div>
               </button>
             ))}

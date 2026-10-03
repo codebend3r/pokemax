@@ -9,6 +9,7 @@ import TypeFilter from '@/components/TypeFilter';
 import ViewModeToggle from '@/components/ViewModeToggle';
 import PageSizeSelector from '@/components/PageSizeSelector';
 import Pagination from '@/components/Pagination';
+import { spaced } from '@/textUtil';
 
 interface Props {
   species: DexEntry[];
@@ -25,12 +26,8 @@ interface Props {
   onClearTypes: () => void;
 }
 
-function pretty(name: string): string {
-  return name.replace(/-/g, ' ');
-}
-
 function cellLabel(s: DexEntry): string {
-  return s.kind === 'form' ? `${pretty(s.speciesName)} · ${s.formLabel}` : pretty(s.name);
+  return s.kind === 'form' ? `${spaced(s.speciesName)} · ${s.formLabel}` : spaced(s.name);
 }
 
 function GridCell({

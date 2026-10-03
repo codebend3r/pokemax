@@ -1,4 +1,5 @@
 import type { ObtainEntry, ObtainMethod } from '@/obtain/types';
+import { titleCase } from '@/textUtil';
 
 export interface ApiEncounterArea {
   location_area: { name: string };
@@ -36,11 +37,7 @@ export const ROD_METHODS: ReadonlySet<string> = new Set([
 ]);
 
 export function prettyLocation(slug: string): string {
-  return slug
-    .replace(/-area$/, '')
-    .split('-')
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
-    .join(' ');
+  return titleCase(slug.replace(/-area$/, ''));
 }
 
 function mapMethod(slug: string): ObtainMethod {

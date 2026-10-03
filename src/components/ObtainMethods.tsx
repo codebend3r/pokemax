@@ -14,6 +14,7 @@ import {
 } from '@/obtain/labels';
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
 import { tintStyle } from '@/typeChart';
+import { spaced } from '@/textUtil';
 
 interface Props {
   state: AsyncState<ObtainFile>;
@@ -32,7 +33,7 @@ function regionOf(game: ObtainGame): string {
 }
 
 function prettyVersions(versions: string[]): string {
-  return versions.map((v) => v.toUpperCase().replace(/-/g, ' ')).join(' / ');
+  return versions.map((v) => spaced(v).toUpperCase()).join(' / ');
 }
 
 function EntryRow({ entry }: { entry: ObtainEntry }) {

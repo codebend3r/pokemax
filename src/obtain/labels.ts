@@ -4,6 +4,7 @@
 import type { ObtainEntry } from '@/obtain/types';
 import { ROD_METHODS } from '@/obtain/pokeapi';
 import { TYPE_COLORS } from '@/typeChart';
+import { spaced } from '@/textUtil';
 
 export const METHOD_LABEL: Record<ObtainEntry['method'], string> = {
   grass: 'GRASS',
@@ -219,10 +220,10 @@ export function prettyCondition(slug: string): string {
   if (family?.strip !== undefined) {
     const prefix = family.prefixes?.find((p) => slug.startsWith(p));
     if (prefix !== undefined) {
-      return (family.strip + slug.slice(prefix.length)).toUpperCase().replace(/-/g, ' ');
+      return spaced(family.strip + slug.slice(prefix.length)).toUpperCase();
     }
   }
-  return slug.toUpperCase().replace(/-/g, ' ');
+  return spaced(slug).toUpperCase();
 }
 
 export function conditionMeta(slug: string): ConditionMeta {

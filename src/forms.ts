@@ -1,6 +1,7 @@
 // How a variety's form suffix (`charizard-mega-x` → `mega-x`) reads on
 // screen and which filter category it falls in. The grid labels forms beside
 // their species name, so labels never repeat it ("Black", not "Black Kyurem").
+import { titleCase } from '@/textUtil';
 import type { FormCategory } from '@/types';
 
 // prettier-ignore
@@ -22,13 +23,7 @@ const FORM_LABELS: Record<string, string> = {
 
 /** Display label for a form suffix — the table above, else the suffix title-cased. */
 export function formLabel(suffix: string): string {
-  return (
-    FORM_LABELS[suffix] ??
-    suffix
-      .split('-')
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-      .join(' ')
-  );
+  return FORM_LABELS[suffix] ?? titleCase(suffix);
 }
 
 export function categorizeForm(suffix: string): FormCategory {

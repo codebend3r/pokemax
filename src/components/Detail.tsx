@@ -4,6 +4,7 @@ import { fetchAbility, fetchItem, fetchMove, fetchNature } from '@/api';
 import { cleanFlavorText } from '@/textUtil';
 import {
   defensiveMatchups,
+  effectiveness,
   groupMatchups,
   isPokeType,
   TYPES,
@@ -176,13 +177,7 @@ function TypeBody({ name }: { name: string }) {
   // Defensive matchups: how this type takes damage (single-type)
   const def = groupMatchups(defensiveMatchups([name]));
   // Offensive: this type's effectiveness AGAINST every other type
-  // We can compute by taking the row of effectiveness — i.e. for each defending type T,
-  // what is `name`'s multiplier when attacking T?
-  const offense: Array<{ type: PokeType; multiplier: number }> = TYPES.map((t) => {
-    // multiplier of `name` attacking T = defensiveMatchups([T]) where attacker == name
-    const m = defensiveMatchups([t]).find((x) => x.type === name)?.multiplier ?? 1;
-    return { type: t, multiplier: m };
-  });
+  const offense = TYPES.map((t) => ({ type: t, multiplier: effectiveness(name, [t]) }));
   const off = {
     super2: offense.filter((o) => o.multiplier === 2).map((o) => ({ type: o.type })),
     not: offense.filter((o) => o.multiplier === 0.5).map((o) => ({ type: o.type })),

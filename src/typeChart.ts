@@ -46,17 +46,16 @@ export interface Matchup {
   multiplier: number;
 }
 
+/** Multiplier an `attacking`-type move deals to a Pokémon of the `defending` types. */
+export function effectiveness(attacking: PokeType, defending: readonly PokeType[]): number {
+  return defending.reduce((m, def) => m * (EFFECTIVENESS[def][attacking] ?? 1), 1);
+}
+
 export function defensiveMatchups(types: PokeType[]): Matchup[] {
-  return TYPES.map((attacking) => {
-    let m = 1;
-    for (const def of types) {
-      const row = EFFECTIVENESS[def];
-      const v = row[attacking];
-      if (v === undefined) continue;
-      m *= v;
-    }
-    return { type: attacking, multiplier: m };
-  });
+  return TYPES.map((attacking) => ({
+    type: attacking,
+    multiplier: effectiveness(attacking, types),
+  }));
 }
 
 export interface MatchupGroups {

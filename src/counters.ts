@@ -1,6 +1,6 @@
 import { memoAsync } from '@/async';
 import { isRecord } from '@/guards';
-import { defensiveMatchups, type PokeType } from '@/typeChart';
+import { effectiveness, type PokeType } from '@/typeChart';
 
 interface PSDexEntry {
   num: number;
@@ -102,11 +102,10 @@ function scoreMatchup(
 
   // Defensive: average multiplier the candidate *takes* from opp's STAB.
   // Lower is better.
-  const candidateDef = defensiveMatchups(candidateTypes);
   let defSum = 0;
   let defMin = Infinity;
   for (const oppType of oppTypes) {
-    const m = candidateDef.find((d) => d.type === oppType)?.multiplier ?? 1;
+    const m = effectiveness(oppType, candidateTypes);
     defSum += m;
     if (m < defMin) defMin = m;
   }
@@ -114,11 +113,10 @@ function scoreMatchup(
 
   // Offensive: average multiplier candidate's STAB deals to opp.
   // Higher is better.
-  const oppDef = defensiveMatchups(oppTypes);
   let offSum = 0;
   let offMax = 0;
   for (const candType of candidateTypes) {
-    const m = oppDef.find((d) => d.type === candType)?.multiplier ?? 1;
+    const m = effectiveness(candType, oppTypes);
     offSum += m;
     if (m > offMax) offMax = m;
   }
@@ -132,21 +130,12 @@ function scoreMatchup(
 }
 
 function rationale(candidateTypes: PokeType[], oppTypes: PokeType[]): string {
-  const candidateDef = defensiveMatchups(candidateTypes);
-  const oppDef = defensiveMatchups(oppTypes);
-
-  const immune: PokeType[] = [];
-  const resists: PokeType[] = [];
-  for (const t of oppTypes) {
-    const m = candidateDef.find((d) => d.type === t)?.multiplier ?? 1;
-    if (m === 0) immune.push(t);
-    else if (m < 1) resists.push(t);
-  }
-  const se: PokeType[] = [];
-  for (const t of candidateTypes) {
-    const m = oppDef.find((d) => d.type === t)?.multiplier ?? 1;
-    if (m >= 2) se.push(t);
-  }
+  const immune = oppTypes.filter((t) => effectiveness(t, candidateTypes) === 0);
+  const resists = oppTypes.filter((t) => {
+    const m = effectiveness(t, candidateTypes);
+    return m > 0 && m < 1;
+  });
+  const se = candidateTypes.filter((t) => effectiveness(t, oppTypes) >= 2);
 
   const parts: string[] = [];
   if (immune.length) parts.push(`immune to ${immune.join('/')}`);

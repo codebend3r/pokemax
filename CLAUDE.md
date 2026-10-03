@@ -91,4 +91,4 @@ Pokemax is a retro CRT-styled Pokédex: a Vite + React 19 + TypeScript single-pa
 
 ## Creating PRs
 
-- When creating a PR, always run the /thermo-nulcear-code-quality-review skill, then apply all of suggestions, commit as a separate commit and push to origin, then open PR
+- When creating a PR, always run the /thermo-nuclear-code-quality-review skill, then apply all of suggestions, commit as a separate commit and push to origin, then open PR

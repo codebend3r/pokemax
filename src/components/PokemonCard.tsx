@@ -21,8 +21,9 @@ import ComparePanel from '@/components/ComparePanel';
 import CompetitiveBuild from '@/components/CompetitiveBuild';
 import Detail from '@/components/Detail';
 import ObtainMethods from '@/components/ObtainMethods';
+import { useAsync } from '@/async';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
-import { useObtainData } from '@/hooks/useObtainData';
+import { obtainFiles } from '@/obtain/files';
 import { GAMES, GAME_ORDER, type GameId } from '@/games';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 import { varietyFromForm, formFromVariety } from '@/routes';
@@ -435,7 +436,7 @@ export default function PokemonCard({
   const buildGames = GAME_ORDER.filter((g) => GAMES[g].gen >= gen);
   const [buildGame, setBuildGame] = useState<GameId | null>(initialBuildGame ?? null);
   const [obtainOpen, setObtainOpen] = useState(false);
-  const obtain = useObtainData(pokemon.id, obtainOpen);
+  const obtain = useAsync(obtainFiles, obtainOpen, pokemon.id);
   const buildSectionRef = useRef<HTMLDivElement | null>(null);
   const [prevBuildTarget, setPrevBuildTarget] = useState({
     name: pokemon.name,
@@ -620,7 +621,7 @@ export default function PokemonCard({
 
       <Section
         label="HOW TO OBTAIN"
-        count={obtain.status === 'ready' ? obtain.file.games.length : undefined}
+        count={obtain.status === 'ready' ? obtain.data.games.length : undefined}
         defaultOpen={false}
         onToggle={setObtainOpen}
       >
@@ -635,15 +636,13 @@ export default function PokemonCard({
         <Section
           label="COMPETITIVE BUILD"
           count={
-            competitive.build
-              ? `GEN ${competitive.build.sourceGen} · ${competitive.build.tier.toUpperCase()}`
+            competitive.status === 'ready' && competitive.data
+              ? `GEN ${competitive.data.sourceGen} · ${competitive.data.tier.toUpperCase()}`
               : undefined
           }
         >
           <CompetitiveBuild
-            build={competitive.build}
-            loading={competitive.loading}
-            error={competitive.error}
+            state={competitive}
             pokemon={pokemon}
             games={buildGames}
             selectedGame={buildGame}

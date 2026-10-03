@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+// The Pokédex indexes — everything the grid, search, filters, and the
+// Pokémon card read — each fetched once per session behind a `memoAsync`.
+import { memoAsync } from '@/async';
+import { fetchEvolutionChain, fetchGenerationList, fetchPokemon, fetchSpecies } from '@/api';
+import { GENERATIONS } from '@/generations';
+import { TYPES, type PokeType } from '@/typeChart';
 import type { FormCategory, Gen8Species } from '@/types';
 
-const URL = 'https://pokeapi.co/api/v2/pokemon?limit=20000';
+const BASE = 'https://pokeapi.co/api/v2';
 
-let cache: Gen8Species[] | null = null;
-let inflight: Promise<Gen8Species[]> | null = null;
+/** Every base species across all generations, national-dex order. */
+export const speciesIndex = memoAsync(async (): Promise<Gen8Species[]> => {
+  const lists = await Promise.all(GENERATIONS.map((g) => fetchGenerationList(g.num)));
+  return lists.flat().sort((a, b) => a.id - b.id);
+});
 
 const FORM_LABEL_OVERRIDES: Record<string, string> = {
   alola: 'Alolan',
@@ -76,10 +84,15 @@ function categorizeForm(suffix: string): FormCategory {
   return 'other';
 }
 
-async function fetchExtraForms(byName: Map<string, Gen8Species>): Promise<Gen8Species[]> {
-  const r = await fetch(URL);
+/** Alternate forms (Mega, Gmax, regional, battle forms), matched to their base species. */
+export const formIndex = memoAsync(async (): Promise<Gen8Species[]> => {
+  const [species, r] = await Promise.all([
+    speciesIndex.get(),
+    fetch(`${BASE}/pokemon?limit=20000`),
+  ]);
   if (!r.ok) throw new Error('Failed to load alternate forms');
   const j = (await r.json()) as { results: { name: string; url: string }[] };
+  const byName = new Map(species.map((s) => [s.name, s]));
 
   const forms: Gen8Species[] = [];
   for (const entry of j.results) {
@@ -115,45 +128,53 @@ async function fetchExtraForms(byName: Map<string, Gen8Species>): Promise<Gen8Sp
     });
   }
   return forms.sort((a, b) => a.id - b.id);
+});
+
+interface TypeResponse {
+  pokemon: { slot: number; pokemon: { name: string; url: string } }[];
 }
 
-export interface ExtraFormsState {
-  forms: Gen8Species[];
-  loading: boolean;
-  error: string | null;
-}
-
-export function useExtraForms(species: Gen8Species[], enabled: boolean): ExtraFormsState {
-  const [state, setState] = useState<{ forms: Gen8Species[]; error: string | null }>({
-    forms: cache ?? [],
-    error: null,
-  });
-
-  useEffect(() => {
-    if (!enabled) return;
-    if (cache) return;
-    if (species.length === 0) return;
-
-    let active = true;
-    if (!inflight) {
-      const byName = new Map(species.map((s) => [s.name, s]));
-      inflight = fetchExtraForms(byName);
+async function fetchTypeIndex(): Promise<Map<number, PokeType[]>> {
+  const responses = await Promise.all(
+    TYPES.map(async (t) => {
+      const r = await fetch(`${BASE}/type/${t}`);
+      if (!r.ok) throw new Error(`type/${t} failed`);
+      const j = (await r.json()) as TypeResponse;
+      return { type: t, body: j };
+    }),
+  );
+  const map = new Map<number, PokeType[]>();
+  for (const { type, body } of responses) {
+    for (const entry of body.pokemon) {
+      const m = entry.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
+      if (!m) continue;
+      const id = parseInt(m[1], 10);
+      const list = map.get(id) ?? [];
+      list[entry.slot - 1] = type;
+      map.set(id, list);
     }
-    inflight
-      .then((f) => {
-        cache = f;
-        if (active) setState({ forms: f, error: null });
-      })
-      .catch((e: Error) => {
-        if (active) setState({ forms: [], error: e.message });
-      });
-    return () => {
-      active = false;
-    };
-  }, [enabled, species]);
-
-  if (enabled && cache) {
-    return { forms: cache, loading: false, error: null };
   }
-  return { forms: state.forms, loading: enabled && species.length > 0, error: state.error };
+  for (const [k, v] of map) {
+    map.set(
+      k,
+      v.filter((t): t is PokeType => Boolean(t)),
+    );
+  }
+  return map;
 }
+
+/** Pokémon id → its types, built from the 18 type endpoints fetched in parallel. */
+export const typeIndex = memoAsync(fetchTypeIndex);
+
+/**
+ * `/pokemon/{id}` or `/pokemon/{name}`. Base species are fetched by id: a
+ * species name is not always a Pokémon name (`deoxys` vs `deoxys-normal`).
+ */
+export const pokemonData = memoAsync(fetchPokemon);
+
+/** A species plus its evolution chain — the chain URL only comes from the species. */
+export const speciesDetails = memoAsync(async (name: string) => {
+  const species = await fetchSpecies(name);
+  const chain = await fetchEvolutionChain(species.evolution_chain.url);
+  return { species, chain };
+});

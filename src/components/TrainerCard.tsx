@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { GAMES } from '@/games';
 import { trainerPortraitUrl, type Trainer } from '@/trainers';
-import { pickCounterTeam } from '@/counters';
+import { minLevels, pickCounterTeam } from '@/counters';
 import Detail from '@/components/Detail';
-import { useTypeIndex } from '@/hooks/useTypeIndex';
-import { useMinLevels } from '@/hooks/useMinLevels';
+import { useAsync } from '@/async';
+import { typeIndex } from '@/dex';
 import { TYPE_COLORS } from '@/typeChart';
 import type { Gen8Species } from '@/types';
 import { showdownSpriteUrl } from '@/showdownSprite';
@@ -16,6 +16,9 @@ interface Props {
   /** Full species index (base + alt forms). Used to map slug ↔ id and apply a gen cap. */
   speciesIndex: Gen8Species[];
 }
+
+// A failed level fetch turns the level gate off rather than blocking counters.
+const NO_LEVEL_GATE = new Map<number, number>();
 
 function Section({
   title,
@@ -48,11 +51,14 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
   const [openMeta, setOpenMeta] = useState(false);
   const [openLoc, setOpenLoc] = useState(false);
   const [openCounters, setOpenCounters] = useState(false);
-  const typeIndex = useTypeIndex(openCounters);
-  const minLevels = useMinLevels(openCounters);
+  const types = useAsync(typeIndex, openCounters, undefined);
+  const levels = useAsync(minLevels, openCounters, undefined);
+  const typeMap = types.status === 'ready' ? types.data : null;
+  const levelMap =
+    levels.status === 'ready' ? levels.data : levels.status === 'error' ? NO_LEVEL_GATE : null;
 
   const counterTeam = useMemo(() => {
-    if (!openCounters || !typeIndex.index || !minLevels) return null;
+    if (!openCounters || !typeMap || !levelMap) return null;
     const nameToId = new Map<string, number>();
     const idToName = new Map<number, string>();
     const allowed = new Set<number>();
@@ -63,7 +69,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
     for (const s of speciesIndex) {
       nameToId.set(s.name, s.id);
       idToName.set(s.id, s.name);
-      if (s.gen <= maxGen && (minLevels.get(s.id) ?? 0) <= maxLevel) allowed.add(s.id);
+      if (s.gen <= maxGen && (levelMap.get(s.id) ?? 0) <= maxLevel) allowed.add(s.id);
     }
     // Early-game trainers additionally pin the pool to what's catchable so far.
     if (trainer.availableBefore) {
@@ -73,22 +79,22 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         if (id != null && allowed.has(id)) pool.add(id);
       }
       return pickCounterTeam(trainer.team, {
-        typeIndex: typeIndex.index,
+        typeIndex: typeMap,
         nameToId,
         idToName,
         candidateFilter: (id) => pool.has(id),
       });
     }
     return pickCounterTeam(trainer.team, {
-      typeIndex: typeIndex.index,
+      typeIndex: typeMap,
       nameToId,
       idToName,
       candidateFilter: (id) => allowed.has(id),
     });
   }, [
     openCounters,
-    typeIndex.index,
-    minLevels,
+    typeMap,
+    levelMap,
     speciesIndex,
     trainer.team,
     trainer.game,
@@ -211,13 +217,13 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         open={openCounters}
         onToggle={() => setOpenCounters((v) => !v)}
       >
-        {typeIndex.loading && (
+        {types.status === 'loading' && (
           <div className="crt-trainer-counters-status">
             ▶ INDEXING TYPES<span className="crt-cursor">&nbsp;</span>
           </div>
         )}
-        {typeIndex.error && (
-          <div className="crt-trainer-counters-status crt-error">ERR: {typeIndex.error}</div>
+        {types.status === 'error' && (
+          <div className="crt-trainer-counters-status crt-error">ERR: {types.message}</div>
         )}
         {counterTeam && counterTeam.length === 0 && (
           <div className="crt-trainer-counters-status">▶ NO COUNTERS FOUND</div>

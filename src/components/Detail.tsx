@@ -1,17 +1,17 @@
 import { useState, type ReactNode } from 'react';
-import { useApiDetail } from '@/hooks/useApiDetail';
+import { memoAsync, useAsync, type AsyncState } from '@/async';
+import { fetchAbility, fetchItem, fetchMove, fetchNature } from '@/api';
 import { cleanFlavorText } from '@/textUtil';
 import { defensiveMatchups, groupMatchups, TYPES, TYPE_COLORS, type PokeType } from '@/typeChart';
 import { ITEM_SOURCES, formatSourceLine, type ItemSource } from '@/itemSources';
+import type { EffectEntry, ItemResponse, MoveResponse, NatureResponse } from '@/types';
 
 export type DetailKind = 'move' | 'ability' | 'item' | 'nature' | 'type';
 
-const ENDPOINT: Record<Exclude<DetailKind, 'type'>, string> = {
-  move: 'move',
-  ability: 'ability',
-  item: 'item',
-  nature: 'nature',
-};
+const moves = memoAsync(fetchMove);
+const abilities = memoAsync(fetchAbility);
+const items = memoAsync(fetchItem);
+const natures = memoAsync(fetchNature);
 
 interface Props {
   kind: DetailKind;
@@ -29,34 +29,9 @@ function isPokeType(t: string): t is PokeType {
   return (TYPES as readonly string[]).includes(t);
 }
 
-function pickEffect(
-  entries: { short_effect?: string; effect?: string; language: { name: string } }[] | undefined,
-): string {
-  if (!entries) return '';
+function pickEffect(entries: EffectEntry[]): string {
   const en = entries.find((e) => e.language.name === 'en');
   return en?.short_effect ?? en?.effect ?? '';
-}
-
-interface MoveResponse {
-  power: number | null;
-  accuracy: number | null;
-  pp: number | null;
-  priority: number;
-  damage_class: { name: string };
-  type: { name: string };
-  effect_entries: { short_effect: string; effect: string; language: { name: string } }[];
-}
-interface AbilityResponse {
-  effect_entries: { short_effect: string; effect: string; language: { name: string } }[];
-}
-interface ItemResponse {
-  effect_entries: { short_effect: string; effect: string; language: { name: string } }[];
-  flavor_text_entries: {
-    text: string;
-    language: { name: string };
-    version_group?: { name: string };
-  }[];
-  category: { name: string };
 }
 
 function pickItemText(data: ItemResponse): string {
@@ -68,9 +43,19 @@ function pickItemText(data: ItemResponse): string {
   // Use the most recent description for clarity
   return cleanFlavorText(enFlavors[enFlavors.length - 1].text);
 }
-interface NatureResponse {
-  increased_stat: { name: string } | null;
-  decreased_stat: { name: string } | null;
+
+/** Renders a lookup's data once ready; the shared scanning / error lines otherwise. */
+function Loaded<T>({
+  state,
+  children,
+}: {
+  state: AsyncState<T>;
+  children: (data: T) => ReactNode;
+}) {
+  if (state.status === 'ready') return children(state.data);
+  if (state.status === 'error')
+    return <span className="crt-detail-error">err: {state.message}</span>;
+  return <span className="crt-detail-loading">scanning...</span>;
 }
 
 function MoveBody({ data }: { data: MoveResponse }) {
@@ -225,29 +210,59 @@ function TypeBody({ name }: { name: string }) {
   );
 }
 
+function MovePanel({ name }: { name: string }) {
+  const move = useAsync(moves, true, name);
+  return <Loaded state={move}>{(data) => <MoveBody data={data} />}</Loaded>;
+}
+
+function AbilityPanel({ name }: { name: string }) {
+  const ability = useAsync(abilities, true, name);
+  return (
+    <Loaded state={ability}>
+      {(data) => (
+        <div className="crt-detail-effect">
+          {pickEffect(data.effect_entries) || 'no description.'}
+        </div>
+      )}
+    </Loaded>
+  );
+}
+
+function ItemPanel({ name }: { name: string }) {
+  const item = useAsync(items, true, name);
+  return (
+    <>
+      <Loaded state={item}>
+        {(data) => (
+          <div className="crt-detail-effect">
+            <span style={{ color: 'var(--dim)' }}>{data.category.name.replace(/-/g, ' ')}</span>
+            {': '}
+            {pickItemText(data) || 'no description.'}
+          </div>
+        )}
+      </Loaded>
+      <ItemObtain slug={name} />
+    </>
+  );
+}
+
+function NaturePanel({ name }: { name: string }) {
+  const nature = useAsync(natures, true, name);
+  return <Loaded state={nature}>{(data) => <NatureBody data={data} />}</Loaded>;
+}
+
+// Each panel mounts only while its detail is open, so it fetches only then.
+const PANELS: Record<DetailKind, (props: { name: string }) => ReactNode> = {
+  move: MovePanel,
+  ability: AbilityPanel,
+  item: ItemPanel,
+  nature: NaturePanel,
+  type: TypeBody,
+};
+
 export default function Detail({ kind, name, label, triggerStyle, triggerClassName }: Props) {
   const [open, setOpen] = useState(false);
-
-  const move = useApiDetail<MoveResponse>(
-    'move',
-    kind === 'move' && open ? name : null,
-    kind === 'move' && open,
-  );
-  const ability = useApiDetail<AbilityResponse>(
-    'ability',
-    kind === 'ability' && open ? name : null,
-    kind === 'ability' && open,
-  );
-  const item = useApiDetail<ItemResponse>(
-    'item',
-    kind === 'item' && open ? name : null,
-    kind === 'item' && open,
-  );
-  const nature = useApiDetail<NatureResponse>(
-    'nature',
-    kind === 'nature' && open ? name : null,
-    kind === 'nature' && open,
-  );
+  const Panel = PANELS[kind];
 
   return (
     <span className="crt-detail">
@@ -262,52 +277,9 @@ export default function Detail({ kind, name, label, triggerStyle, triggerClassNa
       </button>
       {open && (
         <span className="crt-detail-panel">
-          {kind === 'type' && <TypeBody name={name} />}
-          {kind === 'move' && (
-            <>
-              {move.loading && <span className="crt-detail-loading">scanning...</span>}
-              {move.error && <span className="crt-detail-error">err: {move.error}</span>}
-              {move.data && <MoveBody data={move.data} />}
-            </>
-          )}
-          {kind === 'ability' && (
-            <>
-              {ability.loading && <span className="crt-detail-loading">scanning...</span>}
-              {ability.error && <span className="crt-detail-error">err: {ability.error}</span>}
-              {ability.data && (
-                <div className="crt-detail-effect">
-                  {pickEffect(ability.data.effect_entries) || 'no description.'}
-                </div>
-              )}
-            </>
-          )}
-          {kind === 'item' && (
-            <>
-              {item.loading && <span className="crt-detail-loading">scanning...</span>}
-              {item.error && <span className="crt-detail-error">err: {item.error}</span>}
-              {item.data && (
-                <div className="crt-detail-effect">
-                  <span style={{ color: 'var(--dim)' }}>
-                    {item.data.category.name.replace(/-/g, ' ')}
-                  </span>
-                  {': '}
-                  {pickItemText(item.data) || 'no description.'}
-                </div>
-              )}
-              <ItemObtain slug={name} />
-            </>
-          )}
-          {kind === 'nature' && (
-            <>
-              {nature.loading && <span className="crt-detail-loading">scanning...</span>}
-              {nature.error && <span className="crt-detail-error">err: {nature.error}</span>}
-              {nature.data && <NatureBody data={nature.data} />}
-            </>
-          )}
+          <Panel name={name} />
         </span>
       )}
     </span>
   );
 }
-// Re-export for callers that need to render endpoint paths
-export { ENDPOINT };

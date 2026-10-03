@@ -1,3 +1,4 @@
+import type { AsyncState } from '@/async';
 import type { ResolvedBuild, SmogonSet } from '@/competitive';
 import { formatEVs, SMOGON_DEX_SLUGS } from '@/competitive';
 import type { PokemonResponse } from '@/types';
@@ -5,9 +6,8 @@ import { GAMES, isGameId, type GameId } from '@/games';
 import Detail from '@/components/Detail';
 
 interface Props {
-  build: ResolvedBuild | null;
-  loading: boolean;
-  error: string | null;
+  /** Ready with `null` means Smogon has no set. */
+  state: AsyncState<ResolvedBuild | null>;
   /** Default ability fallback when the Smogon set omits it (single-ability species). */
   pokemon?: PokemonResponse;
   /** Games this Pokémon can appear in — the per-game build options. */
@@ -72,9 +72,7 @@ function defaultAbility(p: PokemonResponse | undefined): string | undefined {
 }
 
 export default function CompetitiveBuild({
-  build,
-  loading,
-  error,
+  state,
   pokemon,
   games,
   selectedGame,
@@ -99,7 +97,15 @@ export default function CompetitiveBuild({
     </div>
   );
 
-  if (loading) {
+  if (state.status === 'error') {
+    return (
+      <div>
+        {gameSelect}
+        <div className="crt-build-empty">ERR: {state.message}</div>
+      </div>
+    );
+  }
+  if (state.status !== 'ready') {
     return (
       <div>
         {gameSelect}
@@ -109,14 +115,7 @@ export default function CompetitiveBuild({
       </div>
     );
   }
-  if (error) {
-    return (
-      <div>
-        {gameSelect}
-        <div className="crt-build-empty">ERR: {error}</div>
-      </div>
-    );
-  }
+  const build = state.data;
   if (!build) {
     return (
       <div>

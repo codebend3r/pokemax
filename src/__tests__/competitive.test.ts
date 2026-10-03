@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { findBuildForGen, pickBuild } from '@/competitive';
+import { pickBuild, smogonSets } from '@/competitive';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
 
 const DATA = {
@@ -21,10 +21,10 @@ describe('pickBuild', () => {
   });
 });
 
-describe('findBuildForGen', () => {
+describe('smogonSets', () => {
   it('rejects on a failed fetch instead of reporting "no set"', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 503 })));
-    await expect(findBuildForGen('charizard', 2)).rejects.toThrow();
+    await expect(smogonSets.get(2)).rejects.toThrow();
   });
 });
 
@@ -35,8 +35,7 @@ describe('useCompetitiveSet', () => {
       vi.fn().mockResolvedValue(new Response(JSON.stringify(DATA), { status: 200 })),
     );
     const { result } = renderHook(() => useCompetitiveSet('magikarp', 4));
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.build).toBeNull();
-    expect(result.current.error).toBeNull();
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.status === 'ready' && result.current.data).toBeNull();
   });
 });

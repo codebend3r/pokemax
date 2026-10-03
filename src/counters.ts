@@ -1,3 +1,4 @@
+import { memoAsync } from '@/async';
 import { defensiveMatchups, type PokeType } from '@/typeChart';
 
 interface PSDexEntry {
@@ -54,25 +55,12 @@ export function buildMinLevelMap(dex: Record<string, unknown>): Map<number, numb
   return byNum;
 }
 
-let minLevelsCache: Map<number, number> | null = null;
-let minLevelsInflight: Promise<Map<number, number>> | null = null;
-
-export async function fetchMinLevels(): Promise<Map<number, number>> {
-  if (minLevelsCache) return minLevelsCache;
-  if (!minLevelsInflight) {
-    minLevelsInflight = fetch('https://play.pokemonshowdown.com/data/pokedex.json')
-      .then((r) => {
-        if (!r.ok) throw new Error('pokedex data unavailable');
-        return r.json() as Promise<Record<string, unknown>>;
-      })
-      .then((dex) => {
-        minLevelsCache = buildMinLevelMap(dex);
-        minLevelsInflight = null;
-        return minLevelsCache;
-      });
-  }
-  return minLevelsInflight;
-}
+/** Dex num → earliest level the species can exist at, from Showdown's dex. */
+export const minLevels = memoAsync(async (): Promise<Map<number, number>> => {
+  const r = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
+  if (!r.ok) throw new Error('pokedex data unavailable');
+  return buildMinLevelMap(await (r.json() as Promise<Record<string, unknown>>));
+});
 
 export interface CounterPick {
   /** PokeAPI numeric id. */
@@ -91,7 +79,7 @@ export interface CounterPick {
 }
 
 export interface CounterContext {
-  /** From `useTypeIndex` — Pokémon id → its types. */
+  /** From `typeIndex` (`dex.ts`) — Pokémon id → its types. */
   typeIndex: Map<number, PokeType[]>;
   /** Species slug → numeric id. */
   nameToId: Map<string, number>;

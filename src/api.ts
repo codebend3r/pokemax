@@ -1,7 +1,11 @@
 import type {
+  AbilityResponse,
   EvolutionChainResponse,
   Gen8ListResponse,
   Gen8Species,
+  ItemResponse,
+  MoveResponse,
+  NatureResponse,
   PokemonResponse,
   SpeciesResponse,
 } from '@/types';
@@ -11,7 +15,7 @@ const BASE = 'https://pokeapi.co/api/v2';
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`Request failed: ${res.status} ${url}`);
+    throw new Error(`Lookup failed (${res.status})`);
   }
   return (await res.json()) as T;
 }
@@ -41,4 +45,20 @@ export function fetchSpecies(name: string): Promise<SpeciesResponse> {
 
 export function fetchEvolutionChain(url: string): Promise<EvolutionChainResponse> {
   return getJson<EvolutionChainResponse>(url);
+}
+
+export function fetchMove(name: string): Promise<MoveResponse> {
+  return getJson<MoveResponse>(`${BASE}/move/${name}`);
+}
+
+export function fetchAbility(name: string): Promise<AbilityResponse> {
+  return getJson<AbilityResponse>(`${BASE}/ability/${name}`);
+}
+
+export function fetchItem(name: string): Promise<ItemResponse> {
+  return getJson<ItemResponse>(`${BASE}/item/${name}`);
+}
+
+export function fetchNature(name: string): Promise<NatureResponse> {
+  return getJson<NatureResponse>(`${BASE}/nature/${name}`);
 }

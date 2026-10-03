@@ -1,7 +1,7 @@
 import { useState, type SyntheticEvent } from 'react';
 import { GAMES, REGIONS, type Region } from '@/games';
 import { getGen } from '@/generations';
-import type { ObtainState } from '@/hooks/useObtainData';
+import type { AsyncState } from '@/async';
 import {
   conditionMeta,
   LEGEND_CONDITIONS,
@@ -14,7 +14,7 @@ import {
 import type { ObtainEntry, ObtainFile, ObtainGame } from '@/obtain/types';
 
 interface Props {
-  state: ObtainState;
+  state: AsyncState<ObtainFile>;
   currentGen: number;
 }
 
@@ -173,5 +173,5 @@ export default function ObtainMethods({ state, currentGen }: Props) {
   if (state.status !== 'ready') {
     return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
   }
-  return <ObtainRegions file={state.file} currentGen={currentGen} />;
+  return <ObtainRegions file={state.data} currentGen={currentGen} />;
 }

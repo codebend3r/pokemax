@@ -7,8 +7,9 @@
 //   → split: dry (55%) and convolver reverb (1.6 s exponential noise IR, 45%)
 //   → destination
 
+import { memoAsync } from '@/async';
+
 let ctx: AudioContext | null = null;
-const bufferCache = new Map<string, Promise<AudioBuffer>>();
 let cachedIR: AudioBuffer | null = null;
 
 function getCtx(): AudioContext | null {
@@ -19,19 +20,13 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
-function loadBuffer(c: AudioContext, url: string): Promise<AudioBuffer> {
-  const cached = bufferCache.get(url);
-  if (cached) return cached;
-  const p = fetch(url)
-    .then((r) => {
-      if (!r.ok) throw new Error(`cry fetch ${r.status}`);
-      return r.arrayBuffer();
-    })
-    .then((ab) => c.decodeAudioData(ab));
-  bufferCache.set(url, p);
-  p.catch(() => bufferCache.delete(url));
-  return p;
-}
+const buffers = memoAsync(async (url: string): Promise<AudioBuffer> => {
+  const c = getCtx();
+  if (!c) throw new Error('Web Audio unavailable');
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`cry fetch ${r.status}`);
+  return c.decodeAudioData(await r.arrayBuffer());
+});
 
 function makeReverbIR(c: AudioContext): AudioBuffer {
   if (cachedIR && cachedIR.sampleRate === c.sampleRate) return cachedIR;
@@ -64,7 +59,7 @@ export async function playGmaxCryWithEffects(url: string, gain: number): Promise
   }
   let buffer: AudioBuffer;
   try {
-    buffer = await loadBuffer(c, url);
+    buffer = await buffers.get(url);
   } catch {
     return false;
   }

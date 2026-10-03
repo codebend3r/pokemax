@@ -1,3 +1,5 @@
+import { memoAsync } from '@/async';
+
 export interface SmogonSet {
   moves: (string | string[])[];
   ability?: string | string[];
@@ -28,27 +30,12 @@ const TIER_PRIORITY = [
   'monotype',
 ];
 
-const cached = new Map<number, SmogonData>();
-const inflight = new Map<number, Promise<SmogonData>>();
-
-export async function fetchSmogonData(gen: number): Promise<SmogonData> {
-  if (cached.has(gen)) return cached.get(gen)!;
-  let p = inflight.get(gen);
-  if (!p) {
-    p = fetch(`https://pkmn.github.io/smogon/data/sets/gen${gen}.json`)
-      .then((r) => {
-        if (!r.ok) throw new Error('Smogon data unavailable');
-        return r.json() as Promise<SmogonData>;
-      })
-      .then((d) => {
-        cached.set(gen, d);
-        inflight.delete(gen);
-        return d;
-      });
-    inflight.set(gen, p);
-  }
-  return p;
-}
+/** Every Smogon set for one gen — one sizeable JSON per gen, fetched on demand. */
+export const smogonSets = memoAsync(async (gen: number): Promise<SmogonData> => {
+  const r = await fetch(`https://pkmn.github.io/smogon/data/sets/gen${gen}.json`);
+  if (!r.ok) throw new Error('Smogon data unavailable');
+  return r.json() as Promise<SmogonData>;
+});
 
 function pokeapiToSmogon(name: string): string {
   return name
@@ -63,21 +50,13 @@ function pokeapiToSmogon(name: string): string {
  * preferring the latest gen surfaces the richer modern competitive build.
  * A failed fetch rejects — `null` strictly means "Smogon has no set".
  */
-export async function findBestBuild(name: string): Promise<ResolvedBuild | null> {
+export const bestBuilds = memoAsync(async (name: string): Promise<ResolvedBuild | null> => {
   for (const gen of [9, 8, 7, 6, 5, 4, 3, 2, 1]) {
-    const build = pickBuild(await fetchSmogonData(gen), name, gen);
+    const build = pickBuild(await smogonSets.get(gen), name, gen);
     if (build) return build;
   }
   return null;
-}
-
-/**
- * Look up a set in ONE specific gen — for "show me the build for the game I'm
- * playing". Resolves null (no cross-gen walking) when that gen has no set.
- */
-export async function findBuildForGen(name: string, gen: number): Promise<ResolvedBuild | null> {
-  return pickBuild(await fetchSmogonData(gen), name, gen);
-}
+});
 
 /** Smogon strategy-dex slug for a gen (`smogon.com/dex/<slug>`). */
 export const SMOGON_DEX_SLUGS: Record<number, string> = {

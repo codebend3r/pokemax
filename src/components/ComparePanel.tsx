@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { fetchPokemon } from '@/api';
+import { useMemo, useState } from 'react';
+import { useAsync } from '@/async';
+import { pokemonData } from '@/dex';
 import type { Gen8Species, PokemonResponse } from '@/types';
 import { TYPE_COLORS, TYPES, type PokeType } from '@/typeChart';
 
@@ -56,8 +57,7 @@ function TypeChip({ name }: { name: string }) {
 export default function ComparePanel({ base, species, onClose }: Props) {
   const [query, setQuery] = useState('');
   const [target, setTarget] = useState<Gen8Species | null>(null);
-  const [targetData, setTargetData] = useState<PokemonResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const targetState = useAsync(pokemonData, target !== null, target?.id ?? 0);
 
   const suggestions = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -65,25 +65,8 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     return species.filter((s) => s.name !== base.name && s.name.includes(q)).slice(0, 10);
   }, [query, species, base.name]);
 
-  useEffect(() => {
-    if (!target) return;
-    let active = true;
-    fetchPokemon(target.id)
-      .then((p) => {
-        if (active) setTargetData(p);
-      })
-      .catch((e: Error) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [target]);
-
   const pick = (s: Gen8Species) => {
     setTarget(s);
-    setTargetData(null);
-    setError(null);
     setQuery('');
   };
 
@@ -118,7 +101,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     );
   }
 
-  if (error) {
+  if (targetState.status === 'error') {
     return (
       <div className="crt-compare">
         <div className="crt-compare-header">
@@ -133,7 +116,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     );
   }
 
-  if (!targetData) {
+  if (targetState.status !== 'ready') {
     return (
       <div className="crt-compare">
         <div className="crt-compare-header">
@@ -146,6 +129,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     );
   }
 
+  const targetData = targetState.data;
   const baseTotal = STAT_ORDER.reduce((n, k) => n + statByName(base, k), 0);
   const targetTotal = STAT_ORDER.reduce((n, k) => n + statByName(targetData, k), 0);
 
@@ -153,14 +137,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     <div className="crt-compare">
       <div className="crt-compare-header">
         <span className="crt-compare-label">▶ COMPARING</span>
-        <button
-          type="button"
-          className="crt-compare-change"
-          onClick={() => {
-            setTarget(null);
-            setTargetData(null);
-          }}
-        >
+        <button type="button" className="crt-compare-change" onClick={() => setTarget(null)}>
           [ change ]
         </button>
         <button type="button" className="crt-compare-close" onClick={onClose}>

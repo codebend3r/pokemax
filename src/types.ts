@@ -100,3 +100,38 @@ export interface GroupedMove {
   level: number;
   method: LearnMethod;
 }
+
+export interface EffectEntry {
+  short_effect?: string;
+  effect?: string;
+  language: { name: string };
+}
+
+export interface MoveResponse {
+  power: number | null;
+  accuracy: number | null;
+  pp: number | null;
+  priority: number;
+  damage_class: { name: string };
+  type: { name: string };
+  effect_entries: EffectEntry[];
+}
+
+export interface AbilityResponse {
+  effect_entries: EffectEntry[];
+}
+
+export interface ItemResponse {
+  effect_entries: EffectEntry[];
+  flavor_text_entries: {
+    text: string;
+    language: { name: string };
+    version_group?: { name: string };
+  }[];
+  category: { name: string };
+}
+
+export interface NatureResponse {
+  increased_stat: { name: string } | null;
+  decreased_stat: { name: string } | null;
+}

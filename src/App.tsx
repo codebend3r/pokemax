@@ -6,15 +6,14 @@ import PokemonGrid from '@/components/PokemonGrid';
 import GenFilter from '@/components/GenFilter';
 import ThemeToggle from '@/components/ThemeToggle';
 import ShareButton from '@/components/ShareButton';
-import { useAllSpecies } from '@/hooks/useAllSpecies';
+import { useAsync } from '@/async';
+import { formIndex, speciesIndex, typeIndex } from '@/dex';
 import { usePokemon } from '@/hooks/usePokemon';
-import { useTypeIndex } from '@/hooks/useTypeIndex';
 import { useTheme } from '@/hooks/useTheme';
 import { useViewMode } from '@/hooks/useViewMode';
 import { usePageSize } from '@/hooks/usePageSize';
 import { useVolume } from '@/hooks/useVolume';
-import { useExtraForms } from '@/hooks/useExtraForms';
-import type { FormCategory } from '@/types';
+import type { FormCategory, Gen8Species } from '@/types';
 import {
   pokedexPath,
   trainersPath,
@@ -41,8 +40,12 @@ const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
 const TrainersPage = lazy(() => import('@/components/TrainersPage'));
 const TeamsBrowser = lazy(() => import('@/components/TeamsBrowser'));
 
+const NO_SPECIES: Gen8Species[] = [];
+
 export default function App() {
-  const list = useAllSpecies();
+  const speciesState = useAsync(speciesIndex, true, undefined);
+  const species = speciesState.status === 'ready' ? speciesState.data : NO_SPECIES;
+  const names = useMemo(() => species.map((s) => s.name), [species]);
   const { theme, toggle: toggleTheme } = useTheme();
   const { view, toggle: toggleView } = useViewMode();
   const { pageSize, setPageSize } = usePageSize();
@@ -85,23 +88,24 @@ export default function App() {
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set());
   const [selectedTypes, setSelectedTypes] = useState<Set<PokeType>>(new Set());
   const [typeIndexEnabled, setTypeIndexEnabled] = useState(false);
-  const typeIndex = useTypeIndex(typeIndexEnabled);
+  const typeIndexState = useAsync(typeIndex, typeIndexEnabled, undefined);
   const [activeFormCats, setActiveFormCats] = useState<Set<FormCategory>>(new Set());
-  const extraForms = useExtraForms(list.species, activeFormCats.size > 0);
+  const formState = useAsync(formIndex, activeFormCats.size > 0, undefined);
+  const forms = formState.status === 'ready' ? formState.data : NO_SPECIES;
   const shiny = pokedexSearch.variant === 'shiny';
   const dimension = pokedexSearch.dimension;
   const formKey = pokedexSearch.form;
-  const [attempt, setAttempt] = useState(0);
-  // Game a TEAMS pick was clicked from — preselects the competitive build.
-  const [pendingBuildGame, setPendingBuildGame] = useState<GameId | null>(null);
-  const fullSpeciesIndex = useMemo(
-    () => [...list.species, ...extraForms.forms],
-    [list.species, extraForms.forms],
-  );
-  const result = usePokemon(selected, fullSpeciesIndex, attempt);
+  // A fresh object per pick, so re-picking the shown Pokémon still scrolls to
+  // it. `buildGame` is the game a TEAMS / trainer pick came from — it
+  // preselects the competitive build.
+  const [selection, setSelection] = useState<{ buildGame: GameId | null } | null>(null);
+  const pendingBuildGame = selection?.buildGame ?? null;
+  const fullSpeciesIndex = useMemo(() => [...species, ...forms], [species, forms]);
+  const result = usePokemon(selected, fullSpeciesIndex);
+  const bundle = result.status === 'ready' ? result.data : null;
   const setShiny = (v: boolean) => {
-    if (!result.data) return;
-    const baseName = result.data.species.name;
+    if (!bundle) return;
+    const baseName = bundle.species.name;
     navigate(
       pokedexPath(baseName, {
         ...pokedexSearch,
@@ -111,13 +115,13 @@ export default function App() {
     );
   };
   const setDimension = (next: '2d' | '3d') => {
-    if (!result.data) return;
-    const baseName = result.data.species.name;
+    if (!bundle) return;
+    const baseName = bundle.species.name;
     navigate(pokedexPath(baseName, { ...pokedexSearch, dimension: next }), { replace: true });
   };
   const setFormKey = (next: string) => {
-    if (!result.data) return;
-    const baseName = result.data.species.name;
+    if (!bundle) return;
+    const baseName = bundle.species.name;
     navigate(pokedexPath(baseName, { ...pokedexSearch, form: next }), { replace: true });
   };
   const cardRef = useRef<HTMLDivElement>(null);
@@ -127,18 +131,18 @@ export default function App() {
   // base species that have at least one matching form plus those forms — interleaved
   // by base species ID so each form sits next to its parent.
   const filteredSpecies = useMemo(() => {
-    let merged: typeof list.species;
+    let merged: Gen8Species[];
     if (activeFormCats.size === 0) {
-      merged = list.species;
+      merged = species;
     } else {
-      const matchingForms = extraForms.forms.filter(
+      const matchingForms = forms.filter(
         (f) => f.formCategory && activeFormCats.has(f.formCategory),
       );
-      const parentIdByName = new Map(list.species.map((s) => [s.name, s.id]));
+      const parentIdByName = new Map(species.map((s) => [s.name, s.id]));
       const baseNames = new Set(
         matchingForms.map((f) => f.speciesName).filter(Boolean) as string[],
       );
-      const matchingBases = list.species.filter((s) => baseNames.has(s.name));
+      const matchingBases = species.filter((s) => baseNames.has(s.name));
       merged = [...matchingBases, ...matchingForms].sort((a, b) => {
         const baseIdA = a.speciesName ? (parentIdByName.get(a.speciesName) ?? a.id) : a.id;
         const baseIdB = b.speciesName ? (parentIdByName.get(b.speciesName) ?? b.id) : b.id;
@@ -148,7 +152,7 @@ export default function App() {
     }
     if (selectedGens.size === 0) return merged;
     return merged.filter((s) => selectedGens.has(s.gen));
-  }, [list, extraForms.forms, selectedGens, activeFormCats]);
+  }, [species, forms, selectedGens, activeFormCats]);
 
   const selectedEntry = selected
     ? (fullSpeciesIndex.find((s) => s.name === selected) ?? null)
@@ -156,24 +160,24 @@ export default function App() {
   const selectedGen = selectedEntry?.gen ?? 8;
 
   let status: 'ready' | 'scanning' | 'err-not-found' | 'err-api' | 'loading-dex' = 'ready';
-  if (list.loading) status = 'loading-dex';
-  else if (list.error) status = 'err-api';
-  else if (result.loading) status = 'scanning';
-  else if (result.error?.kind === 'not-in-gen-8') status = 'err-not-found';
-  else if (result.error?.kind === 'transmission') status = 'err-api';
+  if (speciesState.status === 'loading') status = 'loading-dex';
+  else if (speciesState.status === 'error') status = 'err-api';
+  else if (result.status === 'loading') status = 'scanning';
+  else if (result.status === 'not-found') status = 'err-not-found';
+  else if (result.status === 'error') status = 'err-api';
 
   useEffect(() => {
     // A TEAMS pick scrolls to the competitive-build section instead (PokemonCard).
-    if (result.data && cardRef.current && !pendingBuildGame) {
+    if (bundle && cardRef.current && !selection?.buildGame) {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [result.data, pendingBuildGame]);
+  }, [bundle, selection]);
 
   // Keep document.title in sync with the selected Pokemon. URL is owned by the router.
   useEffect(() => {
     const base = 'Pokemax';
-    if (result.data) {
-      const raw = result.data.pokemon.name;
+    if (bundle) {
+      const raw = bundle.pokemon.name;
       const pretty = raw
         .split('-')
         .map((p) => (p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p))
@@ -182,25 +186,24 @@ export default function App() {
     } else {
       document.title = base;
     }
-  }, [result.data]);
+  }, [bundle]);
 
   // Canonicalize alt-form path slugs to base-species + ?form=<suffix>.
   // `/pokedex/charizard-mega-x` → `/pokedex/charizard?form=mega-x`
   useEffect(() => {
-    if (!result.data || !selected) return;
-    const baseName = result.data.species.name;
+    if (!bundle || !selected) return;
+    const baseName = bundle.species.name;
     if (selected !== baseName) {
       const suffix = formFromVariety(baseName, selected);
       if (suffix !== 'base') {
         navigate(pokedexPath(baseName, { ...pokedexSearch, form: suffix }), { replace: true });
       }
     }
-  }, [result.data, selected, pokedexSearch, navigate]);
+  }, [bundle, selected, pokedexSearch, navigate]);
 
   const handleSelect = (name: string, buildGame: GameId | null = null) => {
-    setAttempt((n) => n + 1);
     setQuery('');
-    setPendingBuildGame(buildGame);
+    setSelection({ buildGame });
 
     // Pre-warm the cry audio while the pokemon data is still being fetched.
     // The cry URL is predictable from the species ID, so we don't need to wait.
@@ -234,7 +237,7 @@ export default function App() {
   const handleSubmit = (typed: string) => {
     const q = typed.trim().toLowerCase();
     if (!q) return;
-    if (list.names.includes(q)) {
+    if (names.includes(q)) {
       handleSelect(q);
       return;
     }
@@ -316,14 +319,14 @@ export default function App() {
       {appMode === 'pokedex' && (
         <>
           <SearchBar
-            names={list.names}
+            names={names}
             value={query}
             onValueChange={setQuery}
             onSearch={handleSubmit}
-            disabled={list.loading}
+            disabled={speciesState.status === 'loading'}
           />
 
-          {list.error && (
+          {speciesState.status === 'error' && (
             <div className="crt-error">
               ERR: COULD NOT LOAD POKéDEX INDEX
               <button type="button" onClick={() => window.location.reload()}>
@@ -332,20 +335,20 @@ export default function App() {
             </div>
           )}
 
-          {result.error?.kind === 'not-in-gen-8' && (
+          {result.status === 'not-found' && (
             <div className="crt-error">ERR: "{selected}" NOT FOUND</div>
           )}
 
-          {result.error?.kind === 'transmission' && (
+          {result.status === 'error' && (
             <div className="crt-error">
               ERR: TRANSMISSION LOST
-              <button type="button" onClick={() => setAttempt((n) => n + 1)}>
+              <button type="button" onClick={result.retry}>
                 [ retry ]
               </button>
             </div>
           )}
 
-          {result.data && (
+          {bundle && (
             <div ref={cardRef}>
               <Suspense
                 fallback={
@@ -355,9 +358,9 @@ export default function App() {
                 }
               >
                 <PokemonCard
-                  pokemon={result.data.pokemon}
-                  species={result.data.species}
-                  chain={result.data.chain}
+                  pokemon={bundle.pokemon}
+                  species={bundle.species}
+                  chain={bundle.chain}
                   shiny={shiny}
                   onShinyChange={setShiny}
                   view={dimension}
@@ -395,7 +398,7 @@ export default function App() {
             <div className="crt-extra-chips">
               {FORM_CATEGORIES.map(({ key, label }) => {
                 const active = activeFormCats.has(key);
-                const count = extraForms.forms.filter((f) => f.formCategory === key).length;
+                const count = forms.filter((f) => f.formCategory === key).length;
                 return (
                   <button
                     key={key}
@@ -427,7 +430,7 @@ export default function App() {
                 </button>
               )}
             </div>
-            {extraForms.loading && (
+            {formState.status === 'loading' && (
               <span className="crt-extra-status">
                 ▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span>
               </span>
@@ -443,7 +446,7 @@ export default function App() {
             onToggleView={toggleView}
             pageSize={pageSize}
             onPageSizeChange={setPageSize}
-            typeIndex={typeIndex.index}
+            typeIndex={typeIndexState.status === 'ready' ? typeIndexState.data : null}
             selectedTypes={selectedTypes}
             onToggleType={(t) => {
               setTypeIndexEnabled(true);

@@ -24,9 +24,7 @@ function renderBuild(overrides: Partial<Parameters<typeof CompetitiveBuild>[0]> 
   const onSelectGame = vi.fn();
   render(
     <CompetitiveBuild
-      build={BUILD}
-      loading={false}
-      error={null}
+      state={{ status: 'ready', data: BUILD }}
       games={GAMES}
       selectedGame={null}
       onSelectGame={onSelectGame}
@@ -62,7 +60,7 @@ describe('CompetitiveBuild', () => {
   });
 
   it('shows a game-specific empty state when a pinned gen has no set', () => {
-    renderBuild({ build: null, selectedGame: 'firered-leafgreen' });
+    renderBuild({ state: { status: 'ready', data: null }, selectedGame: 'firered-leafgreen' });
     expect(
       screen.getByText(/no Smogon set for this entry in FireRed \/ LeafGreen/),
     ).toBeInTheDocument();

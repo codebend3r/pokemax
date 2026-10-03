@@ -1,12 +1,17 @@
 // The Pokédex indexes — everything the grid, search, filters, and the
 // Pokémon card read — each fetched once per session behind a `memoAsync`.
 import { memoAsync } from '@/async';
-import { fetchEvolutionChain, fetchGenerationList, fetchPokemon, fetchSpecies } from '@/api';
+import {
+  fetchEvolutionChain,
+  fetchGenerationList,
+  fetchPokemon,
+  fetchPokemonList,
+  fetchSpecies,
+  fetchTypeMembers,
+} from '@/api';
 import { GENERATIONS } from '@/generations';
 import { TYPES, type PokeType } from '@/typeChart';
 import type { FormCategory, Gen8Species } from '@/types';
-
-const BASE = 'https://pokeapi.co/api/v2';
 
 /** Every base species across all generations, national-dex order. */
 export const speciesIndex = memoAsync(async (): Promise<Gen8Species[]> => {
@@ -86,40 +91,31 @@ function categorizeForm(suffix: string): FormCategory {
 
 /** Alternate forms (Mega, Gmax, regional, battle forms), matched to their base species. */
 export const formIndex = memoAsync(async (): Promise<Gen8Species[]> => {
-  const [species, r] = await Promise.all([
-    speciesIndex.get(),
-    fetch(`${BASE}/pokemon?limit=20000`),
-  ]);
-  if (!r.ok) throw new Error('Failed to load alternate forms');
-  const j = (await r.json()) as { results: { name: string; url: string }[] };
+  const [species, varieties] = await Promise.all([speciesIndex.get(), fetchPokemonList()]);
   const byName = new Map(species.map((s) => [s.name, s]));
 
   const forms: Gen8Species[] = [];
-  for (const entry of j.results) {
-    const m = entry.url.match(/\/pokemon\/(\d+)\/?$/);
-    if (!m) continue;
-    const id = parseInt(m[1], 10);
+  for (const { name, id } of varieties) {
     if (id < 10000) continue; // skip base species (already in main list)
 
     // Match the form's name to a parent species by trying progressively shorter
     // dash-separated prefixes. e.g. 'charizard-mega-x' → tries 'charizard-mega'
-    // then 'charizard'. The previous loop bailed out before checking single-segment
-    // names, which meant nothing ever matched and the forms array stayed empty.
-    const parts = entry.name.split('-');
+    // then 'charizard'.
+    const parts = name.split('-');
     let base: Gen8Species | undefined;
     let suffix = '';
     for (let i = parts.length - 1; i >= 1; i--) {
       const candidate = parts.slice(0, i).join('-');
       base = byName.get(candidate);
       if (base) {
-        suffix = entry.name.slice(candidate.length + 1);
+        suffix = name.slice(candidate.length + 1);
         break;
       }
     }
     if (!base || !suffix) continue;
 
     forms.push({
-      name: entry.name,
+      name,
       id,
       gen: base.gen,
       speciesName: base.name,
@@ -130,30 +126,16 @@ export const formIndex = memoAsync(async (): Promise<Gen8Species[]> => {
   return forms.sort((a, b) => a.id - b.id);
 });
 
-interface TypeResponse {
-  pokemon: { slot: number; pokemon: { name: string; url: string } }[];
-}
-
 async function fetchTypeIndex(): Promise<Map<number, PokeType[]>> {
-  const responses = await Promise.all(
-    TYPES.map(async (t) => {
-      const r = await fetch(`${BASE}/type/${t}`);
-      if (!r.ok) throw new Error(`type/${t} failed`);
-      const j = (await r.json()) as TypeResponse;
-      return { type: t, body: j };
-    }),
-  );
+  const members = await Promise.all(TYPES.map(fetchTypeMembers));
   const map = new Map<number, PokeType[]>();
-  for (const { type, body } of responses) {
-    for (const entry of body.pokemon) {
-      const m = entry.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
-      if (!m) continue;
-      const id = parseInt(m[1], 10);
+  TYPES.forEach((type, i) => {
+    for (const { id, slot } of members[i]) {
       const list = map.get(id) ?? [];
-      list[entry.slot - 1] = type;
+      list[slot - 1] = type;
       map.set(id, list);
     }
-  }
+  });
   for (const [k, v] of map) {
     map.set(
       k,

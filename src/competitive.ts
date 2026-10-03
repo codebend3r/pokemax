@@ -1,16 +1,56 @@
 import { memoAsync } from '@/async';
+import { isRecord } from '@/guards';
+
+type StatSpread = Partial<Record<'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>;
 
 export interface SmogonSet {
   moves: (string | string[])[];
   ability?: string | string[];
   item?: string | string[];
   nature?: string | string[];
-  evs?: Partial<Record<'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>;
-  ivs?: Partial<Record<'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>;
+  /** A list when the set offers alternative spreads. */
+  evs?: StatSpread | StatSpread[];
+  ivs?: StatSpread | StatSpread[];
   teratypes?: string | string[];
 }
 
 type SmogonData = Record<string, Record<string, Record<string, SmogonSet>>>;
+
+const isStringOrList = (v: unknown): boolean =>
+  v === undefined ||
+  typeof v === 'string' ||
+  (Array.isArray(v) && v.every((x) => typeof x === 'string'));
+
+const isSpreads = (v: unknown): boolean =>
+  v === undefined || isRecord(v) || (Array.isArray(v) && v.every(isRecord));
+
+function isSmogonSet(v: unknown): v is SmogonSet {
+  return (
+    isRecord(v) &&
+    Array.isArray(v.moves) &&
+    v.moves.every(isStringOrList) &&
+    isStringOrList(v.ability) &&
+    isStringOrList(v.item) &&
+    isStringOrList(v.nature) &&
+    isStringOrList(v.teratypes) &&
+    isSpreads(v.evs) &&
+    isSpreads(v.ivs)
+  );
+}
+
+/** Species → format → set name → set. */
+function isSmogonData(v: unknown): v is SmogonData {
+  return (
+    isRecord(v) &&
+    Object.values(v).every(
+      (formats) =>
+        isRecord(formats) &&
+        Object.values(formats).every(
+          (sets) => isRecord(sets) && Object.values(sets).every(isSmogonSet),
+        ),
+    )
+  );
+}
 
 const TIER_PRIORITY = [
   'ou',
@@ -34,7 +74,9 @@ const TIER_PRIORITY = [
 export const smogonSets = memoAsync(async (gen: number): Promise<SmogonData> => {
   const r = await fetch(`https://pkmn.github.io/smogon/data/sets/gen${gen}.json`);
   if (!r.ok) throw new Error('Smogon data unavailable');
-  return r.json() as Promise<SmogonData>;
+  const data: unknown = await r.json();
+  if (!isSmogonData(data)) throw new Error('Malformed Smogon data');
+  return data;
 });
 
 function pokeapiToSmogon(name: string): string {
@@ -114,20 +156,26 @@ export function pickBuild(
   return null;
 }
 
+const SPREAD_LABELS: Record<string, string> = {
+  hp: 'HP',
+  atk: 'Atk',
+  def: 'Def',
+  spa: 'SpA',
+  spd: 'SpD',
+  spe: 'Spe',
+};
+
+function formatSpread(spread: StatSpread): string {
+  return Object.entries(spread)
+    .filter(([, v]) => typeof v === 'number' && v > 0)
+    .map(([k, v]) => `${v} ${SPREAD_LABELS[k] ?? k}`)
+    .join(' / ');
+}
+
 export function formatEVs(evs?: SmogonSet['evs']): string {
   if (!evs) return '—';
-  const labels: Record<string, string> = {
-    hp: 'HP',
-    atk: 'Atk',
-    def: 'Def',
-    spa: 'SpA',
-    spd: 'SpD',
-    spe: 'Spe',
-  };
-  const parts = Object.entries(evs)
-    .filter(([, v]) => typeof v === 'number' && v > 0)
-    .map(([k, v]) => `${v} ${labels[k] ?? k}`);
-  return parts.length > 0 ? parts.join(' / ') : '—';
+  const spreads = (Array.isArray(evs) ? evs : [evs]).map(formatSpread).filter(Boolean);
+  return spreads.length > 0 ? spreads.join(' or ') : '—';
 }
 
 export function formatMaybeArray(value: string | string[] | undefined): string {

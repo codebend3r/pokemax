@@ -7,7 +7,7 @@ import type {
 } from '@/types';
 import { groupMoves } from '@/moves';
 import { getGen } from '@/generations';
-import { fetchPokemon } from '@/api';
+import { fetchPokemon, idFromUrl } from '@/api';
 import { CRY_VOLUME_SCALE, cleanFlavorText } from '@/textUtil';
 import StatBar from '@/components/StatBar';
 import AbilityList from '@/components/AbilityList';
@@ -500,9 +500,8 @@ export default function PokemonCard({
     // time `CardSprite`'s auto-play effect would run, browsers no
     // longer count the click as a user gesture and `play()` rejects.
     const v = species.varieties.find((x) => x.pokemon.name === varietyName);
-    const idMatch = v?.pokemon.url.match(/\/pokemon\/(\d+)\/?$/);
-    if (idMatch) {
-      const id = parseInt(idMatch[1], 10);
+    const id = v ? idFromUrl(v.pokemon.url) : 0;
+    if (id) {
       const cryUrl =
         cryOverrideFor(varietyName) ??
         `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;

@@ -42,19 +42,44 @@ describe('fetchGen8List', () => {
   });
 });
 
+const SPRITES = { front_default: null, front_shiny: null };
+const POKEMON = {
+  id: 813,
+  name: 'scorbunny',
+  height: 3,
+  weight: 45,
+  sprites: { ...SPRITES, other: { 'official-artwork': SPRITES } },
+  types: [{ slot: 1, type: { name: 'fire' } }],
+  stats: [{ base_stat: 50, stat: { name: 'hp' } }],
+  abilities: [{ ability: { name: 'blaze' }, is_hidden: false, slot: 1 }],
+  moves: [],
+};
+
 describe('fetchPokemon', () => {
   it('hits /pokemon/{name} and returns parsed JSON', async () => {
-    const body = { id: 813, name: 'scorbunny' };
-    fetchMock.mockReturnValue(ok(body));
+    fetchMock.mockReturnValue(ok(POKEMON));
     const result = await fetchPokemon('scorbunny');
-    expect(result).toEqual(body);
+    expect(result).toEqual(POKEMON);
     expect(fetchMock).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon/scorbunny');
+  });
+
+  it('rejects a response missing the fields the card reads', async () => {
+    fetchMock.mockReturnValue(ok({ id: 813, name: 'scorbunny' }));
+    await expect(fetchPokemon('scorbunny')).rejects.toThrow(/Malformed/);
   });
 });
 
 describe('fetchSpecies', () => {
   it('hits /pokemon-species/{name}', async () => {
-    fetchMock.mockReturnValue(ok({ name: 'scorbunny', evolution_chain: { url: 'X' } }));
+    fetchMock.mockReturnValue(
+      ok({
+        name: 'scorbunny',
+        evolution_chain: { url: 'X' },
+        varieties: [],
+        flavor_text_entries: [],
+        genera: [],
+      }),
+    );
     const result = await fetchSpecies('scorbunny');
     expect(result.evolution_chain.url).toBe('X');
     expect(fetchMock).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon-species/scorbunny');

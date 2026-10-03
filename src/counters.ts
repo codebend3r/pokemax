@@ -1,4 +1,5 @@
 import { memoAsync } from '@/async';
+import { isRecord } from '@/guards';
 import { defensiveMatchups, type PokeType } from '@/typeChart';
 
 interface PSDexEntry {
@@ -59,7 +60,9 @@ export function buildMinLevelMap(dex: Record<string, unknown>): Map<number, numb
 export const minLevels = memoAsync(async (): Promise<Map<number, number>> => {
   const r = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
   if (!r.ok) throw new Error('pokedex data unavailable');
-  return buildMinLevelMap(await (r.json() as Promise<Record<string, unknown>>));
+  const dex: unknown = await r.json();
+  if (!isRecord(dex)) throw new Error('Malformed pokedex data');
+  return buildMinLevelMap(dex);
 });
 
 export interface CounterPick {

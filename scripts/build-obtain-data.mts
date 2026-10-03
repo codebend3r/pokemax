@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { idFromUrl } from '../src/api';
 import { assembleObtainFile } from '../src/obtain/assemble';
 import { parseTradeLists, type NpcTrade } from '../src/obtain/bulbapedia';
 import { encountersToEntries, type ApiEncounterArea } from '../src/obtain/pokeapi';
@@ -65,10 +66,6 @@ function num(v: unknown): number {
 }
 function arr(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
-}
-function idFromUrl(url: string): number {
-  const m = url.match(/\/(\d+)\/?$/);
-  return m ? parseInt(m[1], 10) : 0;
 }
 function pretty(slug: string): string {
   return slug.replace(/-/g, ' ');

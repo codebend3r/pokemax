@@ -11,7 +11,62 @@ import {
 } from '@/api';
 import { GENERATIONS } from '@/generations';
 import { TYPES, type PokeType } from '@/typeChart';
+import type { Form } from '@/routes';
 import type { AltForm, BaseSpecies, FormCategory } from '@/types';
+
+/**
+ * Splits a variety slug into its base species and form suffix by the longest
+ * dash-separated prefix that names a species: `charizard-mega-x` tries
+ * `charizard-mega`, then `charizard`; `mr-mime-galar` finds `mr-mime`.
+ */
+function parentOf(
+  name: string,
+  byName: Map<string, BaseSpecies>,
+): { base: BaseSpecies; suffix: string } | null {
+  const parts = name.split('-');
+  for (let i = parts.length - 1; i >= 1; i--) {
+    const base = byName.get(parts.slice(0, i).join('-'));
+    if (base) return { base, suffix: name.slice(base.name.length + 1) };
+  }
+  return null;
+}
+
+export type DexRoute =
+  | { status: 'none' }
+  | { status: 'not-found' }
+  | {
+      status: 'found';
+      species: string;
+      form: Form;
+      /** National dex number, once the index has loaded. */
+      baseId: number | null;
+      /** False for a form slug (`/pokedex/charizard-mega-x`) the URL should be rewritten from. */
+      canonical: boolean;
+    };
+
+/**
+ * Resolves `/pokedex/:name?form=` to a species and form BEFORE anything is
+ * fetched. Until the index loads, the name is taken as a species — the
+ * canonical shape of every link the app writes.
+ */
+export function resolveDexRoute(name: string | null, form: Form, index: BaseSpecies[]): DexRoute {
+  if (name === null) return { status: 'none' };
+  if (index.length === 0) {
+    return { status: 'found', species: name, form, baseId: null, canonical: true };
+  }
+  const byName = new Map(index.map((s) => [s.name, s]));
+  const exact = byName.get(name);
+  if (exact) return { status: 'found', species: name, form, baseId: exact.id, canonical: true };
+  const parent = parentOf(name, byName);
+  if (!parent) return { status: 'not-found' };
+  return {
+    status: 'found',
+    species: parent.base.name,
+    form: parent.suffix,
+    baseId: parent.base.id,
+    canonical: false,
+  };
+}
 
 /** Every base species across all generations, national-dex order. */
 export const speciesIndex = memoAsync(async (): Promise<BaseSpecies[]> => {
@@ -98,21 +153,9 @@ export const formIndex = memoAsync(async (): Promise<AltForm[]> => {
   for (const { name, id } of varieties) {
     if (id < 10000) continue; // skip base species (already in main list)
 
-    // Match the form's name to a parent species by trying progressively shorter
-    // dash-separated prefixes. e.g. 'charizard-mega-x' → tries 'charizard-mega'
-    // then 'charizard'.
-    const parts = name.split('-');
-    let base: BaseSpecies | undefined;
-    let suffix = '';
-    for (let i = parts.length - 1; i >= 1; i--) {
-      const candidate = parts.slice(0, i).join('-');
-      base = byName.get(candidate);
-      if (base) {
-        suffix = name.slice(candidate.length + 1);
-        break;
-      }
-    }
-    if (!base || !suffix) continue;
+    const parent = parentOf(name, byName);
+    if (!parent) continue;
+    const { base, suffix } = parent;
 
     forms.push({
       kind: 'form',

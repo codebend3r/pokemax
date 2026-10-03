@@ -111,6 +111,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -130,6 +131,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -149,6 +151,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -172,6 +175,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -189,6 +193,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={true}
@@ -206,6 +211,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}
@@ -225,6 +231,7 @@ describe('PokemonCard', () => {
     render(
       <PokemonCard
         pokemon={pokemon}
+        base={pokemon}
         species={species}
         chain={chain}
         shiny={false}

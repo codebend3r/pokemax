@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { EvolutionChainResponse, DexEntry, PokemonResponse, SpeciesResponse } from '@/types';
 import { groupMoves } from '@/moves';
 import { getGen } from '@/generations';
-import { fetchPokemon, idFromUrl } from '@/api';
+import { idFromUrl } from '@/api';
 import { CRY_VOLUME_SCALE, cleanFlavorText } from '@/textUtil';
 import StatBar from '@/components/StatBar';
 import AbilityList from '@/components/AbilityList';
@@ -27,7 +27,10 @@ import { cryOverrideFor } from '@/cryOverrides';
 import { playGmaxCryWithEffects } from '@/gmaxAudio';
 
 interface Props {
+  /** The variety on screen. */
   pokemon: PokemonResponse;
+  /** The species' default variety. */
+  base: PokemonResponse;
   species: SpeciesResponse;
   chain: EvolutionChainResponse;
   shiny: boolean;
@@ -324,7 +327,8 @@ function CardSprite({
 }
 
 export default function PokemonCard({
-  pokemon: defaultPokemon,
+  pokemon,
+  base,
   species,
   chain,
   shiny,
@@ -342,42 +346,15 @@ export default function PokemonCard({
   initialBuildGame,
 }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
-  const [activeVariety, setActiveVariety] = useState<string>(() =>
-    varietyFromForm(species.name, form),
-  );
-  const [varietyData, setVarietyData] = useState<PokemonResponse | null>(null);
+  // The variety the URL names — `pokemon` until that variety's data lands.
+  const activeVariety = form === 'base' ? base.name : varietyFromForm(species.name, form);
   const localCryRef = useRef<HTMLAudioElement | null>(null);
   const audioRef = cryAudioRef ?? localCryRef;
 
-  // On species (route) change, snap the active variety to whatever the URL says.
-  const [prevSpeciesForm, setPrevSpeciesForm] = useState({ name: species.name, form });
-  if (prevSpeciesForm.name !== species.name || prevSpeciesForm.form !== form) {
-    setPrevSpeciesForm({ name: species.name, form });
-    setActiveVariety(varietyFromForm(species.name, form));
-    setVarietyData(null);
-  }
-
-  // Fetch alternate variety data when user picks a different form
-  useEffect(() => {
-    if (activeVariety === defaultPokemon.name) return;
-    let active = true;
-    fetchPokemon(activeVariety)
-      .then((p) => {
-        if (active) setVarietyData(p);
-      })
-      .catch(() => {
-        /* leave defaults */
-      });
-    return () => {
-      active = false;
-    };
-  }, [activeVariety, defaultPokemon.name]);
-
-  const pokemon = varietyData ?? defaultPokemon;
   // Cosmetic variants (Gigantamax / Mega / regional) often ship empty `moves`
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
   // so the MOVES section isn't blank when viewing those forms.
-  const movesPokemon = pokemon.moves.length > 0 ? pokemon : defaultPokemon;
+  const movesPokemon = pokemon.moves.length > 0 ? pokemon : base;
   // 2D shows only frame-animated pixel art. Gen 1-5 base species always have
   // a BW animation. For everything else, probe in priority order: PokeAPI's
   // Showdown mirror by id → Smogon's fan animation by slug. If neither URL
@@ -486,9 +463,7 @@ export default function PokemonCard({
   })();
 
   const handleVarietyChange = (varietyName: string) => {
-    setActiveVariety(varietyName);
-    setVarietyData(null);
-    onFormChange(formFromVariety(species.name, varietyName));
+    onFormChange(varietyName === base.name ? 'base' : formFromVariety(species.name, varietyName));
     // Pre-warm + play the new variety's cry synchronously inside this
     // user-gesture handler. The variety data fetch is async — by the
     // time `CardSprite`'s auto-play effect would run, browsers no

@@ -97,6 +97,10 @@ export function useAsync<K, V>(memo: AsyncMemo<K, V>, enabled: boolean, key: K):
   return enabled ? { status: 'loading' } : { status: 'idle' };
 }
 
+export function dataOf<T>(state: AsyncState<T>): T | null {
+  return state.status === 'ready' ? state.data : null;
+}
+
 export type Pending = Exclude<AsyncState<never>, { status: 'ready' }>;
 
 /**

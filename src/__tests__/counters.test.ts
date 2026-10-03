@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMinLevelMap, pickCounterTeam } from '@/counters';
+import { buildMinLevelMap, counterTeamFor, pickCounterTeam } from '@/counters';
 import type { PokeType } from '@/typeChart';
 
 describe('pickCounterTeam', () => {
@@ -140,5 +140,45 @@ describe('buildMinLevelMap', () => {
   it('skips form entries so the base species wins', () => {
     const m = buildMinLevelMap(dex);
     expect(m.has(6)).toBe(false); // only the Mega form is present in this fixture
+  });
+});
+
+describe('counterTeamFor', () => {
+  const index = [
+    { kind: 'species' as const, name: 'pikachu', id: 25, gen: 1 },
+    { kind: 'species' as const, name: 'raichu', id: 26, gen: 1 },
+    { kind: 'species' as const, name: 'squirtle', id: 7, gen: 1 },
+    { kind: 'species' as const, name: 'mudkip', id: 258, gen: 3 },
+    { kind: 'species' as const, name: 'geodude', id: 74, gen: 1 },
+  ];
+  const typeIndex = new Map<number, PokeType[]>([
+    [25, ['electric']],
+    [26, ['electric']],
+    [7, ['water']],
+    [258, ['water']],
+    [74, ['rock', 'ground']],
+  ]);
+  const brock = {
+    id: 'rb-brock',
+    name: 'Brock',
+    trainerClass: 'Gym Leader',
+    game: 'red-blue' as const,
+    team: [{ species: 'geodude', level: 12 }],
+  };
+
+  it('never suggests a Pokémon from a dex the game lacks, or that cannot exist yet', () => {
+    const levels = new Map([[26, 30]]); // raichu: stone evo, mid-game floor
+    const team = counterTeamFor(brock, index, typeIndex, levels);
+    expect(team.map((p) => p.name)).toEqual(['squirtle']); // not gen-3 mudkip, not raichu
+  });
+
+  it('pins early-game trainers to what is catchable by that fight', () => {
+    const team = counterTeamFor(
+      { ...brock, availableBefore: ['pikachu'] },
+      index,
+      typeIndex,
+      new Map(),
+    );
+    expect(team.map((p) => p.name)).toEqual(['pikachu']);
   });
 });

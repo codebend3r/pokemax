@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { GAMES } from '@/games';
 import { trainerPortraitUrl, type Trainer } from '@/trainers';
-import { minLevels, pickCounterTeam } from '@/counters';
+import { counterTeamFor, minLevels } from '@/counters';
 import Detail from '@/components/Detail';
 import { useAsync } from '@/async';
 import { typeIndex } from '@/dex';
@@ -57,49 +57,13 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
   const levelMap =
     levels.status === 'ready' ? levels.data : levels.status === 'error' ? NO_LEVEL_GATE : null;
 
-  const counterTeam = useMemo(() => {
-    if (!openCounters || !typeMap || !levelMap) return null;
-    const nameToId = new Map<string, number>();
-    const idToName = new Map<number, string>();
-    const allowed = new Set<number>();
-    const maxGen = GAMES[trainer.game].dexGen;
-    // A counter must be able to EXIST at this fight: at or below the
-    // trainer's strongest level, given how its evolution line works.
-    const maxLevel = Math.max(...trainer.team.map((m) => m.level));
-    for (const s of speciesIndex) {
-      nameToId.set(s.name, s.id);
-      idToName.set(s.id, s.name);
-      if (s.gen <= maxGen && (levelMap.get(s.id) ?? 0) <= maxLevel) allowed.add(s.id);
-    }
-    // Early-game trainers additionally pin the pool to what's catchable so far.
-    if (trainer.availableBefore) {
-      const pool = new Set<number>();
-      for (const slug of trainer.availableBefore) {
-        const id = nameToId.get(slug);
-        if (id != null && allowed.has(id)) pool.add(id);
-      }
-      return pickCounterTeam(trainer.team, {
-        typeIndex: typeMap,
-        nameToId,
-        idToName,
-        candidateFilter: (id) => pool.has(id),
-      });
-    }
-    return pickCounterTeam(trainer.team, {
-      typeIndex: typeMap,
-      nameToId,
-      idToName,
-      candidateFilter: (id) => allowed.has(id),
-    });
-  }, [
-    openCounters,
-    typeMap,
-    levelMap,
-    speciesIndex,
-    trainer.team,
-    trainer.game,
-    trainer.availableBefore,
-  ]);
+  const counterTeam = useMemo(
+    () =>
+      openCounters && typeMap && levelMap
+        ? counterTeamFor(trainer, speciesIndex, typeMap, levelMap)
+        : null,
+    [openCounters, typeMap, levelMap, trainer, speciesIndex],
+  );
 
   return (
     <div className="crt-trainer-detail">

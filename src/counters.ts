@@ -1,4 +1,7 @@
 import { memoAsync } from '@/async';
+import { GAMES } from '@/games';
+import type { Trainer } from '@/trainers';
+import type { DexEntry } from '@/types';
 import { isRecord } from '@/guards';
 import { effectiveness, type PokeType } from '@/typeChart';
 
@@ -197,4 +200,34 @@ export function pickCounterTeam(
   });
 
   return team;
+}
+
+/**
+ * The counter team for `trainer`, drawn only from Pokémon a player could
+ * realistically field there: in a dex the game holds, able to EXIST at the
+ * trainer's strongest level given how their line evolves, and — for
+ * early-game trainers with `availableBefore` — catchable by that fight.
+ */
+export function counterTeamFor(
+  trainer: Trainer,
+  index: DexEntry[],
+  typeIndex: Map<number, PokeType[]>,
+  minLevels: Map<number, number>,
+): CounterPick[] {
+  const nameToId = new Map(index.map((s) => [s.name, s.id]));
+  const idToName = new Map(index.map((s) => [s.id, s.name]));
+  const dexGen = GAMES[trainer.game].dexGen;
+  const maxLevel = Math.max(...trainer.team.map((m) => m.level));
+  const fieldable = new Set(
+    index.filter((s) => s.gen <= dexGen && (minLevels.get(s.id) ?? 0) <= maxLevel).map((s) => s.id),
+  );
+  const catchable = trainer.availableBefore
+    ? new Set(trainer.availableBefore.map((slug) => nameToId.get(slug)))
+    : null;
+  return pickCounterTeam(trainer.team, {
+    typeIndex,
+    nameToId,
+    idToName,
+    candidateFilter: (id) => fieldable.has(id) && (!catchable || catchable.has(id)),
+  });
 }

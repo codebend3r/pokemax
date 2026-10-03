@@ -33,14 +33,12 @@ const FORM_CATEGORIES: { key: FormCategory; label: string }[] = [
 import type { PokeType } from '@/typeChart';
 import { CRY_VOLUME_SCALE } from '@/textUtil';
 import { cryOverrideFor } from '@/cryOverrides';
-import { TRAINERS, type Trainer } from '@/trainers';
 import type { GameId } from '@/games';
 
 // Lazy-loaded — only fetched when first needed
 const PokemonCard = lazy(() => import('@/components/PokemonCard'));
 const MusicPlayer = lazy(() => import('@/components/MusicPlayer'));
-const TrainerGrid = lazy(() => import('@/components/TrainerGrid'));
-const TrainerCard = lazy(() => import('@/components/TrainerCard'));
+const TrainersPage = lazy(() => import('@/components/TrainersPage'));
 const TeamsBrowser = lazy(() => import('@/components/TeamsBrowser'));
 
 export default function App() {
@@ -66,10 +64,6 @@ export default function App() {
 
   const selected: string | null = matchPokemonDetail
     ? (pokemonDetailParams?.name?.toLowerCase() ?? null)
-    : null;
-
-  const selectedTrainer: Trainer | null = matchTrainerDetail
-    ? (TRAINERS.find((t) => t.id === trainerDetailParams?.id) ?? null)
     : null;
 
   // Legacy back-compat: ?p=charizard → /pokedex/charizard (one-shot on mount)
@@ -473,24 +467,13 @@ export default function App() {
             </div>
           }
         >
-          {matchTrainerDetail && !selectedTrainer && (
-            <div className="crt-error">ERR: TRAINER "{trainerDetailParams?.id}" NOT FOUND</div>
-          )}
-          {selectedTrainer ? (
-            <TrainerCard
-              trainer={selectedTrainer}
-              onBack={() => navigate(trainersPath())}
-              onSelectPokemon={(name) => {
-                // Roster AND counter picks preselect this trainer's game.
-                handleSelect(name, selectedTrainer.game);
-              }}
-              speciesIndex={fullSpeciesIndex}
-            />
-          ) : (
-            !matchTrainerDetail && (
-              <TrainerGrid trainers={TRAINERS} onSelect={(t) => navigate(trainerPath(t.id))} />
-            )
-          )}
+          <TrainersPage
+            trainerId={matchTrainerDetail ? (trainerDetailParams?.id ?? null) : null}
+            onOpenTrainer={(id) => navigate(trainerPath(id))}
+            onBack={() => navigate(trainersPath())}
+            onSelectPokemon={handleSelect}
+            speciesIndex={fullSpeciesIndex}
+          />
         </Suspense>
       )}
 

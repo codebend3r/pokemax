@@ -11,6 +11,11 @@
    * `Space Mono` swaps in for small body text + stat numbers where pixel-art
    * letterforms get cramped (Pokédex entries, descriptions, base stats, etc.). */
   --font-body: 'Space Mono', 'Courier New', monospace;
+  /* Tinted chips (type, method, condition tags): the oklch lightness band
+     their text is clamped into so every hue clears 4.5:1, and their glow. */
+  --tint-l-min: 0.68;
+  --tint-l-max: 1;
+  --tint-glow: 40%;
 }
 
 * {
@@ -1357,6 +1362,7 @@ button.crt-type:hover,
   gap: 4px;
 }
 .crt-tf-chip {
+  --tf-fill: var(--type-color);
   padding: 4px 10px;
   border: 1px solid var(--type-color);
   background: rgba(0, 0, 0, 0.3);
@@ -1373,7 +1379,7 @@ button.crt-type:hover,
   filter: brightness(1.4);
 }
 .crt-tf-chip.active {
-  background: var(--type-color);
+  background: var(--tf-fill);
   color: #000;
   text-shadow: none;
   font-weight: bold;
@@ -3208,8 +3214,8 @@ button.crt-type:hover,
    ──────────────────────────────────────────── */
 /* `tintStyle` sets `--tint` inline to a palette color. Some palette colors are
    too dark (ghost, dragon) to read as text on the dark theme, and most are too
-   light on the cream one, so the text keeps the tint's hue at a lightness that
-   clears 4.5:1 against either background. */
+   light on the cream one, so the text keeps the tint's hue at a lightness
+   inside the theme's `--tint-l-min` / `--tint-l-max` band. */
 .crt-type,
 .crt-mu-chip,
 .crt-obtain-tag,
@@ -3218,7 +3224,7 @@ button.crt-type:hover,
   --tint-text: var(--tint, var(--primary));
   color: var(--tint-text);
   border-color: var(--tint, var(--primary));
-  text-shadow: 0 0 4px color-mix(in srgb, var(--tint, var(--primary)) 40%, transparent);
+  text-shadow: 0 0 4px color-mix(in srgb, var(--tint, var(--primary)) var(--tint-glow), transparent);
 }
 /* A type chip that opens a detail keeps its hue over the trigger's accent. */
 .crt-type.crt-detail-trigger:hover,
@@ -3231,13 +3237,14 @@ button.crt-type:hover,
   .crt-obtain-tag,
   .crt-obtain-cond,
   .crt-trainer-counter-type {
-    --tint-text: oklch(from var(--tint, var(--primary)) max(l, 0.68) c h / alpha);
+    --tint-text: oklch(
+      from var(--tint, var(--primary)) clamp(var(--tint-l-min), l, var(--tint-l-max)) c h / alpha
+    );
   }
   .crt-tf-chip {
-    color: oklch(from var(--type-color) max(l, 0.68) c h / alpha);
-  }
-  .crt-tf-chip.active {
-    background: oklch(from var(--type-color) max(l, 0.68) c h);
+    /* The active chip's black text needs a light enough fill in both themes. */
+    --tf-fill: oklch(from var(--type-color) max(l, 0.68) c h);
+    color: oklch(from var(--type-color) clamp(var(--tint-l-min), l, var(--tint-l-max)) c h / alpha);
   }
 }
 
@@ -3255,6 +3262,9 @@ button.crt-type:hover,
   --error: #8a1f1f;
   /* Light-mode specific contrast fixes */
   --border: rgba(58, 31, 6, 0.55);
+  --tint-l-min: 0;
+  --tint-l-max: 0.45;
+  --tint-glow: 0%;
 }
 :root[data-theme='light'] body::after {
   /* slightly more visible scanlines on cream so they still read as "CRT" */
@@ -3307,7 +3317,7 @@ button.crt-type:hover,
   background: color-mix(in srgb, var(--type-color) 38%, #ffffff);
 }
 :root[data-theme='light'] .crt-tf-chip.active {
-  background: var(--type-color);
+  background: var(--tf-fill);
   color: #000;
   border-color: color-mix(in srgb, var(--type-color) 50%, #000000);
   text-shadow: none;
@@ -3438,14 +3448,7 @@ button.crt-type:hover,
   filter: none;
 }
 /* Tinted chips on cream: a light wash of the tint replaces the dark-theme
-   smoke background, and the text darkens until it clears 4.5:1. */
-:root[data-theme='light'] .crt-type,
-:root[data-theme='light'] .crt-mu-chip,
-:root[data-theme='light'] .crt-obtain-tag,
-:root[data-theme='light'] .crt-obtain-cond,
-:root[data-theme='light'] .crt-trainer-counter-type {
-  text-shadow: none;
-}
+   smoke background. */
 :root[data-theme='light'] .crt-type:not(.crt-detail-trigger),
 :root[data-theme='light'] .crt-mu-chip {
   background: color-mix(in srgb, var(--tint, var(--primary)) 15%, var(--bg));
@@ -3456,19 +3459,6 @@ button.crt-type:hover,
 :root[data-theme='light'] .crt-type.crt-detail-trigger[aria-expanded='true'] {
   filter: none;
 }
-@supports (color: oklch(from red l c h)) {
-  :root[data-theme='light'] .crt-type,
-  :root[data-theme='light'] .crt-mu-chip,
-  :root[data-theme='light'] .crt-obtain-tag,
-  :root[data-theme='light'] .crt-obtain-cond,
-  :root[data-theme='light'] .crt-trainer-counter-type {
-    --tint-text: oklch(from var(--tint, var(--primary)) min(l, 0.45) c h / alpha);
-  }
-  :root[data-theme='light'] .crt-tf-chip.active {
-    background: oklch(from var(--type-color) max(l, 0.68) c h);
-  }
-}
-
 /* ────────────────────────────────────────────
    Reduced motion
    ──────────────────────────────────────────── */

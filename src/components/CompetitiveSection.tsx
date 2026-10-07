@@ -23,12 +23,11 @@ export default function CompetitiveSection({ pokemon, gen, pick }: Props) {
     setBuildGame(pick?.buildGame ?? null);
   }
 
-  const sectionRef = useRef<HTMLDivElement | null>(null);
   const summaryRef = useRef<HTMLElement>(null);
   useEffect(() => {
     // Arriving from a TEAMS pick — jump straight to the build for that game.
     if (!pick?.buildGame) return;
-    sectionRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+    summaryRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     summaryRef.current?.focus({ preventScroll: true });
   }, [pokemon.name, pick]);
 
@@ -36,20 +35,18 @@ export default function CompetitiveSection({ pokemon, gen, pick }: Props) {
   const build = competitive.status === 'ready' ? competitive.data : null;
 
   return (
-    <div ref={sectionRef}>
-      <Section
-        label="COMPETITIVE BUILD"
-        summaryRef={summaryRef}
-        count={build ? `GEN ${build.sourceGen} · ${build.tier.toUpperCase()}` : undefined}
-      >
-        <CompetitiveBuild
-          state={competitive}
-          pokemon={pokemon}
-          games={games}
-          selectedGame={buildGame}
-          onSelectGame={setBuildGame}
-        />
-      </Section>
-    </div>
+    <Section
+      label="COMPETITIVE BUILD"
+      summaryRef={summaryRef}
+      count={build ? `GEN ${build.sourceGen} · ${build.tier.toUpperCase()}` : undefined}
+    >
+      <CompetitiveBuild
+        state={competitive}
+        pokemon={pokemon}
+        games={games}
+        selectedGame={buildGame}
+        onSelectGame={setBuildGame}
+      />
+    </Section>
   );
 }

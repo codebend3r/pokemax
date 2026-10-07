@@ -1,5 +1,5 @@
 import { useId, useMemo, useRef, useState } from 'react';
-import { useAsync } from '@/async';
+import { dataOf, useAsync, type AsyncState } from '@/async';
 import { pokemonData } from '@/dex';
 import type { DexEntry, PokemonResponse } from '@/types';
 import { pokeapiShowdownGif } from '@/sprites';
@@ -35,6 +35,20 @@ function StatNum({ value, other }: { value: number; other: number }) {
       {higher && <span className="crt-visually-hidden"> (higher)</span>}
     </span>
   );
+}
+
+/** The header line, which doubles as the panel's live status. */
+function headerLabel({
+  target,
+  state,
+}: {
+  target: DexEntry | null;
+  state: AsyncState<PokemonResponse>;
+}): string {
+  if (!target) return 'COMPARE WITH';
+  const name = titleCase(target.name).toUpperCase();
+  if (state.status === 'error') return `ERR LOADING ${name}`;
+  return state.status === 'ready' ? 'COMPARING' : `FETCHING ${name}…`;
 }
 
 function Comparison({ base, target }: { base: PokemonResponse; target: PokemonResponse }) {
@@ -109,7 +123,7 @@ export default function ComparePanel({ base, species, onClose }: Props) {
   const [query, setQuery] = useState('');
   const [target, setTarget] = useState<DexEntry | null>(null);
   const targetState = useAsync(pokemonData, target !== null, target?.id ?? 0);
-  const targetData = target && targetState.status === 'ready' ? targetState.data : null;
+  const targetData = dataOf(targetState);
   const panelRef = useRef<HTMLElement>(null);
   const labelId = useId();
 
@@ -126,20 +140,11 @@ export default function ComparePanel({ base, species, onClose }: Props) {
     panelRef.current?.focus();
   };
 
-  const targetName = titleCase(target?.name ?? '').toUpperCase();
-  const label = !target
-    ? 'COMPARE WITH'
-    : targetState.status === 'error'
-      ? `ERR LOADING ${targetName}`
-      : targetData
-        ? 'COMPARING'
-        : `FETCHING ${targetName}…`;
-
   return (
     <section ref={panelRef} className="crt-compare" aria-labelledby={labelId} tabIndex={-1}>
       <div className="crt-compare-header">
         <span id={labelId} className="crt-compare-label" role="status">
-          <span aria-hidden="true">▶</span> {label}
+          <span aria-hidden="true">▶</span> {headerLabel({ target, state: targetState })}
         </span>
         {targetData && (
           <button type="button" className="crt-compare-change" onClick={() => setTarget(null)}>

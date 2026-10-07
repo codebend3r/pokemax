@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { dataOf, useAsync } from '@/async';
 import TrainerCard from '@/components/TrainerCard';
@@ -20,6 +20,9 @@ interface Props {
 // lazily-loaded page, which keeps it out of the main bundle.
 export default function TrainersPage({ trainerId, onSelectPokemon }: Props) {
   const [, navigate] = useLocation();
+  // The last trainer page shown — the list hands focus back to that trainer's card.
+  const [lastTrainerId, setLastTrainerId] = useState(trainerId);
+  if (trainerId !== null && trainerId !== lastTrainerId) setLastTrainerId(trainerId);
   // Counter picks map slugs to ids and gens through the dex index; alternate
   // forms join it only once the Pokédex has loaded them.
   const species = dataOf(useAsync(speciesIndex, true, undefined));
@@ -30,10 +33,23 @@ export default function TrainersPage({ trainerId, onSelectPokemon }: Props) {
   );
 
   if (trainerId === null) {
-    return <TrainerGrid trainers={TRAINERS} onSelect={(t) => navigate(trainerPath(t.id))} />;
+    return (
+      <TrainerGrid
+        trainers={TRAINERS}
+        onSelect={(t) => navigate(trainerPath(t.id))}
+        returnFocusTo={lastTrainerId}
+      />
+    );
   }
   const trainer = TRAINERS.find((t) => t.id === trainerId);
-  if (!trainer) return <div className="crt-error">ERR: TRAINER "{trainerId}" NOT FOUND</div>;
+  if (!trainer) {
+    return (
+      <>
+        <h1 className="crt-visually-hidden">Trainer not found</h1>
+        <div className="crt-error">ERR: TRAINER "{trainerId}" NOT FOUND</div>
+      </>
+    );
+  }
   return (
     <TrainerCard
       trainer={trainer}

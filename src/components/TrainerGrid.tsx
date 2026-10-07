@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import TrainerFilters from '@/components/TrainerFilters';
 import { GAMES, GAME_ORDER, REGIONS, type GameId } from '@/games';
 import { trainerPortraitUrl, type Trainer } from '@/trainers';
@@ -9,6 +9,8 @@ import { useToggleSet } from '@/hooks/useToggleSet';
 interface Props {
   trainers: Trainer[];
   onSelect: (trainer: Trainer) => void;
+  /** The trainer whose page was just closed; their card gets focus back on return. */
+  returnFocusTo?: string | null;
 }
 
 const ALL_REGIONS: readonly string[] = REGIONS.map((r) => r.name);
@@ -17,7 +19,7 @@ function normalize(s: string): string {
   return s.toLowerCase().replace(/[-_]/g, ' ');
 }
 
-export default function TrainerGrid({ trainers, onSelect }: Props) {
+export default function TrainerGrid({ trainers, onSelect, returnFocusTo = null }: Props) {
   const games = useToggleSet<GameId>();
   const classes = useToggleSet<string>();
   const selectedGames = games.set;
@@ -59,6 +61,11 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
     nameQuery.trim() !== '' ||
     pokemonQuery.trim() !== '';
 
+  const returnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    returnRef.current?.focus();
+  }, []);
+
   const regionGroups = useMemo(
     () =>
       REGIONS.map(({ name: region, note, games }) => ({
@@ -71,6 +78,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
 
   return (
     <>
+      <h1 className="crt-visually-hidden">Trainers</h1>
       <TrainerFilters
         selectedGames={selectedGames}
         selectedClasses={selectedClasses}
@@ -88,10 +96,10 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
 
       <div className="crt-teams-fold-controls crt-trainers-fold">
         <button type="button" className="crt-trainer-chip" onClick={() => expandAll(ALL_REGIONS)}>
-          ▼ EXPAND ALL
+          <span aria-hidden="true">▼</span> EXPAND ALL
         </button>
         <button type="button" className="crt-trainer-chip" onClick={collapseAll}>
-          ▶ COLLAPSE ALL
+          <span aria-hidden="true">▶</span> COLLAPSE ALL
         </button>
       </div>
 
@@ -110,9 +118,15 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                 aria-expanded={!isCollapsed}
                 onClick={() => toggle(region)}
               >
-                <span className="crt-team-region-caret">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="crt-team-region-caret" aria-hidden="true">
+                  {isCollapsed ? '▶' : '▼'}
+                </span>
                 {region.toUpperCase()}
-                {note && <span className="crt-team-region-note">◂ {note.toUpperCase()}</span>}
+                {note && (
+                  <span className="crt-team-region-note">
+                    <span aria-hidden="true">◂</span> {note.toUpperCase()}
+                  </span>
+                )}
               </button>
             </h2>
             {!isCollapsed && (
@@ -120,6 +134,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                 {regionTrainers.map((t) => (
                   <button
                     key={t.id}
+                    ref={t.id === returnFocusTo ? returnRef : null}
                     className="crt-trainer-list-card"
                     type="button"
                     onClick={() => onSelect(t)}
@@ -128,7 +143,7 @@ export default function TrainerGrid({ trainers, onSelect }: Props) {
                       <img
                         className="crt-trainer-list-card-portrait"
                         src={trainerPortraitUrl(t)}
-                        alt={t.name}
+                        alt=""
                         loading="lazy"
                       />
                     )}

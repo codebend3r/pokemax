@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import PokemonCard from '@/components/PokemonCard';
 import type { ChainLink, PokemonResponse, SpeciesResponse, EvolutionChainResponse } from '@/types';
 
@@ -244,5 +245,46 @@ describe('PokemonCard', () => {
       />,
     );
     expect(screen.getByText(/dragon darts/i)).toBeInTheDocument();
+  });
+
+  it('heads the card with the name and moves focus to it on a pick', () => {
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        base={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
+        pick={{ buildGame: null }}
+      />,
+    );
+    expect(screen.getByRole('heading', { level: 1, name: 'DRAGAPULT' })).toHaveFocus();
+  });
+
+  it('returns focus to the COMPARE toggle when the panel closes', async () => {
+    render(
+      <PokemonCard
+        pokemon={pokemon}
+        base={pokemon}
+        species={species}
+        chain={chain}
+        shiny={false}
+        onShinyChange={() => {}}
+        view="2d"
+        onViewChange={() => {}}
+        form="base"
+        onFormChange={() => {}}
+        speciesPool={[{ kind: 'species', name: 'dreepy', id: 885, gen: 8 }]}
+      />,
+    );
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'COMPARE' }));
+    await user.click(screen.getByRole('button', { name: 'Close compare' }));
+    expect(screen.getByRole('button', { name: 'COMPARE' })).toHaveFocus();
   });
 });

@@ -33,6 +33,18 @@ describe('TrainerCard', () => {
     expect(screen.getByText('Lv 14')).toBeInTheDocument();
   });
 
+  it('heads the page with the trainer and focuses it on arrival', () => {
+    render(
+      <TrainerCard
+        trainer={BROCK}
+        onBack={() => {}}
+        onSelectPokemon={() => {}}
+        speciesIndex={[]}
+      />,
+    );
+    expect(screen.getByRole('heading', { level: 1, name: 'BROCK' })).toHaveFocus();
+  });
+
   it('clicking a roster member reports its species slug', async () => {
     const onSelectPokemon = vi.fn();
     render(

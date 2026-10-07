@@ -99,7 +99,9 @@ export default function CompetitiveBuild({
     return (
       <div>
         {gameSelect}
-        <div className="crt-build-empty">ERR: {state.message}</div>
+        <div className="crt-build-empty" role="alert">
+          ERR: {state.message}
+        </div>
       </div>
     );
   }
@@ -107,8 +109,11 @@ export default function CompetitiveBuild({
     return (
       <div>
         {gameSelect}
-        <div className="crt-build-empty">
-          ▶ FETCHING COMPETITIVE DATA<span className="crt-cursor">&nbsp;</span>
+        <div className="crt-build-empty" role="status">
+          ▶ FETCHING COMPETITIVE DATA
+          <span className="crt-cursor" aria-hidden="true">
+            &nbsp;
+          </span>
         </div>
       </div>
     );

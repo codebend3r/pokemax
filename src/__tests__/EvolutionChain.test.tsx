@@ -100,6 +100,12 @@ describe('EvolutionChain', () => {
     expect(screen.getAllByText(/lv 35/i).length).toBeGreaterThan(0);
   });
 
+  it('marks the shown stage as current', () => {
+    render(<EvolutionChain chain={linear} active="raboot" onSelect={() => {}} />);
+    expect(screen.getByText('RABOOT')).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByRole('button', { name: 'SCORBUNNY' })).not.toHaveAttribute('aria-current');
+  });
+
   it('renders branches for Toxel→Toxtricity', () => {
     render(<EvolutionChain chain={branching} active="toxel" />);
     expect(screen.getByText(/toxel/i)).toBeInTheDocument();

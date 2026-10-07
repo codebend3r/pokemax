@@ -1,21 +1,29 @@
-import type { ReactNode, SyntheticEvent } from 'react';
+import type { ReactNode, Ref, SyntheticEvent } from 'react';
 
 interface Props {
   label: string;
+  summaryRef?: Ref<HTMLElement>;
   count?: number | string;
   defaultOpen?: boolean;
   onToggle?: (open: boolean) => void;
   children: ReactNode;
 }
 
-export default function Section({ label, count, defaultOpen = true, onToggle, children }: Props) {
+export default function Section({
+  label,
+  summaryRef,
+  count,
+  defaultOpen = true,
+  onToggle,
+  children,
+}: Props) {
   return (
     <details
       className="crt-section"
       open={defaultOpen}
       onToggle={(e: SyntheticEvent<HTMLDetailsElement>) => onToggle?.(e.currentTarget.open)}
     >
-      <summary className="crt-section-summary">
+      <summary ref={summaryRef} className="crt-section-summary">
         <span className="crt-section-label">{label}</span>
         {count !== undefined && <span className="crt-section-count"> · {count}</span>}
       </summary>

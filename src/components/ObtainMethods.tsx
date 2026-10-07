@@ -78,7 +78,9 @@ function Legend() {
       className="crt-obtain-legend"
       onToggle={(e: SyntheticEvent<HTMLDetailsElement>) => setOpen(e.currentTarget.open)}
     >
-      <summary>{open ? '▼' : '▶'} LEGEND</summary>
+      <summary>
+        <span aria-hidden="true">{open ? '▼' : '▶'}</span> LEGEND
+      </summary>
       <div className="crt-obtain-legend-section">
         <div className="crt-obtain-legend-title">METHODS</div>
         <ul className="crt-obtain-legend-list">
@@ -146,7 +148,7 @@ function ObtainRegions({ file, currentGen }: { file: ObtainFile; currentGen: num
               aria-expanded={open}
               onClick={() => toggle(region.name)}
             >
-              {open ? '▼' : '▶'} {regionLabel(region)}
+              <span aria-hidden="true">{open ? '▼' : '▶'}</span> {regionLabel(region)}
             </button>
             {open && gamesInRegion.map((g, i) => <GameRow key={i} game={g} />)}
           </div>
@@ -158,10 +160,18 @@ function ObtainRegions({ file, currentGen }: { file: ObtainFile; currentGen: num
 
 export default function ObtainMethods({ state, currentGen }: Props) {
   if (state.status === 'loading') {
-    return <div className="crt-obtain-status">LOADING OBTAIN DATA…</div>;
+    return (
+      <div className="crt-obtain-status" role="status">
+        LOADING OBTAIN DATA…
+      </div>
+    );
   }
   if (state.status !== 'ready') {
-    return <div className="crt-obtain-status">OBTAIN DATA UNAVAILABLE</div>;
+    return (
+      <div className="crt-obtain-status" role="status">
+        OBTAIN DATA UNAVAILABLE
+      </div>
+    );
   }
   return <ObtainRegions file={state.data} currentGen={currentGen} />;
 }

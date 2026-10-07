@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useAsync } from '@/async';
+import { useId, useMemo, useRef, useState } from 'react';
+import { dataOf, useAsync, type AsyncState } from '@/async';
 import { pokemonData } from '@/dex';
 import type { DexEntry, PokemonResponse } from '@/types';
 import { pokeapiShowdownGif } from '@/sprites';
@@ -25,99 +25,38 @@ function TypeChip({ name }: { name: string }) {
   );
 }
 
-export default function ComparePanel({ base, species, onClose }: Props) {
-  const [query, setQuery] = useState('');
-  const [target, setTarget] = useState<DexEntry | null>(null);
-  const targetState = useAsync(pokemonData, target !== null, target?.id ?? 0);
+/** One side of a stat row. The higher value gets a ▲ as well as its color. */
+function StatNum({ value, other }: { value: number; other: number }) {
+  const higher = value > other;
+  return (
+    <span className={'crt-compare-stat-num' + (higher ? ' win' : value < other ? ' lose' : '')}>
+      {higher && <span aria-hidden="true">▲ </span>}
+      {value}
+      {higher && <span className="crt-visually-hidden"> (higher)</span>}
+    </span>
+  );
+}
 
-  const suggestions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return species.filter((s) => s.name !== base.name && s.name.includes(q)).slice(0, 10);
-  }, [query, species, base.name]);
+/** The header line, which doubles as the panel's live status. */
+function headerLabel({
+  target,
+  state,
+}: {
+  target: DexEntry | null;
+  state: AsyncState<PokemonResponse>;
+}): string {
+  if (!target) return 'COMPARE WITH';
+  const name = titleCase(target.name).toUpperCase();
+  if (state.status === 'error') return `ERR LOADING ${name}`;
+  return state.status === 'ready' ? 'COMPARING' : `FETCHING ${name}…`;
+}
 
-  const pick = (s: DexEntry) => {
-    setTarget(s);
-    setQuery('');
-  };
-
-  if (!target) {
-    return (
-      <div className="crt-compare">
-        <div className="crt-compare-header">
-          <span className="crt-compare-label">▶ COMPARE WITH</span>
-          <button type="button" className="crt-compare-close" onClick={onClose}>
-            [ × ]
-          </button>
-        </div>
-        <input
-          className="crt-compare-input"
-          autoFocus
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="search for a pokémon to compare..."
-        />
-        {suggestions.length > 0 && (
-          <ul className="crt-compare-suggestions">
-            {suggestions.map((s) => (
-              <li key={s.name}>
-                <button type="button" onClick={() => pick(s)}>
-                  #{String(s.id).padStart(3, '0')} {titleCase(s.name)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
-
-  if (targetState.status === 'error') {
-    return (
-      <div className="crt-compare">
-        <div className="crt-compare-header">
-          <span className="crt-compare-label">
-            ▶ ERR LOADING {titleCase(target.name).toUpperCase()}
-          </span>
-          <button type="button" className="crt-compare-close" onClick={onClose}>
-            [ × ]
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (targetState.status !== 'ready') {
-    return (
-      <div className="crt-compare">
-        <div className="crt-compare-header">
-          <span className="crt-compare-label">
-            ▶ FETCHING {titleCase(target.name).toUpperCase()}…
-          </span>
-          <button type="button" className="crt-compare-close" onClick={onClose}>
-            [ × ]
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const targetData = targetState.data;
+function Comparison({ base, target }: { base: PokemonResponse; target: PokemonResponse }) {
   const baseTotal = STAT_ORDER.reduce((n, k) => n + statByName(base, k), 0);
-  const targetTotal = STAT_ORDER.reduce((n, k) => n + statByName(targetData, k), 0);
+  const targetTotal = STAT_ORDER.reduce((n, k) => n + statByName(target, k), 0);
 
   return (
-    <div className="crt-compare">
-      <div className="crt-compare-header">
-        <span className="crt-compare-label">▶ COMPARING</span>
-        <button type="button" className="crt-compare-change" onClick={() => setTarget(null)}>
-          [ change ]
-        </button>
-        <button type="button" className="crt-compare-close" onClick={onClose}>
-          [ × ]
-        </button>
-      </div>
-
+    <>
       <div className="crt-compare-row crt-compare-names">
         <div className="crt-compare-col">
           <img src={pokeapiShowdownGif(base.id)} alt={base.name} className="crt-compare-sprite" />
@@ -131,13 +70,13 @@ export default function ComparePanel({ base, species, onClose }: Props) {
         <div className="crt-compare-vs">VS</div>
         <div className="crt-compare-col">
           <img
-            src={pokeapiShowdownGif(targetData.id)}
-            alt={targetData.name}
+            src={pokeapiShowdownGif(target.id)}
+            alt={target.name}
             className="crt-compare-sprite"
           />
-          <div className="crt-compare-name">{titleCase(targetData.name).toUpperCase()}</div>
+          <div className="crt-compare-name">{titleCase(target.name).toUpperCase()}</div>
           <div className="crt-compare-types">
-            {targetData.types.map((t) => (
+            {target.types.map((t) => (
               <TypeChip key={t.type.name} name={t.type.name} />
             ))}
           </div>
@@ -147,42 +86,19 @@ export default function ComparePanel({ base, species, onClose }: Props) {
       <div className="crt-compare-stats">
         {STAT_ORDER.map((key) => {
           const a = statByName(base, key);
-          const b = statByName(targetData, key);
-          const diff = a - b;
+          const b = statByName(target, key);
           return (
             <div key={key} className="crt-compare-stat-row">
-              <span
-                className={'crt-compare-stat-num' + (diff > 0 ? ' win' : diff < 0 ? ' lose' : '')}
-              >
-                {a}
-              </span>
+              <StatNum value={a} other={b} />
               <span className="crt-compare-stat-label">{statLabel(key)}</span>
-              <span
-                className={'crt-compare-stat-num' + (diff < 0 ? ' win' : diff > 0 ? ' lose' : '')}
-              >
-                {b}
-              </span>
+              <StatNum value={b} other={a} />
             </div>
           );
         })}
         <div className="crt-compare-stat-row total">
-          <span
-            className={
-              'crt-compare-stat-num' +
-              (baseTotal > targetTotal ? ' win' : baseTotal < targetTotal ? ' lose' : '')
-            }
-          >
-            {baseTotal}
-          </span>
+          <StatNum value={baseTotal} other={targetTotal} />
           <span className="crt-compare-stat-label">TOTAL</span>
-          <span
-            className={
-              'crt-compare-stat-num' +
-              (targetTotal > baseTotal ? ' win' : targetTotal < baseTotal ? ' lose' : '')
-            }
-          >
-            {targetTotal}
-          </span>
+          <StatNum value={targetTotal} other={baseTotal} />
         </div>
       </div>
 
@@ -193,12 +109,81 @@ export default function ComparePanel({ base, species, onClose }: Props) {
           <span className="crt-compare-vital-label">WT</span> {(base.weight / 10).toFixed(1)}kg
         </div>
         <div className="crt-compare-vital-cell">
-          <span className="crt-compare-vital-label">HT</span> {(targetData.height / 10).toFixed(1)}m
+          <span className="crt-compare-vital-label">HT</span> {(target.height / 10).toFixed(1)}m
           &nbsp;
-          <span className="crt-compare-vital-label">WT</span> {(targetData.weight / 10).toFixed(1)}
+          <span className="crt-compare-vital-label">WT</span> {(target.weight / 10).toFixed(1)}
           kg
         </div>
       </div>
-    </div>
+    </>
+  );
+}
+
+export default function ComparePanel({ base, species, onClose }: Props) {
+  const [query, setQuery] = useState('');
+  const [target, setTarget] = useState<DexEntry | null>(null);
+  const targetState = useAsync(pokemonData, target !== null, target?.id ?? 0);
+  const targetData = dataOf(targetState);
+  const panelRef = useRef<HTMLElement>(null);
+  const labelId = useId();
+
+  const suggestions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return species.filter((s) => s.name !== base.name && s.name.includes(q)).slice(0, 10);
+  }, [query, species, base.name]);
+
+  const pick = (s: DexEntry) => {
+    setTarget(s);
+    setQuery('');
+    // The clicked suggestion unmounts with the picker; keep focus in the panel.
+    panelRef.current?.focus();
+  };
+
+  return (
+    <section ref={panelRef} className="crt-compare" aria-labelledby={labelId} tabIndex={-1}>
+      <div className="crt-compare-header">
+        <span id={labelId} className="crt-compare-label" role="status">
+          <span aria-hidden="true">▶</span> {headerLabel({ target, state: targetState })}
+        </span>
+        {targetData && (
+          <button type="button" className="crt-compare-change" onClick={() => setTarget(null)}>
+            [ change ]
+          </button>
+        )}
+        <button
+          type="button"
+          className="crt-compare-close"
+          onClick={onClose}
+          aria-label="Close compare"
+        >
+          [ × ]
+        </button>
+      </div>
+      {!target && (
+        <>
+          <input
+            className="crt-compare-input"
+            aria-label="Pokémon to compare with"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="search for a pokémon to compare..."
+          />
+          {suggestions.length > 0 && (
+            <ul className="crt-compare-suggestions">
+              {suggestions.map((s) => (
+                <li key={s.name}>
+                  <button type="button" onClick={() => pick(s)}>
+                    #{String(s.id).padStart(3, '0')} {titleCase(s.name)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+      {targetData && <Comparison base={base} target={targetData} />}
+    </section>
   );
 }

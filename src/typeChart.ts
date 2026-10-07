@@ -104,7 +104,10 @@ export function typeColor(name: string): string {
   return isPokeType(name) ? TYPE_COLORS[name] : 'var(--primary)';
 }
 
-/** The colorful-chip look: palette color as text and border, plus a matching low glow. */
+/**
+ * The colorful-chip look. `crt.css` turns `--tint` into the border, a low glow,
+ * and text at a lightness that stays readable on either theme.
+ */
 export function tintStyle(color: string): CSSProperties {
-  return { color, borderColor: color, textShadow: `0 0 4px ${color}66` };
+  return { '--tint': color };
 }

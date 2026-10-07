@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GAMES } from '@/games';
 import { trainerPortraitUrl, type Trainer } from '@/trainers';
 import { counterTeamFor, minLevels } from '@/counters';
 import Detail from '@/components/Detail';
 import { useAsync } from '@/async';
 import { typeIndex } from '@/dex';
-import { TYPE_COLORS } from '@/typeChart';
+import { tintStyle, TYPE_COLORS } from '@/typeChart';
 import type { DexEntry } from '@/types';
 import { showdownSpriteUrl } from '@/sprites';
 import { spaced } from '@/textUtil';
@@ -57,6 +57,11 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
   const typeMap = types.status === 'ready' ? types.data : null;
   const levelMap =
     levels.status === 'ready' ? levels.data : levels.status === 'error' ? NO_LEVEL_GATE : null;
+  // Arriving from the trainer list, whose clicked card just unmounted.
+  const nameRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, [trainer.id]);
 
   const counterTeam = useMemo(
     () =>
@@ -69,7 +74,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
   return (
     <div className="crt-trainer-detail">
       <button type="button" className="crt-trainer-back" onClick={onBack}>
-        ← BACK
+        <span aria-hidden="true">←</span> BACK
       </button>
 
       <div className="crt-trainer-detail-header">
@@ -81,7 +86,9 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
           />
         )}
         <div className="crt-trainer-detail-header-text">
-          <div className="crt-trainer-detail-name">{trainer.name.toUpperCase()}</div>
+          <h1 ref={nameRef} className="crt-trainer-detail-name" tabIndex={-1}>
+            {trainer.name.toUpperCase()}
+          </h1>
           <div className="crt-trainer-detail-class">{trainer.trainerClass.toUpperCase()}</div>
           <div className="crt-trainer-detail-game">{GAMES[trainer.game].label}</div>
           {trainer.location && (
@@ -99,11 +106,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
             onClick={() => onSelectPokemon(m.species)}
             title={`View ${m.species}`}
           >
-            <img
-              className="crt-trainer-member-sprite"
-              src={showdownSpriteUrl(m.species)}
-              alt={m.species}
-            />
+            <img className="crt-trainer-member-sprite" src={showdownSpriteUrl(m.species)} alt="" />
             <div className="crt-trainer-member-name">{spaced(m.species).toUpperCase()}</div>
             <div className="crt-trainer-member-level">Lv {m.level}</div>
           </button>
@@ -177,12 +180,17 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
         onToggle={() => setOpenCounters((v) => !v)}
       >
         {types.status === 'loading' && (
-          <div className="crt-trainer-counters-status">
-            ▶ INDEXING TYPES<span className="crt-cursor">&nbsp;</span>
+          <div className="crt-trainer-counters-status" role="status">
+            ▶ INDEXING TYPES
+            <span className="crt-cursor" aria-hidden="true">
+              &nbsp;
+            </span>
           </div>
         )}
         {types.status === 'error' && (
-          <div className="crt-trainer-counters-status crt-error">ERR: {types.message}</div>
+          <div className="crt-trainer-counters-status crt-error" role="alert">
+            ERR: {types.message}
+          </div>
         )}
         {counterTeam && counterTeam.length === 0 && (
           <div className="crt-trainer-counters-status">▶ NO COUNTERS FOUND</div>
@@ -200,7 +208,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
                 <img
                   className="crt-trainer-counter-sprite"
                   src={showdownSpriteUrl(pick.name)}
-                  alt={pick.name}
+                  alt=""
                 />
                 <div className="crt-trainer-counter-name">{spaced(pick.name).toUpperCase()}</div>
                 <div className="crt-trainer-counter-types">
@@ -208,7 +216,7 @@ export default function TrainerCard({ trainer, onBack, onSelectPokemon, speciesI
                     <span
                       key={t}
                       className="crt-trainer-counter-type"
-                      style={{ borderColor: TYPE_COLORS[t], color: TYPE_COLORS[t] }}
+                      style={tintStyle(TYPE_COLORS[t])}
                     >
                       {t}
                     </span>

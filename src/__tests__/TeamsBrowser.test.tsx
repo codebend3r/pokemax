@@ -10,7 +10,7 @@ describe('TeamsBrowser', () => {
 
   it('renders every region collapsed by default', () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
-    expect(screen.getByRole('button', { name: /^[▼▶]KANTO$/ })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /^KANTO$/ })).toHaveAttribute(
       'aria-expanded',
       'false',
     );
@@ -20,7 +20,7 @@ describe('TeamsBrowser', () => {
   it('expands and re-collapses a region via its heading', async () => {
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
     const user = userEvent.setup();
-    const kanto = screen.getByRole('button', { name: /^[▼▶]KANTO$/ });
+    const kanto = screen.getByRole('button', { name: /^KANTO$/ });
     await user.click(kanto);
     expect(kanto).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText('Red / Blue')).toBeInTheDocument();
@@ -42,10 +42,10 @@ describe('TeamsBrowser', () => {
   it('remembers expanded regions across remounts via localStorage', async () => {
     const { unmount } = render(<TeamsBrowser onSelectPokemon={() => {}} />);
     const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: /^[▼▶]KANTO$/ }));
+    await user.click(screen.getByRole('button', { name: /^KANTO$/ }));
     unmount();
     render(<TeamsBrowser onSelectPokemon={() => {}} />);
-    expect(screen.getByRole('button', { name: /^[▼▶]KANTO$/ })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /^KANTO$/ })).toHaveAttribute(
       'aria-expanded',
       'true',
     );

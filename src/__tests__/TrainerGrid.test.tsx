@@ -46,6 +46,12 @@ describe('TrainerGrid', () => {
     expect(screen.getByText('Falkner')).toBeInTheDocument();
   });
 
+  it('hands focus back to the trainer whose page was just closed', () => {
+    render(<TrainerGrid trainers={TRAINERS} onSelect={() => {}} returnFocusTo="frlg-misty" />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Trainers' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /misty/i })).toHaveFocus();
+  });
+
   it('orders games within a region by release date', () => {
     render(<TrainerGrid trainers={TRAINERS} onSelect={() => {}} />);
     const cards = screen.getAllByRole('button', { name: /gym leader/i });
@@ -61,7 +67,7 @@ describe('TrainerGrid', () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /collapse all/i }));
     expect(screen.queryByText('Brock')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /^[▼▶]KANTO$/ }));
+    await user.click(screen.getByRole('button', { name: /^KANTO$/ }));
     expect(screen.getByText('Brock')).toBeInTheDocument();
     expect(screen.queryByText('Falkner')).not.toBeInTheDocument();
   });

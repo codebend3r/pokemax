@@ -65,15 +65,21 @@ function CardSprite({
 
   return (
     <div className="crt-card-sprite-wrap">
-      <img
-        key={sprite.url}
-        className={className}
-        src={sprite.url}
-        alt={pokemon.name}
+      <button
+        type="button"
+        className="crt-sprite-button"
         onClick={handleSpriteClick}
-        onError={next}
+        aria-label={`play ${pokemon.name} cry`}
         title="click to play cry"
-      />
+      >
+        <img
+          key={sprite.url}
+          className={className}
+          src={sprite.url}
+          alt={pokemon.name}
+          onError={next}
+        />
+      </button>
       {particles.map((p) => (
         <span
           key={p.id}

@@ -193,7 +193,7 @@ describe('ObtainMethods', () => {
     // Sinnoh, labeled as ancient Sinnoh
     expect(screen.getByRole('button', { name: /GALAR/ })).toBeInTheDocument();
     expect(screen.queryByText(/GEN VIII/)).not.toBeInTheDocument();
-    const sinnoh = screen.getByRole('button', { name: /^▶ SINNOH$/ });
+    const sinnoh = screen.getByRole('button', { name: /^SINNOH$/ });
     const hisui = screen.getByRole('button', { name: /HISUI · ANCIENT SINNOH/ });
     expect(sinnoh.compareDocumentPosition(hisui) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     // currentGen 8 → home region Galar expanded; the others start collapsed

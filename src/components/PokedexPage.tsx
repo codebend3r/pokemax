@@ -13,6 +13,7 @@ import { usePageSize } from '@/hooks/usePageSize';
 import { usePokemonView } from '@/hooks/usePokemonView';
 import { useToggleSet } from '@/hooks/useToggleSet';
 import { useViewMode } from '@/hooks/useViewMode';
+import { scrollBehavior } from '@/motion';
 import { parsePokedexSearch, pokedexPath, type PokedexSearch } from '@/routes';
 import type { PokeType } from '@/typeChart';
 import type { AltForm, BaseSpecies, DexEntry, FormCategory } from '@/types';
@@ -96,10 +97,11 @@ export default function PokedexPage({
   }, [route, pokedexSearch, navigate]);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     // A TEAMS pick scrolls to the competitive-build section instead (`CompetitiveSection`).
     if (shownSpecies && cardRef.current && !pick?.buildGame) {
-      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      cardRef.current.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
   }, [shownSpecies, pick]);
 
@@ -131,10 +133,18 @@ export default function PokedexPage({
   else if (result.status === 'not-found') status = 'err-not-found';
   else if (result.status === 'error') status = 'err-api';
 
+  const back = () => {
+    onHome();
+    // BACK unmounts with the card; the search box heads the page it returns to.
+    searchRef.current?.focus({ preventScroll: true });
+  };
+
   return (
     <>
+      {!card && <h1 className="crt-visually-hidden">Pokédex</h1>}
       <StatusLine state={status} />
       <SearchBar
+        ref={searchRef}
         value={query}
         onValueChange={onQueryChange}
         onSearch={handleSubmit}
@@ -176,7 +186,7 @@ export default function PokedexPage({
               form={route.status === 'found' ? route.form : 'base'}
               onFormChange={(form) => updateSearch({ form })}
               onSelectEvolution={onSelect}
-              onBack={onHome}
+              onBack={back}
               cryVolume={cryVolume}
               onCryVolumeChange={onCryVolumeChange}
               speciesPool={allEntries}

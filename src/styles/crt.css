@@ -17,6 +17,20 @@
   box-sizing: border-box;
 }
 
+/* Off screen but still read by screen readers: page headings that have no
+   visible counterpart, and live status text. */
+.crt-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html {
   zoom: 1.15;
 }
@@ -270,6 +284,11 @@ button.crt-header-link:hover {
   padding: 8px 12px;
   background: rgba(0, 255, 159, 0.04);
 }
+/* The input itself drops its outline, so the row carries the focus ring. */
+.crt-search-row:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .crt-search-prompt {
   color: var(--accent);
   margin-right: 8px;
@@ -334,9 +353,11 @@ button.crt-header-link:hover {
   margin-bottom: -4px;
 }
 .crt-card-name {
+  margin: 0;
   color: var(--primary);
   text-shadow: 0 0 6px rgba(0, 255, 159, 0.5);
   font-size: 28px;
+  font-weight: inherit;
   letter-spacing: 1px;
   line-height: 1;
 }
@@ -469,6 +490,7 @@ button.crt-type:hover,
 .crt-evo-node.active {
   color: var(--accent);
   border-color: var(--accent);
+  font-weight: 700;
   text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
 }
 .crt-evo-node.clickable {
@@ -986,6 +1008,9 @@ button.crt-type:hover,
   /* Active grid cell uses bg-elev in both themes for stronger pop */
   background: rgba(255, 0, 170, 0.12);
 }
+.crt-grid-cell.active .crt-grid-name {
+  font-weight: 700;
+}
 .crt-grid-sprite {
   position: relative;
   display: block;
@@ -1205,6 +1230,14 @@ button.crt-type:hover,
   display: flex;
   flex-direction: column;
   align-items: stretch;
+}
+.crt-sprite-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 .crt-card-top img.crt-sprite-3d,
 .crt-card-top img.crt-sprite-2d {
@@ -2038,6 +2071,10 @@ button.crt-type:hover,
   padding: 6px 10px;
   outline: 0;
 }
+.crt-compare-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .crt-compare-suggestions {
   list-style: none;
   margin: 4px 0 0;
@@ -2254,6 +2291,8 @@ button.crt-type:hover,
   letter-spacing: 3px;
   font-size: 18px;
   text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
   min-width: 160px;
   transition:
     background 80ms,
@@ -2371,6 +2410,10 @@ button.crt-type:hover,
 .crt-trainer-search-input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 8px rgba(0, 255, 159, 0.2);
+}
+.crt-trainer-search-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Trainer list grid */
@@ -2505,9 +2548,11 @@ button.crt-type:hover,
   }
 }
 .crt-trainer-detail-name {
+  margin: 0;
   color: var(--primary);
   text-shadow: 0 0 10px rgba(0, 255, 159, 0.5);
   font-size: 30px;
+  font-weight: inherit;
   letter-spacing: 2px;
   line-height: 1;
 }
@@ -3152,7 +3197,48 @@ button.crt-type:hover,
 .crt-footer-link:focus-visible {
   color: var(--accent);
   text-shadow: 0 0 6px currentColor;
-  outline: none;
+}
+.crt-footer-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ────────────────────────────────────────────
+   Tinted chips — type, method and condition tags
+   ──────────────────────────────────────────── */
+/* `tintStyle` sets `--tint` inline to a palette color. Some palette colors are
+   too dark (ghost, dragon) to read as text on the dark theme, and most are too
+   light on the cream one, so the text keeps the tint's hue at a lightness that
+   clears 4.5:1 against either background. */
+.crt-type,
+.crt-mu-chip,
+.crt-obtain-tag,
+.crt-obtain-cond,
+.crt-trainer-counter-type {
+  --tint-text: var(--tint, var(--primary));
+  color: var(--tint-text);
+  border-color: var(--tint, var(--primary));
+  text-shadow: 0 0 4px color-mix(in srgb, var(--tint, var(--primary)) 40%, transparent);
+}
+/* A type chip that opens a detail keeps its hue over the trigger's accent. */
+.crt-type.crt-detail-trigger:hover,
+.crt-type.crt-detail-trigger[aria-expanded='true'] {
+  color: var(--tint-text);
+}
+@supports (color: oklch(from red l c h)) {
+  .crt-type,
+  .crt-mu-chip,
+  .crt-obtain-tag,
+  .crt-obtain-cond,
+  .crt-trainer-counter-type {
+    --tint-text: oklch(from var(--tint, var(--primary)) max(l, 0.68) c h / alpha);
+  }
+  .crt-tf-chip {
+    color: oklch(from var(--type-color) max(l, 0.68) c h / alpha);
+  }
+  .crt-tf-chip.active {
+    background: oklch(from var(--type-color) max(l, 0.68) c h);
+  }
 }
 
 /* ────────────────────────────────────────────
@@ -3350,4 +3436,58 @@ button.crt-type:hover,
 :root[data-theme='light'] .crt-trainer-list-card-portrait,
 :root[data-theme='light'] .crt-trainer-detail-portrait {
   filter: none;
+}
+/* Tinted chips on cream: a light wash of the tint replaces the dark-theme
+   smoke background, and the text darkens until it clears 4.5:1. */
+:root[data-theme='light'] .crt-type,
+:root[data-theme='light'] .crt-mu-chip,
+:root[data-theme='light'] .crt-obtain-tag,
+:root[data-theme='light'] .crt-obtain-cond,
+:root[data-theme='light'] .crt-trainer-counter-type {
+  text-shadow: none;
+}
+:root[data-theme='light'] .crt-type:not(.crt-detail-trigger),
+:root[data-theme='light'] .crt-mu-chip {
+  background: color-mix(in srgb, var(--tint, var(--primary)) 15%, var(--bg));
+}
+/* Brightening lightens the text past its contrast floor on cream. */
+:root[data-theme='light'] button.crt-type:hover,
+:root[data-theme='light'] .crt-type.crt-detail-trigger:hover,
+:root[data-theme='light'] .crt-type.crt-detail-trigger[aria-expanded='true'] {
+  filter: none;
+}
+@supports (color: oklch(from red l c h)) {
+  :root[data-theme='light'] .crt-type,
+  :root[data-theme='light'] .crt-mu-chip,
+  :root[data-theme='light'] .crt-obtain-tag,
+  :root[data-theme='light'] .crt-obtain-cond,
+  :root[data-theme='light'] .crt-trainer-counter-type {
+    --tint-text: oklch(from var(--tint, var(--primary)) min(l, 0.45) c h / alpha);
+  }
+  :root[data-theme='light'] .crt-tf-chip.active {
+    background: oklch(from var(--type-color) max(l, 0.68) c h);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Reduced motion
+   ──────────────────────────────────────────── */
+/* CSS effects settle instantly. Sprite GIFs keep their own frame animation,
+   which this can't stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Beats the `!important` animation on the click reaction. */
+  .crt-card-top img.reacting {
+    animation: none !important;
+  }
+  .crt-card-particle {
+    display: none;
+  }
 }

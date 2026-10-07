@@ -3,6 +3,7 @@ import CompetitiveBuild from '@/components/CompetitiveBuild';
 import Section from '@/components/Section';
 import { GAMES, GAME_ORDER, type GameId } from '@/games';
 import { useCompetitiveSet } from '@/hooks/useCompetitiveSet';
+import { scrollBehavior } from '@/motion';
 import type { PokemonResponse } from '@/types';
 
 interface Props {
@@ -23,9 +24,12 @@ export default function CompetitiveSection({ pokemon, gen, pick }: Props) {
   }
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  const summaryRef = useRef<HTMLElement>(null);
   useEffect(() => {
     // Arriving from a TEAMS pick — jump straight to the build for that game.
-    if (pick?.buildGame) sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!pick?.buildGame) return;
+    sectionRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+    summaryRef.current?.focus({ preventScroll: true });
   }, [pokemon.name, pick]);
 
   const competitive = useCompetitiveSet(pokemon.name, buildGame ? GAMES[buildGame].gen : null);
@@ -35,6 +39,7 @@ export default function CompetitiveSection({ pokemon, gen, pick }: Props) {
     <div ref={sectionRef}>
       <Section
         label="COMPETITIVE BUILD"
+        summaryRef={summaryRef}
         count={build ? `GEN ${build.sourceGen} · ${build.tier.toUpperCase()}` : undefined}
       >
         <CompetitiveBuild

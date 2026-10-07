@@ -71,6 +71,8 @@ export default function PokemonCard({
   pick,
 }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
+  const compareButtonRef = useRef<HTMLButtonElement>(null);
+  const nameRef = useRef<HTMLHeadingElement>(null);
   // The variety the URL names — `pokemon` until that variety's data lands.
   const activeVariety = form === 'base' ? base.name : varietyFromForm(species.name, form);
 
@@ -86,6 +88,20 @@ export default function PokemonCard({
     const url = cryUrlOf(pokemon);
     if (url) playCry(pokemon.name, url);
   }, [pokemon, activeVariety, species.name, pick]);
+
+  // A fresh pick moves focus to the card the page scrolls to, so keyboard and
+  // screen-reader users land on it too. Someone typing in the search box keeps
+  // their place, and a TEAMS pick lands on its build (`CompetitiveSection`).
+  useEffect(() => {
+    if (pick?.buildGame || document.activeElement instanceof HTMLInputElement) return;
+    nameRef.current?.focus({ preventScroll: true });
+  }, [species.name, pick]);
+
+  const closeCompare = () => {
+    setCompareOpen(false);
+    // The panel's close button unmounts with it; hand focus back to the toggle.
+    compareButtonRef.current?.focus();
+  };
 
   // Cosmetic variants (Gigantamax / Mega / regional) often ship empty `moves`
   // arrays from PokeAPI — they inherit the base species's learnset. Fall back
@@ -123,7 +139,7 @@ export default function PokemonCard({
     <div className="crt-card">
       {onBack && (
         <button type="button" className="crt-card-back" onClick={onBack}>
-          ← BACK TO POKéDEX
+          <span aria-hidden="true">←</span> BACK TO POKéDEX
         </button>
       )}
       <div className="crt-card-top">
@@ -138,7 +154,9 @@ export default function PokemonCard({
         />
         <div className="crt-card-meta">
           <div className="crt-card-dex">#{String(pokemon.id).padStart(3, '0')}</div>
-          <div className="crt-card-name">{pokemon.name.toUpperCase()}</div>
+          <h1 ref={nameRef} className="crt-card-name" tabIndex={-1}>
+            {pokemon.name.toUpperCase()}
+          </h1>
           <div className="crt-card-gen">
             GEN {meta.roman} · {meta.region.toUpperCase()}
             {genus ? ` · ${genus.toUpperCase()}` : ''}
@@ -164,12 +182,13 @@ export default function PokemonCard({
             </span>
           </div>
           <button
+            ref={compareButtonRef}
             type="button"
             className="crt-compare-btn"
             onClick={() => setCompareOpen((v) => !v)}
             aria-pressed={compareOpen}
           >
-            ⇄ {compareOpen ? 'CLOSE COMPARE' : 'COMPARE'}
+            <span aria-hidden="true">⇄</span> {compareOpen ? 'CLOSE COMPARE' : 'COMPARE'}
           </button>
         </div>
       </div>
@@ -182,7 +201,7 @@ export default function PokemonCard({
       />
 
       {compareOpen && speciesPool && speciesPool.length > 0 && (
-        <ComparePanel base={pokemon} species={speciesPool} onClose={() => setCompareOpen(false)} />
+        <ComparePanel base={pokemon} species={speciesPool} onClose={closeCompare} />
       )}
 
       <PokedexEntries species={species} />

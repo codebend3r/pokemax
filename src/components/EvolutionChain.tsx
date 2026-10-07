@@ -44,7 +44,11 @@ function Node({
       </button>
     );
   }
-  return <span className={'crt-evo-node' + (isActive ? ' active' : '')}>{label}</span>;
+  return (
+    <span className={'crt-evo-node' + (isActive ? ' active' : '')} aria-current={isActive}>
+      {label}
+    </span>
+  );
 }
 
 function Branch({

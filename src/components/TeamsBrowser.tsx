@@ -33,6 +33,7 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
 
   return (
     <div className="crt-teams-page">
+      <h1 className="crt-visually-hidden">Teams</h1>
       <div className="crt-teams-search">
         <span className="crt-search-prompt">&gt;</span>
         <input
@@ -52,10 +53,10 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
             className="crt-trainer-chip"
             onClick={() => expandAll(TEAM_REGIONS.map((r) => r.name))}
           >
-            ▼ EXPAND ALL
+            <span aria-hidden="true">▼</span> EXPAND ALL
           </button>
           <button type="button" className="crt-trainer-chip" onClick={collapseAll}>
-            ▶ COLLAPSE ALL
+            <span aria-hidden="true">▶</span> COLLAPSE ALL
           </button>
         </div>
       </div>
@@ -74,9 +75,15 @@ export default function TeamsBrowser({ onSelectPokemon }: Props) {
                 aria-expanded={!isCollapsed}
                 onClick={() => toggle(region)}
               >
-                <span className="crt-team-region-caret">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="crt-team-region-caret" aria-hidden="true">
+                  {isCollapsed ? '▶' : '▼'}
+                </span>
                 {region.toUpperCase()}
-                {note && <span className="crt-team-region-note">◂ {note.toUpperCase()}</span>}
+                {note && (
+                  <span className="crt-team-region-note">
+                    <span aria-hidden="true">◂</span> {note.toUpperCase()}
+                  </span>
+                )}
               </button>
             </h2>
             {!isCollapsed && (
@@ -141,7 +148,7 @@ function TeamPickButton({ pick, onSelect }: { pick: TeamPick; onSelect: (slug: s
         <img
           className="team-pick-still"
           src={showdownSpriteUrl(pick.species)}
-          alt={pick.species}
+          alt=""
           loading="lazy"
           decoding="async"
         />

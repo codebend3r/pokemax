@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Router } from 'wouter';
 import { memoryLocation } from 'wouter/memory-location';
@@ -39,9 +39,22 @@ describe('App routing', () => {
     await waitFor(() => expect(last(location.history)).toBe('/pokedex/charizard'));
   });
 
-  it('marks the tab for the current mode, including detail routes', () => {
+  it('marks the link for the current section, including detail routes', () => {
     renderAt('/trainers/rb-brock');
-    expect(screen.getByRole('tab', { name: 'TRAINERS' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('tab', { name: 'POKÉDEX' })).toHaveAttribute('aria-selected', 'false');
+    const nav = screen.getByRole('navigation', { name: 'Sections' });
+    expect(within(nav).getByRole('link', { name: 'TRAINERS' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(within(nav).getByRole('link', { name: 'POKÉDEX' })).not.toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  it('gives each page a single level-1 heading', async () => {
+    renderAt('/teams');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Teams' })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 });

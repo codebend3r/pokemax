@@ -11,16 +11,23 @@ const TEXT: Record<Props['state'], string> = {
 };
 
 export default function StatusLine({ state }: Props) {
-  if (state === 'ready') return null;
+  const busy = state === 'scanning' || state === 'loading-dex';
   const className =
     'crt-status' +
-    (state === 'scanning' || state === 'loading-dex' ? ' scanning' : '') +
+    (busy ? ' scanning' : '') +
     (state === 'err-not-found' || state === 'err-api' ? ' err' : '');
+  // The live region stays mounted through READY so screen readers hear each change.
   return (
-    <div className={className}>
-      {TEXT[state]}{' '}
-      {(state === 'scanning' || state === 'loading-dex') && (
-        <span className="crt-cursor">&nbsp;</span>
+    <div className="crt-status-live" role="status">
+      {state !== 'ready' && (
+        <div className={className}>
+          {TEXT[state]}{' '}
+          {busy && (
+            <span className="crt-cursor" aria-hidden="true">
+              &nbsp;
+            </span>
+          )}
+        </div>
       )}
     </div>
   );

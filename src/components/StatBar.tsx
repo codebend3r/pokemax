@@ -14,7 +14,7 @@ export default function StatBar({ name, value }: Props) {
   return (
     <div className="crt-stat">
       <span>{statLabel(name)}</span>
-      <span className="crt-stat-bar">
+      <span className="crt-stat-bar" aria-hidden="true">
         {'█'.repeat(filled)}
         {'░'.repeat(empty)}
       </span>

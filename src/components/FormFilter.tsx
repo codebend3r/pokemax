@@ -49,8 +49,11 @@ export default function FormFilter({ active, forms, loading, onToggle, onClear }
         )}
       </div>
       {loading && (
-        <span className="crt-extra-status">
-          ▶ FETCHING FORMS<span className="crt-cursor">&nbsp;</span>
+        <span className="crt-extra-status" role="status">
+          ▶ FETCHING FORMS
+          <span className="crt-cursor" aria-hidden="true">
+            &nbsp;
+          </span>
         </span>
       )}
     </div>

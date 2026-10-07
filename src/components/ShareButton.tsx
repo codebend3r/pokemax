@@ -32,14 +32,18 @@ export default function ShareButton({ selected }: Props) {
   };
 
   return (
-    <button
-      type="button"
-      className={'crt-share-btn' + (copied ? ' copied' : '')}
-      onClick={handle}
-      aria-label="Share link"
-      title="Copy share link"
-    >
-      {copied ? '✓ COPIED' : '⇪ SHARE'}
-    </button>
+    <>
+      <button
+        type="button"
+        className={'crt-share-btn' + (copied ? ' copied' : '')}
+        onClick={handle}
+        title="Copy share link"
+      >
+        <span aria-hidden="true">{copied ? '✓' : '⇪'}</span> {copied ? 'COPIED' : 'SHARE'}
+      </button>
+      <span className="crt-visually-hidden" role="status">
+        {copied && 'Link copied'}
+      </span>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import {
   effectiveness,
   groupMatchups,
   isPokeType,
+  tintStyle,
   TYPES,
   TYPE_COLORS,
   type PokeType,
@@ -133,10 +134,7 @@ function NatureBody({ data }: { data: NatureResponse }) {
 
 function TypeChip({ type }: { type: PokeType }) {
   return (
-    <span
-      className="crt-mu-chip"
-      style={{ borderColor: TYPE_COLORS[type], color: TYPE_COLORS[type] }}
-    >
+    <span className="crt-mu-chip" style={tintStyle(TYPE_COLORS[type])}>
       {type}
     </span>
   );
@@ -270,7 +268,7 @@ export default function Detail({ kind, name, label, triggerStyle, triggerClassNa
         {label ?? spaced(name)}
       </button>
       {open && (
-        <span className="crt-detail-panel">
+        <span className="crt-detail-panel" aria-live="polite">
           <Panel name={name} />
         </span>
       )}

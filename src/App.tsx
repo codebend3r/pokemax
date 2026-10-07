@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useRoute, useSearch } from 'wouter';
+import { Link, Redirect, Route, Switch, useLocation, useRoute, useSearch } from 'wouter';
 import LoadingCard from '@/components/LoadingCard';
 import PokedexPage from '@/components/PokedexPage';
 import ShareButton from '@/components/ShareButton';
@@ -9,6 +9,7 @@ import { formIndex, resolveDexRoute, speciesIndex } from '@/dex';
 import type { GameId } from '@/games';
 import { useTheme } from '@/hooks/useTheme';
 import { useVolume } from '@/hooks/useVolume';
+import { scrollBehavior } from '@/motion';
 import { pokedexPath, teamsPath, trainersPath } from '@/routes';
 
 // Lazy-loaded — only fetched when first needed
@@ -61,18 +62,13 @@ export default function App() {
   const goHome = () => {
     setQuery('');
     navigate(pokedexPath());
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
   };
 
   return (
     <div className="crt">
-      <div className="crt-topbar">
-        <button
-          type="button"
-          className="crt-header crt-header-link"
-          onClick={goHome}
-          aria-label="Go to top"
-        >
+      <header className="crt-topbar">
+        <button type="button" className="crt-header crt-header-link" onClick={goHome}>
           <svg
             className="crt-header-icon"
             viewBox="0 0 24 24"
@@ -92,24 +88,22 @@ export default function App() {
           <ShareButton selected={pokedexParams?.name.toLowerCase() ?? null} />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
-      </div>
-      <div className="crt-mode-toggle" role="tablist" aria-label="App mode">
+      </header>
+      <nav className="crt-mode-toggle" aria-label="Sections">
         {MODES.map(({ label, path }) => {
           const active = location === path || location.startsWith(`${path}/`);
           return (
-            <button
+            <Link
               key={path}
-              type="button"
-              role="tab"
-              aria-selected={active}
+              href={path}
+              aria-current={active && 'page'}
               className={'crt-mode-tab' + (active ? ' active' : '')}
-              onClick={() => navigate(path)}
             >
               {label}
-            </button>
+            </Link>
           );
         })}
-      </div>
+      </nav>
       <div className="crt-subheader">ALL POKéMON · GEN I — IX</div>
       <Suspense
         fallback={
@@ -123,37 +117,39 @@ export default function App() {
         <MusicPlayer />
       </Suspense>
 
-      <Switch>
-        <Route path="/pokedex/:name?">
-          {(params) => (
-            <PokedexPage
-              name={params.name?.toLowerCase() ?? null}
-              query={query}
-              onQueryChange={setQuery}
-              pick={pick}
-              onSelect={select}
-              onHome={goHome}
-              cryVolume={cryVolume}
-              onCryVolumeChange={saveCryVolume}
-            />
-          )}
-        </Route>
-        <Route path="/trainers/:id?">
-          {(params) => (
-            <Suspense fallback={<LoadingCard what="TRAINERS" />}>
-              <TrainersPage trainerId={params.id ?? null} onSelectPokemon={select} />
+      <main>
+        <Switch>
+          <Route path="/pokedex/:name?">
+            {(params) => (
+              <PokedexPage
+                name={params.name?.toLowerCase() ?? null}
+                query={query}
+                onQueryChange={setQuery}
+                pick={pick}
+                onSelect={select}
+                onHome={goHome}
+                cryVolume={cryVolume}
+                onCryVolumeChange={saveCryVolume}
+              />
+            )}
+          </Route>
+          <Route path="/trainers/:id?">
+            {(params) => (
+              <Suspense fallback={<LoadingCard what="TRAINERS" />}>
+                <TrainersPage trainerId={params.id ?? null} onSelectPokemon={select} />
+              </Suspense>
+            )}
+          </Route>
+          <Route path="/teams">
+            <Suspense fallback={<LoadingCard what="TEAMS" />}>
+              <TeamsBrowser onSelectPokemon={select} />
             </Suspense>
-          )}
-        </Route>
-        <Route path="/teams">
-          <Suspense fallback={<LoadingCard what="TEAMS" />}>
-            <TeamsBrowser onSelectPokemon={select} />
-          </Suspense>
-        </Route>
-        <Route>
-          <HomeRedirect />
-        </Route>
-      </Switch>
+          </Route>
+          <Route>
+            <HomeRedirect />
+          </Route>
+        </Switch>
+      </main>
 
       <footer className="crt-footer">
         <span>v{__APP_VERSION__}</span>

@@ -52,6 +52,7 @@ function GridCell({
         'crt-grid-cell' + (selected ? ' active' : '') + (anim.src ? ' has-anim' : ' no-anim')
       }
       onClick={() => onSelect(s.name)}
+      aria-current={selected}
     >
       <span className="crt-grid-dex">#{String(s.id).padStart(3, '0')}</span>
       <span className="crt-grid-sprite">
@@ -59,7 +60,7 @@ function GridCell({
           <img
             className="grid-still"
             src={still.src}
-            alt={s.name}
+            alt=""
             loading="lazy"
             decoding="async"
             onError={still.next}
@@ -132,6 +133,11 @@ export default function PokemonGrid({
 
   return (
     <div className="crt-grid-wrap">
+      <span className="crt-visually-hidden" role="status">
+        {visible.length === 0
+          ? 'No matches'
+          : `${visible.length} of ${species.length} entries shown`}
+      </span>
       <TypeFilter selected={selectedTypes} onToggle={onToggleType} onClear={onClearTypes} />
 
       {visible.length === 0 ? (

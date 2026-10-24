@@ -2,7 +2,7 @@ import { memoAsync } from '@/async';
 import { GAMES } from '@/games';
 import type { Trainer } from '@/trainers';
 import type { DexEntry } from '@/types';
-import { isRecord } from '@/guards';
+import { isNumber, isOptional, isRecord, isString } from '@/guards';
 import { effectiveness, type PokeType } from '@/typeChart';
 
 interface PSDexEntry {
@@ -15,7 +15,26 @@ interface PSDexEntry {
 }
 
 function isPSDexEntry(v: unknown): v is PSDexEntry {
-  return typeof v === 'object' && v !== null && 'num' in v;
+  return (
+    isRecord(v) &&
+    isNumber(v.num) &&
+    isOptional(v.prevo, isString) &&
+    isOptional(v.evoLevel, isNumber) &&
+    isOptional(v.evoType, isString) &&
+    isOptional(v.forme, isString) &&
+    isOptional(v.baseSpecies, isString)
+  );
+}
+
+/**
+ * Cosmetic formes (`burmysandy`, …) have no `num` and nothing the level map
+ * reads, so only an entry that declares a `num` has to be a whole `PSDexEntry`.
+ */
+export function isPokedexData(v: unknown): v is Record<string, unknown> {
+  return (
+    isRecord(v) &&
+    Object.values(v).every((e) => isRecord(e) && (e.num === undefined || isPSDexEntry(e)))
+  );
 }
 
 function toPSId(name: string): string {
@@ -64,7 +83,7 @@ export const minLevels = memoAsync(async (): Promise<Map<number, number>> => {
   const r = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
   if (!r.ok) throw new Error('pokedex data unavailable');
   const dex: unknown = await r.json();
-  if (!isRecord(dex)) throw new Error('Malformed pokedex data');
+  if (!isPokedexData(dex)) throw new Error('Malformed pokedex data');
   return buildMinLevelMap(dex);
 });
 

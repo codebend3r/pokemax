@@ -1,4 +1,5 @@
 import { isGameId, type GameId } from '@/games';
+import { isNullable, isNumber, isOptional, isRecord, isString, isStringList } from '@/guards';
 
 // Single source for the method vocabulary — the union, the runtime guard, and
 // the label/color tables in `@/obtain/labels` all derive from this list.
@@ -54,32 +55,48 @@ export interface ObtainFile {
 const METHOD_SET: ReadonlySet<string> = new Set(OBTAIN_METHODS);
 
 function isObtainEntry(v: unknown): v is ObtainEntry {
-  if (typeof v !== 'object' || v === null) return false;
-  const e: Record<string, unknown> = { ...v };
-  return typeof e.method === 'string' && METHOD_SET.has(e.method);
+  return (
+    isRecord(v) &&
+    isString(v.method) &&
+    METHOD_SET.has(v.method) &&
+    isOptional(v.location, isString) &&
+    isOptional(v.minLevel, isNumber) &&
+    isOptional(v.maxLevel, isNumber) &&
+    isOptional(v.chance, isNumber) &&
+    isOptional(v.conditions, isStringList) &&
+    isOptional(v.detail, isString)
+  );
 }
 
 function isObtainGame(v: unknown): v is ObtainGame {
-  if (typeof v !== 'object' || v === null) return false;
-  const g: Record<string, unknown> = { ...v };
   return (
-    typeof g.gen === 'number' &&
-    typeof g.versionGroup === 'string' &&
-    isGameId(g.versionGroup) &&
-    Array.isArray(g.versions) &&
-    Array.isArray(g.entries) &&
-    g.entries.every(isObtainEntry)
+    isRecord(v) &&
+    isNumber(v.gen) &&
+    isString(v.versionGroup) &&
+    isGameId(v.versionGroup) &&
+    isStringList(v.versions) &&
+    Array.isArray(v.entries) &&
+    v.entries.every(isObtainEntry)
+  );
+}
+
+export function isObtainBreeding(v: unknown): v is ObtainBreeding {
+  return (
+    isRecord(v) &&
+    isStringList(v.eggGroups) &&
+    isNumber(v.hatchCycles) &&
+    isNumber(v.steps) &&
+    typeof v.breedable === 'boolean'
   );
 }
 
 export function isObtainFile(v: unknown): v is ObtainFile {
-  if (typeof v !== 'object' || v === null) return false;
-  const o: Record<string, unknown> = { ...v };
   return (
-    typeof o.pokemonId === 'number' &&
-    typeof o.name === 'string' &&
-    Array.isArray(o.games) &&
-    o.games.every(isObtainGame) &&
-    'breeding' in o
+    isRecord(v) &&
+    isNumber(v.pokemonId) &&
+    isString(v.name) &&
+    isNullable(v.breeding, isObtainBreeding) &&
+    Array.isArray(v.games) &&
+    v.games.every(isObtainGame)
   );
 }

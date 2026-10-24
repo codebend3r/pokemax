@@ -1,12 +1,6 @@
 // PokéAPI response shapes, each beside the guard that checks it where it
 // enters the app (`getJson` in `api.ts`). Guards check what the app reads.
-import { isNamed, isRecord, isResource } from '@/guards';
-
-function isNullable<T>(v: unknown, isT: (x: unknown) => x is T): v is T | null {
-  return v === null || isT(v);
-}
-const isString = (v: unknown): v is string => typeof v === 'string';
-const isNumber = (v: unknown): v is number => typeof v === 'number';
+import { isNamed, isNullable, isNumber, isRecord, isResource, isString } from '@/guards';
 
 export interface GenerationResponse {
   pokemon_species: { name: string; url: string }[];
@@ -213,12 +207,28 @@ export interface EvolutionChainResponse {
   chain: ChainLink;
 }
 
+function isEvolutionDetail(v: unknown): v is EvolutionDetail {
+  return (
+    isRecord(v) &&
+    isNullable(v.min_level, isNumber) &&
+    isNamed(v.trigger) &&
+    isNullable(v.item, isNamed) &&
+    isNullable(v.held_item, isNamed) &&
+    isNullable(v.known_move, isNamed) &&
+    isNullable(v.min_happiness, isNumber) &&
+    isString(v.time_of_day) &&
+    isNullable(v.location, isNamed) &&
+    typeof v.needs_overworld_rain === 'boolean' &&
+    isNullable(v.gender, isNumber)
+  );
+}
+
 function isChainLink(v: unknown): v is ChainLink {
   return (
     isRecord(v) &&
     isNamed(v.species) &&
     Array.isArray(v.evolution_details) &&
-    v.evolution_details.every((d) => isRecord(d) && isNamed(d.trigger)) &&
+    v.evolution_details.every(isEvolutionDetail) &&
     Array.isArray(v.evolves_to) &&
     v.evolves_to.every(isChainLink)
   );

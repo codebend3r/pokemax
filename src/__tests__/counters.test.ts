@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { buildMinLevelMap, counterTeamFor, pickCounterTeam } from '@/counters';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import {
+  buildMinLevelMap,
+  counterTeamFor,
+  isPokedexData,
+  minLevels,
+  pickCounterTeam,
+} from '@/counters';
 import type { PokeType } from '@/typeChart';
 
 describe('pickCounterTeam', () => {
@@ -180,5 +186,60 @@ describe('counterTeamFor', () => {
       new Map(),
     );
     expect(team.map((p) => p.name)).toEqual(['pikachu']);
+  });
+});
+
+describe('isPokedexData', () => {
+  it('accepts entries that carry only the fields the level map reads', () => {
+    expect(
+      isPokedexData({
+        magikarp: { num: 129 },
+        gyarados: { num: 130, prevo: 'Magikarp', evoLevel: 20 },
+        alakazam: { num: 65, prevo: 'Kadabra', evoType: 'trade' },
+        charizardmegax: { num: 6, baseSpecies: 'Charizard', forme: 'Mega-X' },
+      }),
+    ).toBe(true);
+  });
+
+  it('accepts cosmetic formes, which Showdown lists without a num', () => {
+    expect(
+      isPokedexData({
+        burmysandy: {
+          isCosmeticForme: true,
+          name: 'Burmy-Sandy',
+          baseSpecies: 'Burmy',
+          forme: 'Sandy',
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects non-records and entries whose num is not a number', () => {
+    expect(isPokedexData(null)).toBe(false);
+    expect(isPokedexData([])).toBe(false);
+    expect(isPokedexData({ missingno: 'x' })).toBe(false);
+    expect(isPokedexData({ missingno: { num: '0' } })).toBe(false);
+  });
+
+  it.each([
+    ['prevo', 42],
+    ['evoLevel', '20'],
+    ['evoType', 7],
+    ['forme', 1],
+    ['baseSpecies', false],
+  ])('rejects an entry whose %s is %j', (field, value) => {
+    expect(isPokedexData({ gyarados: { num: 130, [field]: value } })).toBe(false);
+  });
+});
+
+describe('minLevels', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('rejects a pokedex with a malformed prevo instead of reading around it', async () => {
+    const bad = { gyarados: { num: 130, prevo: 42, evoLevel: 20 } };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(bad))));
+    await expect(minLevels.get()).rejects.toThrow('Malformed');
   });
 });

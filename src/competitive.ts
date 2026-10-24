@@ -1,7 +1,8 @@
 import { memoAsync } from '@/async';
-import { isRecord } from '@/guards';
+import { isNumber, isOptional, isRecord, isString, isStringList } from '@/guards';
 
-type StatSpread = Partial<Record<'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>;
+const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+type StatSpread = Partial<Record<(typeof STAT_KEYS)[number], number>>;
 
 export interface SmogonSet {
   moves: (string | string[])[];
@@ -16,30 +17,31 @@ export interface SmogonSet {
 
 type SmogonData = Record<string, Record<string, Record<string, SmogonSet>>>;
 
-const isStringOrList = (v: unknown): boolean =>
-  v === undefined ||
-  typeof v === 'string' ||
-  (Array.isArray(v) && v.every((x) => typeof x === 'string'));
+const isStringOrList = (v: unknown): v is string | string[] => isString(v) || isStringList(v);
 
-const isSpreads = (v: unknown): boolean =>
-  v === undefined || isRecord(v) || (Array.isArray(v) && v.every(isRecord));
+const isStatSpread = (v: unknown): v is StatSpread =>
+  isRecord(v) &&
+  Object.entries(v).every(([stat, n]) => STAT_KEYS.some((k) => k === stat) && isNumber(n));
+
+const isSpreads = (v: unknown): v is StatSpread | StatSpread[] =>
+  isStatSpread(v) || (Array.isArray(v) && v.every(isStatSpread));
 
 function isSmogonSet(v: unknown): v is SmogonSet {
   return (
     isRecord(v) &&
     Array.isArray(v.moves) &&
     v.moves.every(isStringOrList) &&
-    isStringOrList(v.ability) &&
-    isStringOrList(v.item) &&
-    isStringOrList(v.nature) &&
-    isStringOrList(v.teratypes) &&
-    isSpreads(v.evs) &&
-    isSpreads(v.ivs)
+    isOptional(v.ability, isStringOrList) &&
+    isOptional(v.item, isStringOrList) &&
+    isOptional(v.nature, isStringOrList) &&
+    isOptional(v.teratypes, isStringOrList) &&
+    isOptional(v.evs, isSpreads) &&
+    isOptional(v.ivs, isSpreads)
   );
 }
 
 /** Species → format → set name → set. */
-function isSmogonData(v: unknown): v is SmogonData {
+export function isSmogonData(v: unknown): v is SmogonData {
   return (
     isRecord(v) &&
     Object.values(v).every(
@@ -122,6 +124,18 @@ export interface ResolvedBuild {
   sourceGen: number;
 }
 
+type TierBuild = Pick<ResolvedBuild, 'tier' | 'buildName' | 'set'>;
+
+/** The preferred tier that actually holds a set; an empty tier is no build. */
+function pickTier(tiers: Record<string, Record<string, SmogonSet>>): TierBuild | null {
+  return [...TIER_PRIORITY, ...Object.keys(tiers)].reduce<TierBuild | null>((found, tier) => {
+    if (found) return found;
+    const builds = tiers[tier] ?? {};
+    const [buildName] = Object.keys(builds);
+    return buildName === undefined ? null : { tier, buildName, set: builds[buildName] };
+  }, null);
+}
+
 export function pickBuild(
   data: SmogonData,
   pokeapiName: string,
@@ -131,29 +145,12 @@ export function pickBuild(
   const baseName = pokeapiName.split('-')[0];
   if (baseName !== pokeapiName) candidates.push(pokeapiToSmogon(baseName));
 
-  for (const key of candidates) {
+  return candidates.reduce<ResolvedBuild | null>((found, key) => {
+    if (found) return found;
     const tiers = data[key];
-    if (!tiers) continue;
-    for (const tier of TIER_PRIORITY) {
-      const builds = tiers[tier];
-      if (!builds) continue;
-      const buildName = Object.keys(builds)[0];
-      return { pokemonKey: key, tier, buildName, set: builds[buildName], sourceGen };
-    }
-    const fallbackTier = Object.keys(tiers)[0];
-    if (fallbackTier) {
-      const builds = tiers[fallbackTier];
-      const buildName = Object.keys(builds)[0];
-      return {
-        pokemonKey: key,
-        tier: fallbackTier,
-        buildName,
-        set: builds[buildName],
-        sourceGen,
-      };
-    }
-  }
-  return null;
+    const pick = tiers && pickTier(tiers);
+    return pick ? { pokemonKey: key, ...pick, sourceGen } : null;
+  }, null);
 }
 
 const SPREAD_LABELS: Record<string, string> = {

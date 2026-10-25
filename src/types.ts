@@ -1,6 +1,6 @@
 // PokéAPI response shapes, each beside the guard that checks it where it
 // enters the app (`getJson` in `api.ts`). Guards check what the app reads.
-import { isNamed, isNullable, isNumber, isRecord, isResource, isString } from '@/guards';
+import { isBoolean, isNamed, isNullable, isNumber, isRecord, isResource, isString } from '@/guards';
 
 export interface GenerationResponse {
   pokemon_species: { name: string; url: string }[];
@@ -218,7 +218,7 @@ function isEvolutionDetail(v: unknown): v is EvolutionDetail {
     isNullable(v.min_happiness, isNumber) &&
     isString(v.time_of_day) &&
     isNullable(v.location, isNamed) &&
-    typeof v.needs_overworld_rain === 'boolean' &&
+    isBoolean(v.needs_overworld_rain) &&
     isNullable(v.gender, isNumber)
   );
 }

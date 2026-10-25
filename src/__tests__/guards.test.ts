@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { isNullable, isNumber, isOptional, isString, isStringList } from '@/guards';
+import { isBoolean, isNullable, isNumber, isOptional, isString, isStringList } from '@/guards';
 
-describe('isString / isNumber', () => {
+describe('isString / isNumber / isBoolean', () => {
   it('accept only their own primitive', () => {
+    expect(isBoolean(false)).toBe(true);
+    expect(isBoolean(0)).toBe(false);
+    expect(isBoolean('true')).toBe(false);
     expect(isString('a')).toBe(true);
     expect(isString(1)).toBe(false);
     expect(isNumber(1)).toBe(true);

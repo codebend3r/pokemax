@@ -3,6 +3,7 @@ import { isNumber, isOptional, isRecord, isString, isStringList } from '@/guards
 
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
 type StatSpread = Partial<Record<(typeof STAT_KEYS)[number], number>>;
+const STAT_SET: ReadonlySet<string> = new Set(STAT_KEYS);
 
 export interface SmogonSet {
   moves: (string | string[])[];
@@ -20,8 +21,7 @@ type SmogonData = Record<string, Record<string, Record<string, SmogonSet>>>;
 const isStringOrList = (v: unknown): v is string | string[] => isString(v) || isStringList(v);
 
 const isStatSpread = (v: unknown): v is StatSpread =>
-  isRecord(v) &&
-  Object.entries(v).every(([stat, n]) => STAT_KEYS.some((k) => k === stat) && isNumber(n));
+  isRecord(v) && Object.entries(v).every(([stat, n]) => STAT_SET.has(stat) && isNumber(n));
 
 const isSpreads = (v: unknown): v is StatSpread | StatSpread[] =>
   isStatSpread(v) || (Array.isArray(v) && v.every(isStatSpread));

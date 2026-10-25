@@ -1,5 +1,13 @@
 import { isGameId, type GameId } from '@/games';
-import { isNullable, isNumber, isOptional, isRecord, isString, isStringList } from '@/guards';
+import {
+  isBoolean,
+  isNullable,
+  isNumber,
+  isOptional,
+  isRecord,
+  isString,
+  isStringList,
+} from '@/guards';
 
 // Single source for the method vocabulary — the union, the runtime guard, and
 // the label/color tables in `@/obtain/labels` all derive from this list.
@@ -86,7 +94,7 @@ export function isObtainBreeding(v: unknown): v is ObtainBreeding {
     isStringList(v.eggGroups) &&
     isNumber(v.hatchCycles) &&
     isNumber(v.steps) &&
-    typeof v.breedable === 'boolean'
+    isBoolean(v.breedable)
   );
 }
 
